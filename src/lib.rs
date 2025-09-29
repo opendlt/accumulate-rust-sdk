@@ -28,6 +28,8 @@ use url::Url;
 pub mod client;
 pub mod json_rpc_client;
 pub mod types;
+pub mod codec;
+pub mod protocol;
 
 pub use client::AccumulateClient;
 pub use json_rpc_client::{JsonRpcClient, JsonRpcError};
