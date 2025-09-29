@@ -1,0 +1,41 @@
+{
+  "description": "Canonical JSON test cases for byte-for-byte parity",
+  "testCases": [
+    {
+      "name": "simple_object",
+      "input": {
+        "z": 3,
+        "a": 1,
+        "m": 2
+      },
+      "expectedCanonical": "{\"a\":1,\"m\":2,\"z\":3}"
+    },
+    {
+      "name": "nested_object",
+      "input": {
+        "z": {
+          "y": 2,
+          "x": 1
+        },
+        "a": 1
+      },
+      "expectedCanonical": "{\"a\":1,\"z\":{\"x\":1,\"y\":2}}"
+    },
+    {
+      "name": "array_with_objects",
+      "input": {
+        "arr": [
+          {
+            "b": 2,
+            "a": 1
+          },
+          {
+            "d": 4,
+            "c": 3
+          }
+        ]
+      },
+      "expectedCanonical": "{\"arr\":[{\"a\":1,\"b\":2},{\"c\":3,\"d\":4}]}"
+    }
+  ]
+}

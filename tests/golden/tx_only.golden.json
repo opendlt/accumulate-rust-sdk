@@ -1,0 +1,15 @@
+{
+  "header": {
+    "principal": "acc://test.acme/tokens",
+    "initiator": "cf44e0f55dddb5858481ebb2369c35957b38d228d32db1475b051113755bd965"
+  },
+  "body": {
+    "type": "sendTokens",
+    "to": [
+      {
+        "url": "acc://test.acme/staking",
+        "amount": "200000"
+      }
+    ]
+  }
+}
