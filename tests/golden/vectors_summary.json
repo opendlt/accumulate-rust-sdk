@@ -1,0 +1,38 @@
+{
+  "categories": [
+    {
+      "name": "uvarint",
+      "count": 19
+    },
+    {
+      "name": "varint",
+      "count": 19
+    },
+    {
+      "name": "strings",
+      "count": 10
+    },
+    {
+      "name": "bytes",
+      "count": 8
+    },
+    {
+      "name": "booleans",
+      "count": 2
+    },
+    {
+      "name": "hashes",
+      "count": 4
+    },
+    {
+      "name": "transactions",
+      "count": 4
+    },
+    {
+      "name": "envelopes",
+      "count": 1
+    }
+  ],
+  "total_vectors": 67,
+  "generated_at": "2025-09-29T19:28:58.446Z"
+}
