@@ -1,32 +1,37 @@
 [package]
 name = "accumulate-client"
-version = "1.0.0"
+version = "0.1.0"
 edition = "2021"
-description = "Rust client for Accumulate blockchain JSON-RPC API "
-homepage = "https://accumulatenetwork.io"
-repository = "https://github.com/AccumulateNetwork/accumulate"
 license = "MIT"
-keywords = ["blockchain", "accumulate", "jsonrpc", "client"]
-categories = ["api-bindings", "web-programming::http-client"]
 readme = "README.md"
+authors = ["OpenDLT <dev@opendlt.dev>"]
+description = "Accumulate Rust SDK (V2/V3 unified) with DevNet-first flows"
+repository = "https://github.com/opendlt/accumulate-rust"
+
+[features]
+default = ["rustls-tls"]
+rustls-tls = []
 
 [dependencies]
-reqwest = { version = "0.11", features = ["json"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-tokio = { version = "1.0", features = ["rt", "macros"] }
-base64 = "0.21"
-chrono = { version = "0.4", features = ["serde"] }
-thiserror = "1.0"
-uuid = { version = "1.0", features = ["v4", "serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+thiserror = "1"
+anyhow = "1"
+url = "2"
+time = { version = "0.3", features = ["formatting", "parsing"] }
+hex = "0.4"
+base64 = "0.22"
+sha2 = "0.10"
+rand = "0.8"
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+dotenvy = "0.15"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 
 [dev-dependencies]
-tokio-test = "0.4"
-
-[[example]]
-name = "basic_usage"
-path = "examples/basic_usage.rs"
-
-[package.metadata.docs.rs]
-all-features = true
-rustdoc-args = ["--cfg", "docsrs"]
+rstest = "0.21"
+serde_json = "1"
+assert_json_diff = "2"
+tokio = { version = "1", features = ["rt", "macros", "time"] }
