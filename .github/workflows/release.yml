@@ -1,0 +1,254 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # Pre-release validation
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Run tests
+        run: cargo test --all-features
+
+      - name: Check package
+        run: cargo package --allow-dirty
+
+      - name: Test package
+        run: cargo publish --dry-run
+
+  # Build release artifacts
+  build-artifacts:
+    name: Build Release Artifacts
+    needs: validate
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact-name: accumulate-client-linux-x86_64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact-name: accumulate-client-windows-x86_64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact-name: accumulate-client-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact-name: accumulate-client-macos-aarch64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.os }}-${{ matrix.target }}
+
+      - name: Build release binary
+        run: cargo build --release --bin devnet_discovery --target ${{ matrix.target }}
+
+      - name: Create artifact directory
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            cp target/${{ matrix.target }}/release/devnet_discovery.exe artifacts/
+          else
+            cp target/${{ matrix.target }}/release/devnet_discovery artifacts/
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: artifacts/
+
+  # Generate changelog
+  changelog:
+    name: Generate Changelog
+    needs: validate
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.changelog.outputs.changelog }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the latest tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 HEAD^)
+
+          # Generate changelog
+          echo "## Changes in this release" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+
+          # Get commits since last tag
+          git log --pretty=format:"- %s (%h)" ${LATEST_TAG}..HEAD >> CHANGELOG.md
+
+          # Set output
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Upload changelog
+        uses: actions/upload-artifact@v3
+        with:
+          name: changelog
+          path: CHANGELOG.md
+
+  # Create GitHub release
+  github-release:
+    name: Create GitHub Release
+    needs: [validate, build-artifacts, changelog]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Create release archives
+        run: |
+          # Create compressed archives for each platform
+          for dir in accumulate-client-*; do
+            if [[ -d "$dir" ]]; then
+              if [[ "$dir" == *"windows"* ]]; then
+                cd "$dir" && zip -r "../${dir}.zip" . && cd ..
+              else
+                tar -czf "${dir}.tar.gz" -C "$dir" .
+              fi
+            fi
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ github.ref_name }}
+          body: ${{ needs.changelog.outputs.changelog }}
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
+          files: |
+            *.tar.gz
+            *.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Publish to crates.io
+  publish-crates:
+    name: Publish to crates.io
+    needs: [validate, github-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Publish to crates.io
+        run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
+
+  # Update documentation (docs.rs will automatically build)
+  docs:
+    name: Documentation
+    needs: [publish-crates]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build documentation
+        run: cargo doc --all-features --no-deps
+
+      - name: Deploy to GitHub Pages (if configured)
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/doc
+
+  # Post-release validation
+  post-release:
+    name: Post-Release Validation
+    needs: [publish-crates]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for crates.io propagation
+        run: sleep 60
+
+      - name: Test installation from crates.io
+        run: |
+          cargo install accumulate-client --version ${{ github.ref_name }}
+
+      - name: Verify installation
+        run: |
+          which devnet_discovery || echo "Binary not in PATH (expected for library crate)"
+
+  # Notify on completion
+  notify:
+    name: Notify Release Completion
+    needs: [github-release, publish-crates, docs, post-release]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Release Status
+        run: |
+          if [[ "${{ needs.github-release.result }}" == "success" && \
+                "${{ needs.publish-crates.result }}" == "success" ]]; then
+            echo "🎉 Release ${{ github.ref_name }} completed successfully!"
+            echo "📦 Published to crates.io"
+            echo "📋 GitHub release created"
+            echo "📚 Documentation updated"
+          else
+            echo "❌ Release ${{ github.ref_name }} failed"
+            echo "GitHub Release: ${{ needs.github-release.result }}"
+            echo "Crates.io: ${{ needs.publish-crates.result }}"
+            exit 1
+          fi

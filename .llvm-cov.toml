@@ -1,0 +1,49 @@
+# LLVM Coverage Configuration for Accumulate Rust SDK
+
+[llvm-cov]
+# Minimum coverage thresholds
+fail-under-lines = 85.0
+fail-under-functions = 85.0
+fail-under-branches = 75.0
+
+# Output formats
+lcov = true
+html = true
+text = true
+
+# Coverage scope
+all-features = true
+workspace = true
+
+# Exclusions
+exclude = [
+    # Test files
+    "tests/*",
+    "**/tests/*",
+    # Example files
+    "examples/*",
+    # Generated files
+    "**/*_gen.rs",
+    # Binary targets
+    "src/bin/*",
+]
+
+# Include patterns
+include = [
+    "src/**/*.rs",
+]
+
+# Report configuration
+[llvm-cov.report]
+# HTML report options
+html-dir = "target/llvm-cov-html"
+show-instantiations = true
+show-line-counts = true
+show-region-summary = true
+
+# Text report options
+show-missing-lines = true
+
+[llvm-cov.lcov]
+# LCOV-specific options
+output-path = "target/llvm-cov-target/lcov.info"

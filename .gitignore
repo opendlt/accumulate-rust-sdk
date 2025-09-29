@@ -1,0 +1,75 @@
+# Rust
+/target/
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Coverage
+lcov.info
+/target/llvm-cov-target/
+/target/llvm-cov/
+/target/llvm-cov-html/
+coverage/
+*.profraw
+
+# Documentation
+/target/doc/
+
+# Backup files
+*.bak
+*.orig
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
+
+# DevNet configuration
+docker-compose.override.yml
+
+# Release artifacts
+artifacts/
+releases/
+
+# Cache
+.cache/
+.cargo-cache/
+
+# Node.js (for fixture exporter)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+
+# Test outputs
+test-results/
+junit.xml
+
+# Benchmark outputs
+criterion/
+
+# Local development
+local/
+scratch/
+TODO.md
+NOTES.md
