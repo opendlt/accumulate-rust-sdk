@@ -36,3 +36,34 @@ rstest = "0.21"
 serde_json = "1"
 assert_json_diff = "2"
 tokio = { version = "1", features = ["rt", "macros", "time"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+missing_debug_implementations = "warn"
+
+[lints.clippy]
+# Restriction lints for production code
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+
+# Pedantic lints for code quality
+pedantic = "warn"
+nursery = "warn"
+
+# Performance lints
+perf = "warn"
+
+# Cargo lints
+cargo = "warn"
+
+# Allow some pedantic lints that are too strict for our use case
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"

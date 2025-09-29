@@ -3,6 +3,10 @@
 use crate::json_rpc_client::{JsonRpcClient, JsonRpcError, canonical_json};
 use crate::types::*;
 use crate::AccOptions;
+use crate::codec::{
+    TransactionEnvelope, TransactionHeader, TransactionSignature, TransactionCodec,
+    TransactionBodyBuilder, TokenRecipient, AccumulateHash, UrlHash
+};
 use anyhow::Result;
 use ed25519_dalek::{Keypair, Signer, Signature};
 use reqwest::Client;
@@ -86,20 +90,48 @@ impl AccumulateClient {
 
     // V3 API Methods
 
-    /// Submit a single transaction to V3 API
+    /// Submit a single transaction to V3 API using binary codec
     pub async fn submit(&self, envelope: &TransactionEnvelope) -> Result<V3SubmitResponse, JsonRpcError> {
-        let request = V3SubmitRequest {
-            envelope: envelope.clone(),
-        };
-        self.v3_client.call_v3("submit", json!(request)).await
+        // Validate envelope structure before submission
+        TransactionCodec::validate_envelope(envelope)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Invalid envelope: {}", e)))?;
+
+        // Convert to JSON for API submission
+        let envelope_json = serde_json::to_value(envelope)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Failed to serialize envelope: {}", e)))?;
+
+        self.v3_client.call_v3("submit", envelope_json).await
     }
 
-    /// Submit multiple transactions to V3 API
+    /// Submit multiple transactions to V3 API using binary codec
     pub async fn submit_multi(&self, envelopes: &[TransactionEnvelope]) -> Result<Vec<V3SubmitResponse>, JsonRpcError> {
-        let requests: Vec<V3SubmitRequest> = envelopes.iter()
-            .map(|env| V3SubmitRequest { envelope: env.clone() })
+        // Validate all envelopes
+        for (i, envelope) in envelopes.iter().enumerate() {
+            TransactionCodec::validate_envelope(envelope)
+                .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Invalid envelope {}: {}", i, e)))?;
+        }
+
+        // Convert to JSON for API submission
+        let envelopes_json: Result<Vec<Value>, _> = envelopes.iter()
+            .map(|env| serde_json::to_value(env))
             .collect();
-        self.v3_client.call_v3("submitMulti", json!(requests)).await
+
+        let envelopes_json = envelopes_json
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Failed to serialize envelopes: {}", e)))?;
+
+        self.v3_client.call_v3("submitMulti", json!(envelopes_json)).await
+    }
+
+    /// Encode envelope to binary format (for testing/debugging)
+    pub fn encode_envelope_binary(&self, envelope: &TransactionEnvelope) -> Result<Vec<u8>, JsonRpcError> {
+        TransactionCodec::encode_envelope(envelope)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Failed to encode envelope: {}", e)))
+    }
+
+    /// Decode envelope from binary format (for testing/debugging)
+    pub fn decode_envelope_binary(&self, data: &[u8]) -> Result<TransactionEnvelope, JsonRpcError> {
+        TransactionCodec::decode_envelope(data)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Failed to decode envelope: {}", e)))
     }
 
     /// Query using V3 API
@@ -116,48 +148,73 @@ impl AccumulateClient {
 
     // Transaction Building Helpers
 
-    /// Create a signed transaction envelope for V3
+    /// Create a signed transaction envelope using binary codec
     pub fn create_envelope(
         &self,
+        principal: String,
         tx_body: &Value,
         keypair: &Keypair,
     ) -> Result<TransactionEnvelope, JsonRpcError> {
-        // Get current timestamp in microseconds
+        // Get current timestamp in milliseconds (matching TS SDK)
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Time error: {}", e)))?
-            .as_micros() as i64;
+            .as_millis() as u64;
 
-        // Create transaction with timestamp
-        let tx_with_timestamp = json!({
-            "body": tx_body,
-            "timestamp": timestamp
-        });
+        // Create envelope using binary codec
+        let mut envelope = TransactionCodec::create_envelope(principal, tx_body.clone(), Some(timestamp));
 
-        // Create canonical JSON for hashing
-        let canonical = canonical_json(&tx_with_timestamp);
-
-        // Hash the transaction
-        let mut hasher = Sha256::new();
-        hasher.update(canonical.as_bytes());
-        let hash = hasher.finalize();
+        // Get transaction hash for signing (header + body only)
+        let tx_hash = TransactionCodec::get_transaction_hash(&envelope)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Failed to hash transaction: {}", e)))?;
 
         // Sign the hash
-        let signature: Signature = keypair.sign(&hash);
+        let signature: Signature = keypair.sign(&tx_hash);
 
-        // Create V3 signature
-        let v3_sig = V3Signature {
-            public_key: keypair.public.to_bytes().to_vec(),
-            signature: signature.to_bytes().to_vec(),
-            timestamp,
-            vote: None,
-        };
+        // Add signature to envelope
+        TransactionCodec::add_signature(
+            &mut envelope,
+            signature.to_bytes().to_vec(),
+            format!("acc://unknown/book/1"), // TODO: derive proper signer URL
+            Some(keypair.public.to_bytes().to_vec()),
+        );
 
-        Ok(TransactionEnvelope {
-            transaction: tx_with_timestamp,
-            signatures: vec![v3_sig],
-            metadata: None,
-        })
+        Ok(envelope)
+    }
+
+    /// Create a signed transaction envelope with explicit signer URL
+    pub fn create_envelope_with_signer(
+        &self,
+        principal: String,
+        tx_body: &Value,
+        keypair: &Keypair,
+        signer_url: String,
+    ) -> Result<TransactionEnvelope, JsonRpcError> {
+        // Get current timestamp in milliseconds (matching TS SDK)
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Time error: {}", e)))?
+            .as_millis() as u64;
+
+        // Create envelope using binary codec
+        let mut envelope = TransactionCodec::create_envelope(principal, tx_body.clone(), Some(timestamp));
+
+        // Get transaction hash for signing (header + body only)
+        let tx_hash = TransactionCodec::get_transaction_hash(&envelope)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Failed to hash transaction: {}", e)))?;
+
+        // Sign the hash
+        let signature: Signature = keypair.sign(&tx_hash);
+
+        // Add signature to envelope
+        TransactionCodec::add_signature(
+            &mut envelope,
+            signature.to_bytes().to_vec(),
+            signer_url,
+            Some(keypair.public.to_bytes().to_vec()),
+        );
+
+        Ok(envelope)
     }
 
     /// Generate a new keypair for signing
@@ -188,46 +245,84 @@ impl AccumulateClient {
         url.starts_with("acc://") || url.contains('/')
     }
 
-    /// Create a simple token transfer transaction body
+    /// Create a token transfer transaction body using binary codec
     pub fn create_token_transfer(
         &self,
-        from: &str,
         to: &str,
-        amount: u64,
-        token_url: Option<&str>,
+        amount: &str,
     ) -> Value {
-        json!({
-            "type": "sendTokens",
-            "data": {
-                "from": from,
-                "to": to,
-                "amount": amount.to_string(),
-                "token": token_url.unwrap_or("acc://ACME")
+        TransactionBodyBuilder::send_tokens(vec![
+            TokenRecipient {
+                url: to.to_string(),
+                amount: amount.to_string(),
             }
-        })
+        ])
     }
 
-    /// Create account creation transaction body
-    pub fn create_account(
+    /// Create multiple token transfers in one transaction
+    pub fn create_multi_token_transfer(
+        &self,
+        recipients: Vec<(String, String)>, // (url, amount) pairs
+    ) -> Value {
+        let token_recipients: Vec<TokenRecipient> = recipients
+            .into_iter()
+            .map(|(url, amount)| TokenRecipient { url, amount })
+            .collect();
+
+        TransactionBodyBuilder::send_tokens(token_recipients)
+    }
+
+    /// Create identity creation transaction body using binary codec
+    pub fn create_identity(
         &self,
         url: &str,
-        public_key: &[u8],
-        account_type: &str,
+        key_book_url: &str,
     ) -> Value {
-        json!({
-            "type": "createIdentity",
-            "data": {
-                "url": url,
-                "keyBook": {
-                    "publicKeyHash": hex::encode(public_key)
-                },
-                "keyPage": {
-                    "keys": [{
-                        "publicKeyHash": hex::encode(public_key)
-                    }]
-                }
-            }
-        })
+        TransactionBodyBuilder::create_identity(
+            url.to_string(),
+            key_book_url.to_string(),
+        )
+    }
+
+    /// Create key book transaction body using binary codec
+    pub fn create_key_book(
+        &self,
+        url: &str,
+        public_key_hash: &str,
+    ) -> Value {
+        TransactionBodyBuilder::create_key_book(
+            url.to_string(),
+            public_key_hash.to_string(),
+        )
+    }
+
+    /// Create add credits transaction body using binary codec
+    pub fn create_add_credits(
+        &self,
+        recipient: &str,
+        amount: &str,
+        oracle: Option<f64>,
+    ) -> Value {
+        TransactionBodyBuilder::add_credits(
+            recipient.to_string(),
+            amount.to_string(),
+            oracle,
+        )
+    }
+
+    /// Derive key book URL from identity URL
+    pub fn derive_key_book_url(&self, identity_url: &str) -> String {
+        UrlHash::derive_key_book_url(identity_url)
+    }
+
+    /// Derive key page URL from key book URL and page index
+    pub fn derive_key_page_url(&self, key_book_url: &str, page_index: u32) -> String {
+        UrlHash::derive_key_page_url(key_book_url, page_index)
+    }
+
+    /// Hash URL for identity derivation
+    pub fn hash_url(&self, url: &str) -> String {
+        UrlHash::hash_url_hex(url)
     }
 }
 
