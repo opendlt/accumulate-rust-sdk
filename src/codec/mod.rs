@@ -1,7 +1,7 @@
 //! Codec utilities for Accumulate protocol compatibility
 //!
-//! This module provides canonical JSON encoding, hashing, and cryptographic
-//! utilities that match the TypeScript SDK implementation for byte-for-byte parity.
+//! This module provides both JSON and binary encoding to match the TypeScript SDK
+//! implementation for bit-for-bit and byte-for-byte parity.
 
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
@@ -9,9 +9,17 @@ use std::collections::BTreeMap;
 
 pub mod canonical;
 pub mod crypto;
+pub mod writer;
+pub mod reader;
+pub mod transaction_codec;
+pub mod hashes;
 
 pub use canonical::*;
 pub use crypto::*;
+pub use writer::*;
+pub use reader::*;
+pub use transaction_codec::*;
+pub use hashes::*;
 
 /// Convert a JSON value to canonical JSON string with deterministic ordering
 /// This matches the TypeScript SDK implementation exactly
