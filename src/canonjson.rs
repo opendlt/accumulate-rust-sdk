@@ -3,9 +3,10 @@ use serde_json::Value;
 use std::collections::BTreeMap;
 
 /// Convert any serializable value to canonical JSON
-pub fn dumps_canonical<T: Serialize>(value: &T) -> Result<String, serde_json::Error> {
-    let json_value = serde_json::to_value(value)?;
-    Ok(canonicalize(&json_value))
+/// Recursively uses BTreeMap for maps; produces compact JSON identical to TypeScript SDK
+pub fn dumps_canonical<T: Serialize>(value: &T) -> String {
+    let json_value = serde_json::to_value(value).expect("Serialization should not fail");
+    canonicalize(&json_value)
 }
 
 /// Convert a JSON value to canonical JSON string with deterministic ordering
@@ -83,7 +84,7 @@ mod tests {
         }
 
         let test_obj = TestStruct { z: 3, a: 1, m: 2 };
-        let canonical = dumps_canonical(&test_obj).unwrap();
+        let canonical = dumps_canonical(&test_obj);
         assert_eq!(canonical, r#"{"a":1,"m":2,"z":3}"#);
     }
 

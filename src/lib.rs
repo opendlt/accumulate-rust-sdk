@@ -7,8 +7,9 @@ pub use crate::client::AccumulateClient;
 pub use crate::codec::{
     TransactionCodec, TransactionEnvelope, TransactionHeader, TransactionSignature,
     TransactionBodyBuilder, TokenRecipient, KeySpec, BinaryReader, BinaryWriter,
-    AccumulateHash, UrlHash, canonical_json, sha256_bytes
+    AccumulateHash, UrlHash, canonical_json, sha256_bytes, to_canonical_string
 };
+pub use crate::canonjson::{dumps_canonical, canonicalize};
 
 pub mod canonjson;
 pub mod client;

@@ -24,34 +24,13 @@ pub use writer::*;
 /// Convert a JSON value to canonical JSON string with deterministic ordering
 /// This matches the TypeScript SDK implementation exactly
 pub fn canonical_json(value: &Value) -> String {
-    canonical_json_internal(value)
+    crate::canonjson::canonicalize(value)
 }
 
-fn canonical_json_internal(value: &Value) -> String {
-    match value {
-        Value::Null => "null".to_string(),
-        Value::Bool(b) => b.to_string(),
-        Value::Number(n) => n.to_string(),
-        Value::String(s) => serde_json::to_string(s).unwrap(),
-        Value::Array(arr) => {
-            let elements: Vec<String> = arr.iter().map(canonical_json_internal).collect();
-            format!("[{}]", elements.join(","))
-        }
-        Value::Object(obj) => {
-            // Convert to BTreeMap to ensure sorted keys
-            let mut sorted: BTreeMap<String, String> = BTreeMap::new();
-            for (key, val) in obj {
-                sorted.insert(key.clone(), canonical_json_internal(val));
-            }
-
-            let pairs: Vec<String> = sorted
-                .iter()
-                .map(|(k, v)| format!("{}:{}", serde_json::to_string(k).unwrap(), v))
-                .collect();
-
-            format!("{{{}}}", pairs.join(","))
-        }
-    }
+/// Convert any serializable value to canonical JSON
+/// Convenience wrapper around canonjson::dumps_canonical
+pub fn to_canonical_string<T: serde::Serialize>(value: &T) -> String {
+    crate::canonjson::dumps_canonical(value)
 }
 
 /// SHA-256 hash of raw bytes
