@@ -4,6 +4,11 @@
 //! networks, supporting both V2 and V3 protocol versions.
 
 pub use crate::client::AccumulateClient;
+pub use crate::codec::{
+    TransactionCodec, TransactionEnvelope, TransactionHeader, TransactionSignature,
+    TransactionBodyBuilder, TokenRecipient, KeySpec, BinaryReader, BinaryWriter,
+    AccumulateHash, UrlHash, canonical_json, sha256_bytes
+};
 
 pub mod canonjson;
 pub mod client;

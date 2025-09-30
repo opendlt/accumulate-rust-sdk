@@ -2,9 +2,11 @@
 
 use crate::json_rpc_client::{canonical_json, JsonRpcClient, JsonRpcError};
 use crate::types::*;
+use crate::codec::{TransactionCodec, TransactionEnvelope as CodecTransactionEnvelope, TransactionHeader, TransactionSignature};
 use crate::AccOptions;
 use anyhow::Result;
 use ed25519_dalek::{Keypair, Signature, Signer};
+use rand::rngs::OsRng;
 use reqwest::Client;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -172,9 +174,60 @@ impl AccumulateClient {
         })
     }
 
+    /// Create a binary-encoded transaction envelope using codec for bit-for-bit TS parity
+    pub fn create_envelope_binary_compatible(
+        &self,
+        principal: String,
+        tx_body: &Value,
+        keypair: &Keypair,
+    ) -> Result<CodecTransactionEnvelope, JsonRpcError> {
+        // Get current timestamp in microseconds
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Time error: {}", e)))?
+            .as_micros() as u64;
+
+        // Create transaction envelope using codec
+        let mut envelope = TransactionCodec::create_envelope(principal, tx_body.clone(), Some(timestamp));
+
+        // Get hash for signing using codec
+        let hash = TransactionCodec::get_transaction_hash(&envelope)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Hash error: {:?}", e)))?;
+
+        // Sign the hash
+        let signature: Signature = keypair.sign(&hash);
+
+        // Create codec-compatible signature
+        let codec_sig = TransactionSignature {
+            signature: signature.to_bytes().to_vec(),
+            signer: envelope.header.principal.clone(), // Use principal as signer URL
+            timestamp,
+            vote: None,
+            public_key: Some(keypair.public.to_bytes().to_vec()),
+            key_page: None,
+        };
+
+        // Add signature to envelope
+        envelope.signatures.push(codec_sig);
+
+        Ok(envelope)
+    }
+
+    /// Encode transaction envelope to binary using codec
+    pub fn encode_envelope(&self, envelope: &CodecTransactionEnvelope) -> Result<Vec<u8>, JsonRpcError> {
+        TransactionCodec::encode_envelope(envelope)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Encoding error: {:?}", e)))
+    }
+
+    /// Decode transaction envelope from binary using codec
+    pub fn decode_envelope(&self, data: &[u8]) -> Result<CodecTransactionEnvelope, JsonRpcError> {
+        TransactionCodec::decode_envelope(data)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Decoding error: {:?}", e)))
+    }
+
     /// Generate a new keypair for signing
     pub fn generate_keypair() -> Keypair {
-        let mut rng = rand::thread_rng();
+        let mut rng = OsRng;
         Keypair::generate(&mut rng)
     }
 
