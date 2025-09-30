@@ -23,22 +23,44 @@ jobs:
         with:
           components: rustfmt, clippy
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'tooling/ts-fixture-exporter/package-lock.json'
+
+      - name: Install Node.js dependencies
+        working-directory: tooling/ts-fixture-exporter
+        run: npm ci
+
+      - name: Export TypeScript fixtures
+        working-directory: tooling/ts-fixture-exporter
+        run: npm run export
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "unified"
 
       - name: Check formatting
+        working-directory: unified
         run: cargo fmt --all -- --check
 
       - name: Run clippy
+        working-directory: unified
         run: cargo clippy --all-targets --all-features -- -D warnings
 
       - name: Run tests
+        working-directory: unified
         run: cargo test --all-features
 
       - name: Check package
+        working-directory: unified
         run: cargo package --allow-dirty
 
       - name: Test package
+        working-directory: unified
         run: cargo publish --dry-run
 
   # Build release artifacts
@@ -78,10 +100,12 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.target }}
 
       - name: Build release binary
+        working-directory: unified
         run: cargo build --release --bin devnet_discovery --target ${{ matrix.target }}
 
       - name: Create artifact directory
         shell: bash
+        working-directory: unified
         run: |
           mkdir -p artifacts
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
@@ -91,10 +115,10 @@ jobs:
           fi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
-          path: artifacts/
+          path: unified/artifacts/
 
   # Generate changelog
   changelog:
@@ -183,10 +207,28 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'tooling/ts-fixture-exporter/package-lock.json'
+
+      - name: Install Node.js dependencies
+        working-directory: tooling/ts-fixture-exporter
+        run: npm ci
+
+      - name: Export TypeScript fixtures
+        working-directory: tooling/ts-fixture-exporter
+        run: npm run export
+
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "unified"
 
       - name: Publish to crates.io
+        working-directory: unified
         run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
 
   # Update documentation (docs.rs will automatically build)
