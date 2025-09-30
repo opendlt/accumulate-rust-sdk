@@ -36,9 +36,7 @@ pub struct BinaryWriter {
 impl BinaryWriter {
     /// Create a new binary writer
     pub fn new() -> Self {
-        Self {
-            buffer: Vec::new(),
-        }
+        Self { buffer: Vec::new() }
     }
 
     /// Create a binary writer with pre-allocated capacity
@@ -139,7 +137,11 @@ impl BinaryWriter {
     }
 
     /// Encode a big number with field number
-    pub fn write_big_number_field(&mut self, value: &num_bigint::BigUint, field: u32) -> Result<(), EncodingError> {
+    pub fn write_big_number_field(
+        &mut self,
+        value: &num_bigint::BigUint,
+        field: u32,
+    ) -> Result<(), EncodingError> {
         let mut temp_writer = BinaryWriter::new();
         temp_writer.write_big_number(value)?;
         self.write_field(field, temp_writer.bytes())?;
@@ -225,7 +227,12 @@ impl BinaryWriter {
     }
 
     /// Write an optional value (None = skip, Some = encode)
-    pub fn write_optional<F>(&mut self, value: Option<&impl Clone>, field: u32, writer_fn: F) -> Result<(), EncodingError>
+    pub fn write_optional<F>(
+        &mut self,
+        value: Option<&impl Clone>,
+        field: u32,
+        writer_fn: F,
+    ) -> Result<(), EncodingError>
     where
         F: FnOnce(&mut Self, &impl Clone) -> Result<(), EncodingError>,
     {
@@ -236,7 +243,12 @@ impl BinaryWriter {
     }
 
     /// Write an array/slice with element encoding
-    pub fn write_array<T, F>(&mut self, items: &[T], field: u32, writer_fn: F) -> Result<(), EncodingError>
+    pub fn write_array<T, F>(
+        &mut self,
+        items: &[T],
+        field: u32,
+        writer_fn: F,
+    ) -> Result<(), EncodingError>
     where
         F: Fn(&mut Self, &T) -> Result<(), EncodingError>,
     {

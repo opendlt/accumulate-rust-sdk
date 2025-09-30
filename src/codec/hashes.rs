@@ -3,9 +3,9 @@
 //! This module provides SHA-256 hashing utilities with byte-for-byte compatibility
 //! with the TypeScript SDK for deterministic transaction and data hashing.
 
-use sha2::{Digest, Sha256};
-use serde_json::Value;
 use super::{canonical_json, BinaryWriter, EncodingError};
+use serde_json::Value;
+use sha2::{Digest, Sha256};
 
 /// Hash types used in Accumulate protocol
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -112,7 +112,10 @@ impl AccumulateHash {
 
     /// Hash using binary encoding first, returning hex string
     /// Matches TS: hashBinaryEncoded(value: any, field?: number): string (when hex output requested)
-    pub fn sha256_binary_encoded_hex<T>(value: T, field: Option<u32>) -> Result<String, EncodingError>
+    pub fn sha256_binary_encoded_hex<T>(
+        value: T,
+        field: Option<u32>,
+    ) -> Result<String, EncodingError>
     where
         T: BinaryEncodable,
     {
@@ -480,7 +483,10 @@ mod tests {
         let url = "acc://alice.acme";
         let hash1 = UrlHash::hash_url(url);
         let hash2 = UrlHash::hash_url("ACC://ALICE.ACME/");
-        assert_eq!(hash1, hash2, "URL hashing should be case and trailing slash insensitive");
+        assert_eq!(
+            hash1, hash2,
+            "URL hashing should be case and trailing slash insensitive"
+        );
 
         let hex = UrlHash::hash_url_hex(url);
         assert_eq!(hex, hex::encode(hash1));
@@ -523,12 +529,7 @@ mod tests {
 
     #[test]
     fn test_merkle_tree() {
-        let hashes = vec![
-            [1u8; 32],
-            [2u8; 32],
-            [3u8; 32],
-            [4u8; 32],
-        ];
+        let hashes = vec![[1u8; 32], [2u8; 32], [3u8; 32], [4u8; 32]];
 
         let root = MerkleHash::build_merkle_root(&hashes);
         assert_ne!(root, [0u8; 32]);
@@ -544,12 +545,7 @@ mod tests {
 
     #[test]
     fn test_merkle_proof() {
-        let hashes = vec![
-            [1u8; 32],
-            [2u8; 32],
-            [3u8; 32],
-            [4u8; 32],
-        ];
+        let hashes = vec![[1u8; 32], [2u8; 32], [3u8; 32], [4u8; 32]];
 
         let root = MerkleHash::build_merkle_root(&hashes);
         let proof = MerkleHash::create_merkle_proof(&hashes, 0);

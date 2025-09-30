@@ -1,13 +1,21 @@
 #!/usr/bin/env cargo
-//! DevNet Discovery Binary for Accumulate Rust SDK
+//! Accumulate DevNet Discovery Tool
 //!
-//! Discovers DevNet configuration by parsing Docker logs and config files,
-//! then writes environment variables to .env.local for use by examples.
+//! Automatically discovers running DevNet instances and configures environment variables
+//! for seamless integration with Rust SDK examples and applications.
+//!
+//! This tool:
+//! 1. Detects local DevNet instances (Docker containers)
+//! 2. Parses logs and configuration to find API endpoints
+//! 3. Extracts faucet account information
+//! 4. Generates environment configuration files
+//! 5. Provides PowerShell/Bash commands for environment setup
 
 use std::env;
 use std::fs;
-use std::io::{self, BufRead, BufReader};
-use std::path::{Path, PathBuf};
+use std::io::{self, Write};
+use std::path::Path;
+use std::process::Command;
 use std::process::Command;
 
 const DEFAULT_DEVNET_DIR: &str = r"C:\Accumulate_Stuff\devnet-accumulate-instance";
@@ -29,8 +37,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut config = DevNetConfig::default();
 
     // Step 1: Determine DevNet directory
-    config.devnet_dir = env::var("ACC_DEVNET_DIR")
-        .unwrap_or_else(|_| DEFAULT_DEVNET_DIR.to_string());
+    config.devnet_dir =
+        env::var("ACC_DEVNET_DIR").unwrap_or_else(|_| DEFAULT_DEVNET_DIR.to_string());
 
     println!("📁 DevNet Directory: {}", config.devnet_dir);
 
@@ -42,11 +50,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Step 3: Discover RPC URLs (check env vars first, then defaults)
-    config.rpc_url_v2 = env::var("ACC_RPC_URL_V2")
-        .unwrap_or_else(|_| discover_rpc_url_v2(&config.devnet_dir));
+    config.rpc_url_v2 =
+        env::var("ACC_RPC_URL_V2").unwrap_or_else(|_| discover_rpc_url_v2(&config.devnet_dir));
 
-    config.rpc_url_v3 = env::var("ACC_RPC_URL_V3")
-        .unwrap_or_else(|_| discover_rpc_url_v3(&config.devnet_dir));
+    config.rpc_url_v3 =
+        env::var("ACC_RPC_URL_V3").unwrap_or_else(|_| discover_rpc_url_v3(&config.devnet_dir));
 
     // Step 4: Discover faucet account
     config.faucet_account = env::var("ACC_FAUCET_ACCOUNT")
@@ -118,7 +126,10 @@ fn discover_faucet_account(devnet_dir: &str) -> String {
     default_account.to_string()
 }
 
-fn discover_port_from_docker(devnet_dir: &str, service_name: &str) -> Result<u16, Box<dyn std::error::Error>> {
+fn discover_port_from_docker(
+    devnet_dir: &str,
+    service_name: &str,
+) -> Result<u16, Box<dyn std::error::Error>> {
     // Try docker-compose.yml first
     let compose_path = Path::new(devnet_dir).join("docker-compose.yml");
     if compose_path.exists() {
@@ -174,9 +185,7 @@ fn discover_faucet_from_logs(devnet_dir: &str) -> Result<String, Box<dyn std::er
     let containers = ["accumulate-core", "accumulate-devnet", "devnet"];
 
     for container in &containers {
-        let output = Command::new("docker")
-            .args(&["logs", container])
-            .output();
+        let output = Command::new("docker").args(&["logs", container]).output();
 
         if let Ok(output) = output {
             let stdout = String::from_utf8_lossy(&output.stdout);
@@ -247,7 +256,7 @@ fn test_devnet_connectivity(config: &DevNetConfig) -> Result<(), Box<dyn std::er
     let client = std::sync::Arc::new(
         reqwest::blocking::Client::builder()
             .timeout(std::time::Duration::from_secs(5))
-            .build()?
+            .build()?,
     );
 
     // Test V2 endpoint

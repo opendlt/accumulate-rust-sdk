@@ -9,17 +9,17 @@ use std::collections::BTreeMap;
 
 pub mod canonical;
 pub mod crypto;
-pub mod writer;
+pub mod hashes;
 pub mod reader;
 pub mod transaction_codec;
-pub mod hashes;
+pub mod writer;
 
 pub use canonical::*;
 pub use crypto::*;
-pub use writer::*;
+pub use hashes::*;
 pub use reader::*;
 pub use transaction_codec::*;
-pub use hashes::*;
+pub use writer::*;
 
 /// Convert a JSON value to canonical JSON string with deterministic ordering
 /// This matches the TypeScript SDK implementation exactly

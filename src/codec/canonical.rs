@@ -97,7 +97,10 @@ mod tests {
             "simple": 42
         });
         let canonical = to_canonical_string(&value);
-        assert_eq!(canonical, r#"{"outer":{"a":"first","m":"middle","z":"last"},"simple":42}"#);
+        assert_eq!(
+            canonical,
+            r#"{"outer":{"a":"first","m":"middle","z":"last"},"simple":42}"#
+        );
     }
 
     #[test]

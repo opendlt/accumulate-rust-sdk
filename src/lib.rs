@@ -1,46 +1,27 @@
 //! Accumulate Rust SDK (V2/V3 unified) with DevNet-first flows
 //!
-//! A Rust client library for the Accumulate blockchain JSON-RPC API with support for both V2 and V3 protocols.
-//!
-//! ## Quick Start
-//!
-//! ```rust,no_run
-//! use accumulate_client::{Accumulate, AccOptions};
-//!
-//! #[tokio::main]
-//! async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     // Connect to DevNet
-//!     let client = Accumulate::devnet(AccOptions::default()).await?;
-//!
-//!     // Or connect to a custom network
-//!     let client = Accumulate::custom("http://localhost:26660", AccOptions::default()).await?;
-//!
-//!     let status = client.status().await?;
-//!     println!("Node status: {:?}", status);
-//!
-//!     Ok(())
-//! }
-//! ```
+//! This crate provides a unified client for interacting with Accumulate blockchain
+//! networks, supporting both V2 and V3 protocol versions.
 
+pub use crate::client::AccumulateClient;
+
+pub mod canonjson;
+pub mod client;
+pub mod codec;
+pub mod crypto;
+pub mod json_rpc_client;
+pub mod types;
+
+use anyhow::Result;
 use std::time::Duration;
 use url::Url;
 
-pub mod client;
-pub mod json_rpc_client;
-pub mod types;
-pub mod codec;
-pub mod protocol;
-
-pub use client::AccumulateClient;
-pub use json_rpc_client::{JsonRpcClient, JsonRpcError};
-pub use types::*;
-
-/// Configuration options for Accumulate client
+/// Configuration options for the Accumulate client
 #[derive(Debug, Clone)]
 pub struct AccOptions {
     /// Request timeout duration
     pub timeout: Duration,
-    /// Additional HTTP headers
+    /// Default headers to include with requests
     pub headers: std::collections::HashMap<String, String>,
 }
 
@@ -53,48 +34,41 @@ impl Default for AccOptions {
     }
 }
 
-/// Main entry point for Accumulate SDK
-pub struct Accumulate;
-
-impl Accumulate {
-    /// Connect to DevNet (localhost:26660 for V2, localhost:26661 for V3)
-    pub async fn devnet(options: AccOptions) -> Result<AccumulateClient, Box<dyn std::error::Error>> {
-        let v2_url = "http://localhost:26660/v2";
-        let v3_url = "http://localhost:26661/v3";
-        Self::custom_with_versions(v2_url, v3_url, options).await
+impl AccumulateClient {
+    /// Create a new client from explicit V2 and V3 endpoints
+    pub async fn from_endpoints(v2: Url, v3: Url, opts: AccOptions) -> Result<Self> {
+        Self::new_with_options(v2, v3, opts)
+            .await
+            .map_err(|e| anyhow::anyhow!(e))
     }
 
-    /// Connect to testnet
-    pub async fn testnet(options: AccOptions) -> Result<AccumulateClient, Box<dyn std::error::Error>> {
-        let v2_url = "https://testnet.accumulatenetwork.io/v2";
-        let v3_url = "https://testnet.accumulatenetwork.io/v3";
-        Self::custom_with_versions(v2_url, v3_url, options).await
-    }
+    /// Create a new client from environment variables
+    ///
+    /// Reads the following environment variables:
+    /// - `ACCUMULATE_V2_URL`: V2 endpoint URL
+    /// - `ACCUMULATE_V3_URL`: V3 endpoint URL
+    /// - `ACCUMULATE_TIMEOUT_MS`: Request timeout in milliseconds (optional, defaults to 30000)
+    pub fn from_env() -> Result<Self> {
+        dotenvy::dotenv().ok(); // Load .env file if present, ignore errors
 
-    /// Connect to mainnet
-    pub async fn mainnet(options: AccOptions) -> Result<AccumulateClient, Box<dyn std::error::Error>> {
-        let v2_url = "https://mainnet.accumulatenetwork.io/v2";
-        let v3_url = "https://mainnet.accumulatenetwork.io/v3";
-        Self::custom_with_versions(v2_url, v3_url, options).await
-    }
+        let v2_url = std::env::var("ACCUMULATE_V2_URL")
+            .map_err(|_| anyhow::anyhow!("ACCUMULATE_V2_URL environment variable not set"))?;
+        let v3_url = std::env::var("ACCUMULATE_V3_URL")
+            .map_err(|_| anyhow::anyhow!("ACCUMULATE_V3_URL environment variable not set"))?;
 
-    /// Connect to a custom network with base URL (will append /v2 and /v3)
-    pub async fn custom(base_url: &str, options: AccOptions) -> Result<AccumulateClient, Box<dyn std::error::Error>> {
-        let base = base_url.trim_end_matches('/');
-        let v2_url = format!("{}/v2", base);
-        let v3_url = format!("{}/v3", base);
-        Self::custom_with_versions(&v2_url, &v3_url, options).await
-    }
+        let v2 = Url::parse(&v2_url)?;
+        let v3 = Url::parse(&v3_url)?;
 
-    /// Connect to a custom network with explicit V2 and V3 URLs
-    pub async fn custom_with_versions(
-        v2_url: &str,
-        v3_url: &str,
-        options: AccOptions,
-    ) -> Result<AccumulateClient, Box<dyn std::error::Error>> {
-        let v2_parsed = Url::parse(v2_url)?;
-        let v3_parsed = Url::parse(v3_url)?;
+        let timeout_ms = std::env::var("ACCUMULATE_TIMEOUT_MS")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(30_000);
 
-        AccumulateClient::new_with_options(v2_parsed, v3_parsed, options).await
+        let opts = AccOptions {
+            timeout: Duration::from_millis(timeout_ms),
+            ..Default::default()
+        };
+
+        Self::from_endpoints(v2, v3, opts).await
     }
 }

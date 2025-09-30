@@ -3,7 +3,7 @@
 //! This module provides transaction envelope encoding that matches the TypeScript SDK
 //! implementation exactly for transaction construction and signature verification.
 
-use super::{BinaryWriter, BinaryReader, FieldReader, EncodingError, DecodingError};
+use super::{BinaryReader, BinaryWriter, DecodingError, EncodingError, FieldReader};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -59,8 +59,8 @@ impl TransactionCodec {
         writer.write_field(1, &header_data)?;
 
         // Field 2: Body (JSON encoded as bytes)
-        let body_json = serde_json::to_vec(&envelope.body)
-            .map_err(|_| EncodingError::InvalidUtf8)?;
+        let body_json =
+            serde_json::to_vec(&envelope.body).map_err(|_| EncodingError::InvalidUtf8)?;
         writer.write_bytes_field(&body_json, 2)?;
 
         // Field 3: Signatures
@@ -78,15 +78,17 @@ impl TransactionCodec {
         let field_reader = FieldReader::new(data)?;
 
         // Field 1: Header
-        let header_data = field_reader.get_field(1)
+        let header_data = field_reader
+            .get_field(1)
             .ok_or(DecodingError::UnexpectedEof)?;
         let header = Self::decode_header(header_data)?;
 
         // Field 2: Body
-        let body_data = field_reader.read_bytes_field(2)?
+        let body_data = field_reader
+            .read_bytes_field(2)?
             .ok_or(DecodingError::UnexpectedEof)?;
-        let body: Value = serde_json::from_slice(&body_data)
-            .map_err(|_| DecodingError::InvalidUtf8)?;
+        let body: Value =
+            serde_json::from_slice(&body_data).map_err(|_| DecodingError::InvalidUtf8)?;
 
         // Field 3: Signatures (multiple fields with same number)
         let mut signatures = Vec::new();
@@ -133,8 +135,8 @@ impl TransactionCodec {
 
         // Field 6: Metadata (optional)
         if let Some(ref metadata) = header.metadata {
-            let metadata_json = serde_json::to_vec(metadata)
-                .map_err(|_| EncodingError::InvalidUtf8)?;
+            let metadata_json =
+                serde_json::to_vec(metadata).map_err(|_| EncodingError::InvalidUtf8)?;
             writer.write_bytes_field(&metadata_json, 6)?;
         }
 
@@ -146,12 +148,14 @@ impl TransactionCodec {
     pub fn decode_header(data: &[u8]) -> Result<TransactionHeader, DecodingError> {
         let field_reader = FieldReader::new(data)?;
 
-        let principal = field_reader.read_string_field(1)?
+        let principal = field_reader
+            .read_string_field(1)?
             .ok_or(DecodingError::UnexpectedEof)?;
 
         let initiator = field_reader.read_string_field(2)?;
 
-        let timestamp = field_reader.read_uvarint_field(3)?
+        let timestamp = field_reader
+            .read_uvarint_field(3)?
             .ok_or(DecodingError::UnexpectedEof)?;
 
         let nonce = field_reader.read_uvarint_field(4)?;
@@ -159,8 +163,8 @@ impl TransactionCodec {
         let memo = field_reader.read_string_field(5)?;
 
         let metadata = if let Some(metadata_bytes) = field_reader.read_bytes_field(6)? {
-            let metadata: Value = serde_json::from_slice(&metadata_bytes)
-                .map_err(|_| DecodingError::InvalidUtf8)?;
+            let metadata: Value =
+                serde_json::from_slice(&metadata_bytes).map_err(|_| DecodingError::InvalidUtf8)?;
             Some(metadata)
         } else {
             None
@@ -214,13 +218,16 @@ impl TransactionCodec {
     pub fn decode_signature(data: &[u8]) -> Result<TransactionSignature, DecodingError> {
         let field_reader = FieldReader::new(data)?;
 
-        let signature = field_reader.read_bytes_field(1)?
+        let signature = field_reader
+            .read_bytes_field(1)?
             .ok_or(DecodingError::UnexpectedEof)?;
 
-        let signer = field_reader.read_string_field(2)?
+        let signer = field_reader
+            .read_string_field(2)?
             .ok_or(DecodingError::UnexpectedEof)?;
 
-        let timestamp = field_reader.read_uvarint_field(3)?
+        let timestamp = field_reader
+            .read_uvarint_field(3)?
             .ok_or(DecodingError::UnexpectedEof)?;
 
         let vote = field_reader.read_string_field(4)?;
@@ -260,10 +267,12 @@ impl TransactionCodec {
     pub fn decode_key_page(data: &[u8]) -> Result<TransactionKeyPage, DecodingError> {
         let field_reader = FieldReader::new(data)?;
 
-        let height = field_reader.read_uvarint_field(1)?
+        let height = field_reader
+            .read_uvarint_field(1)?
             .ok_or(DecodingError::UnexpectedEof)?;
 
-        let index = field_reader.read_uvarint_field(2)?
+        let index = field_reader
+            .read_uvarint_field(2)?
             .ok_or(DecodingError::UnexpectedEof)? as u32;
 
         Ok(TransactionKeyPage { height, index })
@@ -278,8 +287,8 @@ impl TransactionCodec {
         let header_data = Self::encode_header(&envelope.header)?;
         writer.write_field(1, &header_data)?;
 
-        let body_json = serde_json::to_vec(&envelope.body)
-            .map_err(|_| EncodingError::InvalidUtf8)?;
+        let body_json =
+            serde_json::to_vec(&envelope.body).map_err(|_| EncodingError::InvalidUtf8)?;
         writer.write_bytes_field(&body_json, 2)?;
 
         let data = writer.into_bytes();
@@ -467,19 +476,17 @@ mod tests {
                     "amount": "1000"
                 }]
             }),
-            signatures: vec![
-                TransactionSignature {
-                    signature: vec![1, 2, 3, 4],
-                    signer: "acc://alice.acme/book/1".to_string(),
-                    timestamp: 1234567890124,
-                    vote: Some("accept".to_string()),
-                    public_key: Some(vec![5, 6, 7, 8]),
-                    key_page: Some(TransactionKeyPage {
-                        height: 10,
-                        index: 0,
-                    }),
-                }
-            ],
+            signatures: vec![TransactionSignature {
+                signature: vec![1, 2, 3, 4],
+                signer: "acc://alice.acme/book/1".to_string(),
+                timestamp: 1234567890124,
+                vote: Some("accept".to_string()),
+                public_key: Some(vec![5, 6, 7, 8]),
+                key_page: Some(TransactionKeyPage {
+                    height: 10,
+                    index: 0,
+                }),
+            }],
         };
 
         let encoded = TransactionCodec::encode_envelope(&envelope).unwrap();
@@ -500,8 +507,10 @@ mod tests {
         assert_eq!(orig_sig.timestamp, decoded_sig.timestamp);
         assert_eq!(orig_sig.vote, decoded_sig.vote);
         assert_eq!(orig_sig.public_key, decoded_sig.public_key);
-        assert_eq!(orig_sig.key_page.as_ref().unwrap().height,
-                   decoded_sig.key_page.as_ref().unwrap().height);
+        assert_eq!(
+            orig_sig.key_page.as_ref().unwrap().height,
+            decoded_sig.key_page.as_ref().unwrap().height
+        );
     }
 
     #[test]
@@ -528,12 +537,10 @@ mod tests {
 
     #[test]
     fn test_transaction_body_builders() {
-        let send_tokens_body = TransactionBodyBuilder::send_tokens(vec![
-            TokenRecipient {
-                url: "acc://bob.acme/tokens".to_string(),
-                amount: "1000".to_string(),
-            }
-        ]);
+        let send_tokens_body = TransactionBodyBuilder::send_tokens(vec![TokenRecipient {
+            url: "acc://bob.acme/tokens".to_string(),
+            amount: "1000".to_string(),
+        }]);
 
         assert_eq!(send_tokens_body["type"], "send-tokens");
         assert_eq!(send_tokens_body["to"][0]["url"], "acc://bob.acme/tokens");

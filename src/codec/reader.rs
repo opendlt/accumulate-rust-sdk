@@ -280,7 +280,10 @@ impl<'a> FieldReader<'a> {
     }
 
     /// Read big number from field
-    pub fn read_big_number_field(&self, field: u32) -> Result<Option<num_bigint::BigUint>, DecodingError> {
+    pub fn read_big_number_field(
+        &self,
+        field: u32,
+    ) -> Result<Option<num_bigint::BigUint>, DecodingError> {
         if let Some(data) = self.get_field(field) {
             let mut reader = BinaryReader::new(data);
             Ok(Some(reader.read_big_number()?))
@@ -467,7 +470,10 @@ mod tests {
         let field_reader = FieldReader::new(&encoded).unwrap();
 
         assert_eq!(field_reader.read_uvarint_field(1).unwrap(), Some(42));
-        assert_eq!(field_reader.read_string_field(2).unwrap(), Some("hello".to_string()));
+        assert_eq!(
+            field_reader.read_string_field(2).unwrap(),
+            Some("hello".to_string())
+        );
         assert_eq!(field_reader.read_bool_field(3).unwrap(), Some(true));
         assert_eq!(field_reader.read_uvarint_field(4).unwrap(), None);
     }
