@@ -1,0 +1,16 @@
+{
+  "name": "ts-fixture-exporter",
+  "version": "1.0.0",
+  "description": "TypeScript SDK fixture exporter for Rust parity testing",
+  "main": "export-fixtures.js",
+  "type": "module",
+  "scripts": {
+    "export": "node export-fixtures.js"
+  },
+  "dependencies": {
+    "accumulate.js": "file:../../../accumulate-javascript-client"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
