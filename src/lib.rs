@@ -18,6 +18,7 @@ pub mod codec;
 pub mod crypto;
 pub mod json_rpc_client;
 pub mod types;
+pub mod types_matrix;
 
 use anyhow::Result;
 use std::time::Duration;
