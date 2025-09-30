@@ -1,50 +1,16 @@
-# Cargo configuration for Accumulate Rust SDK
-
-[build]
-# Default target for releases
-# target = "x86_64-unknown-linux-gnu"
-
 [env]
-# Environment variables for builds
-RUST_BACKTRACE = { value = "1", condition = { env-not-set = "RUST_BACKTRACE" } }
+# Environment variables for coverage collection
+CARGO_INCREMENTAL = "0"
+RUSTFLAGS = "-C instrument-coverage"
+LLVM_PROFILE_FILE = "cargo-test-%p-%m.profraw"
 
-[net]
-# Network configuration
-retry = 2
-git-fetch-with-cli = true
+[alias]
+# Coverage collection aliases
+cov = "llvm-cov --all-features --workspace --lcov --output-path target/lcov.info"
+cov-report = "llvm-cov --all-features --workspace --html"
+cov-open = "llvm-cov --all-features --workspace --open"
+cov-clean = "llvm-cov clean"
 
-[profile.dev]
-# Development profile
-debug = true
-debug-assertions = true
-overflow-checks = true
-lto = false
-panic = 'unwind'
-incremental = true
-codegen-units = 256
-
-[profile.release]
-# Release profile optimized for performance
-debug = false
-debug-assertions = false
-overflow-checks = false
-lto = true
-panic = 'abort'
-incremental = false
-codegen-units = 1
-opt-level = 3
-
-[profile.test]
-# Test profile
-debug = true
-debug-assertions = true
-overflow-checks = true
-
-[registries.crates-io]
-protocol = "sparse"
-
-[source.crates-io]
-replace-with = "sparse-index"
-
-[source.sparse-index]
-registry = "https://index.crates.io/"
+# Quality gate aliases
+quality = ["test", "--test", "no_todos"]
+coverage-gate = "llvm-cov --all-features --workspace --lcov --output-path target/lcov.info"
