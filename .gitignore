@@ -73,3 +73,7 @@ local/
 scratch/
 TODO.md
 NOTES.md
+
+
+src/accumulate_client/
+requirements.txt
