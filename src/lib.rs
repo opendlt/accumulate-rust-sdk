@@ -10,6 +10,7 @@ pub use crate::codec::{
     AccumulateHash, UrlHash, canonical_json, sha256_bytes, to_canonical_string
 };
 pub use crate::canonjson::{dumps_canonical, canonicalize};
+pub use crate::crypto::{Ed25519Signer, verify, verify_prehashed, verify_signature, verify_signature_prehashed};
 
 pub mod canonjson;
 pub mod client;

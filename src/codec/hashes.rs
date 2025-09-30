@@ -122,6 +122,18 @@ impl AccumulateHash {
         let hash = Self::sha256_binary_encoded(value, field)?;
         Ok(hex::encode(hash))
     }
+
+    /// Hash a transaction using canonical JSON (matches TS SDK exactly)
+    /// This is the primary method for transaction hashing in Accumulate
+    pub fn hash_transaction(transaction: &Value) -> [u8; 32] {
+        Self::sha256_json(transaction)
+    }
+
+    /// Hash a transaction using canonical JSON, returning hex string
+    pub fn hash_transaction_hex(transaction: &Value) -> String {
+        let hash = Self::hash_transaction(transaction);
+        hex::encode(hash)
+    }
 }
 
 /// Trait for types that can be binary encoded for hashing
