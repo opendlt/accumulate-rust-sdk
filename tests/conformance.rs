@@ -4,8 +4,8 @@
 //! TypeScript SDK behavior for critical functionality.
 
 use accumulate_client::codec::{
-    BinaryWriter, BinaryReader, TransactionCodec, AccumulateHash, UrlHash,
-    TransactionEnvelope, TransactionHeader, TransactionSignature, TransactionBodyBuilder
+    AccumulateHash, BinaryReader, BinaryWriter, TransactionBodyBuilder, TransactionCodec,
+    TransactionEnvelope, TransactionHeader, TransactionSignature, UrlHash,
 };
 use serde_json::{json, Value};
 
@@ -49,7 +49,10 @@ fn test_canonical_json_conformance() {
     });
 
     let canonical4 = accumulate_client::codec::canonical_json(&test4);
-    assert_eq!(canonical4, r#"{"boolean":true,"null":null,"number":42,"string":"test"}"#);
+    assert_eq!(
+        canonical4,
+        r#"{"boolean":true,"null":null,"number":42,"string":"test"}"#
+    );
 }
 
 /// Test that verifies SHA-256 hashing produces identical results
@@ -97,7 +100,11 @@ fn test_url_conformance() {
 
     for (input, expected) in test_cases {
         let normalized = accumulate_client::codec::hashes::UrlHash::normalize_url(input);
-        assert_eq!(normalized, expected, "URL normalization failed for: {}", input);
+        assert_eq!(
+            normalized, expected,
+            "URL normalization failed for: {}",
+            input
+        );
     }
 
     // Test URL derivation
@@ -181,12 +188,11 @@ fn test_binary_encoding_conformance() {
 #[test]
 fn test_transaction_body_conformance() {
     // Test send tokens transaction
-    let send_tokens = TransactionBodyBuilder::send_tokens(vec![
-        accumulate_client::codec::TokenRecipient {
+    let send_tokens =
+        TransactionBodyBuilder::send_tokens(vec![accumulate_client::codec::TokenRecipient {
             url: "acc://bob.acme/tokens".to_string(),
             amount: "1000".to_string(),
-        }
-    ]);
+        }]);
 
     assert_eq!(send_tokens["type"], "send-tokens");
     assert!(send_tokens["to"].is_array());
@@ -230,12 +236,11 @@ fn test_transaction_body_conformance() {
 #[test]
 fn test_transaction_envelope_conformance() {
     // Create a transaction envelope
-    let body = TransactionBodyBuilder::send_tokens(vec![
-        accumulate_client::codec::TokenRecipient {
+    let body =
+        TransactionBodyBuilder::send_tokens(vec![accumulate_client::codec::TokenRecipient {
             url: "acc://bob.acme/tokens".to_string(),
             amount: "1000".to_string(),
-        }
-    ]);
+        }]);
 
     let envelope = TransactionCodec::create_envelope(
         "acc://alice.acme/tokens".to_string(),
@@ -275,12 +280,11 @@ fn test_transaction_envelope_conformance() {
 #[test]
 fn test_envelope_binary_conformance() {
     // Create a complete transaction envelope with signature
-    let body = TransactionBodyBuilder::send_tokens(vec![
-        accumulate_client::codec::TokenRecipient {
+    let body =
+        TransactionBodyBuilder::send_tokens(vec![accumulate_client::codec::TokenRecipient {
             url: "acc://bob.acme/tokens".to_string(),
             amount: "1000".to_string(),
-        }
-    ]);
+        }]);
 
     let mut envelope = TransactionCodec::create_envelope(
         "acc://alice.acme/tokens".to_string(),
@@ -335,15 +339,11 @@ fn test_end_to_end_conformance() {
         accumulate_client::codec::TokenRecipient {
             url: "acc://charlie.acme/tokens".to_string(),
             amount: "500".to_string(),
-        }
+        },
     ]);
 
     // Step 2: Create envelope
-    let mut envelope = TransactionCodec::create_envelope(
-        principal,
-        body,
-        Some(1234567890123),
-    );
+    let mut envelope = TransactionCodec::create_envelope(principal, body, Some(1234567890123));
 
     // Step 3: Get transaction hash for signing
     let tx_hash = TransactionCodec::get_transaction_hash(&envelope).unwrap();
@@ -373,7 +373,10 @@ fn test_end_to_end_conformance() {
     assert_eq!(decoded.signatures.len(), 1);
     assert_eq!(decoded.signatures[0].signature, mock_signature.to_vec());
     assert_eq!(decoded.signatures[0].signer, "acc://alice.acme/book/1");
-    assert_eq!(decoded.signatures[0].public_key, Some(mock_public_key.to_vec()));
+    assert_eq!(
+        decoded.signatures[0].public_key,
+        Some(mock_public_key.to_vec())
+    );
 
     // Step 8: Verify hash consistency
     let decoded_tx_hash = TransactionCodec::get_transaction_hash(&decoded).unwrap();
@@ -383,5 +386,8 @@ fn test_end_to_end_conformance() {
     println!("Envelope size: {} bytes", encoded.len());
     println!("Transaction hash: {}", hex::encode(tx_hash));
     println!("Principal: {}", decoded.header.principal);
-    println!("Recipients: {}", decoded.body["to"].as_array().unwrap().len());
+    println!(
+        "Recipients: {}",
+        decoded.body["to"].as_array().unwrap().len()
+    );
 }

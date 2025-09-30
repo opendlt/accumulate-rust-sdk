@@ -4,8 +4,8 @@
 //! and TypeScript SDK binary encoding/decoding implementations.
 
 use accumulate_client::codec::{
-    BinaryWriter, BinaryReader, TransactionCodec, AccumulateHash, UrlHash,
-    TransactionEnvelope, TransactionHeader, TransactionSignature, TransactionBodyBuilder
+    AccumulateHash, BinaryReader, BinaryWriter, TransactionBodyBuilder, TransactionCodec,
+    TransactionEnvelope, TransactionHeader, TransactionSignature, UrlHash,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -98,12 +98,14 @@ struct EnvelopeVector {
 
 /// Load test vectors from golden fixtures
 fn load_test_vectors() -> TestVectors {
-    let fixtures_path = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/golden/typescript_sdk_vectors.json");
-    let fixtures_content = std::fs::read_to_string(fixtures_path)
-        .expect("Failed to read TypeScript SDK test vectors");
+    let fixtures_path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/golden/typescript_sdk_vectors.json"
+    );
+    let fixtures_content =
+        std::fs::read_to_string(fixtures_path).expect("Failed to read TypeScript SDK test vectors");
 
-    serde_json::from_str(&fixtures_content)
-        .expect("Failed to parse TypeScript SDK test vectors")
+    serde_json::from_str(&fixtures_content).expect("Failed to parse TypeScript SDK test vectors")
 }
 
 #[test]
@@ -199,9 +201,11 @@ fn test_string_parity() {
 
         // Test length validation
         assert_eq!(
-            vector.input.len(), vector.length,
+            vector.input.len(),
+            vector.length,
             "String length mismatch: reported {} vs actual {}",
-            vector.length, vector.input.len()
+            vector.length,
+            vector.input.len()
         );
 
         let utf8_bytes = vector.input.as_bytes().len();
@@ -247,18 +251,24 @@ fn test_bytes_parity() {
 
         // Test length validation
         assert_eq!(
-            vector.input.len(), vector.input_length,
+            vector.input.len(),
+            vector.input_length,
             "Bytes length mismatch: actual {} vs reported {}",
-            vector.input.len(), vector.input_length
+            vector.input.len(),
+            vector.input_length
         );
 
         // Test decoding
         let mut reader = BinaryReader::new(&vector.encoded);
-        let decoded = reader.read_bytes_with_length().expect("Failed to decode bytes");
+        let decoded = reader
+            .read_bytes_with_length()
+            .expect("Failed to decode bytes");
         assert_eq!(
-            decoded, vector.input.as_slice(),
+            decoded,
+            vector.input.as_slice(),
             "Bytes decoding mismatch: decoded {:?} vs original {:?}",
-            decoded, vector.input
+            decoded,
+            vector.input
         );
     }
 }
@@ -355,9 +365,12 @@ fn test_canonical_json_parity() {
         // Test hash generation
         let rust_hash = AccumulateHash::sha256_json(&vector.body);
         assert_eq!(
-            rust_hash.to_vec(), vector.hash,
+            rust_hash.to_vec(),
+            vector.hash,
             "JSON hash mismatch for {:?}: Rust {:?} vs TS {:?}",
-            vector.body, rust_hash, vector.hash
+            vector.body,
+            rust_hash,
+            vector.hash
         );
 
         let rust_hash_hex = hex::encode(rust_hash);
@@ -378,7 +391,9 @@ fn test_envelope_hash_parity() {
 
         // Parse envelope from test vector
         let envelope_value = &vector.envelope;
-        if let (Some(header), Some(body)) = (envelope_value.get("header"), envelope_value.get("body")) {
+        if let (Some(header), Some(body)) =
+            (envelope_value.get("header"), envelope_value.get("body"))
+        {
             // Test header canonical JSON
             let rust_header_canonical = accumulate_client::codec::canonical_json(header);
             assert_eq!(
@@ -410,9 +425,11 @@ fn test_envelope_hash_parity() {
             // Test transaction hash
             let rust_tx_hash = AccumulateHash::sha256_json(&signing_payload);
             assert_eq!(
-                rust_tx_hash.to_vec(), vector.transaction_hash,
+                rust_tx_hash.to_vec(),
+                vector.transaction_hash,
                 "Transaction hash mismatch: Rust {:?} vs TS {:?}",
-                rust_tx_hash, vector.transaction_hash
+                rust_tx_hash,
+                vector.transaction_hash
             );
 
             let rust_tx_hash_hex = hex::encode(rust_tx_hash);
@@ -443,9 +460,19 @@ fn test_url_hashing_parity() {
 
         // Test URL normalization
         let normalized = accumulate_client::codec::hashes::UrlHash::normalize_url(url);
-        assert!(normalized.starts_with("acc://"), "URL should be normalized to start with acc://");
-        assert!(!normalized.ends_with('/') || normalized == "acc://", "URL should not end with slash unless root");
-        assert_eq!(normalized.to_lowercase(), normalized, "URL should be lowercase");
+        assert!(
+            normalized.starts_with("acc://"),
+            "URL should be normalized to start with acc://"
+        );
+        assert!(
+            !normalized.ends_with('/') || normalized == "acc://",
+            "URL should not end with slash unless root"
+        );
+        assert_eq!(
+            normalized.to_lowercase(),
+            normalized,
+            "URL should be lowercase"
+        );
 
         // Test URL hashing
         let hash = UrlHash::hash_url(url);
@@ -456,21 +483,27 @@ fn test_url_hashing_parity() {
         assert_eq!(hash, upper_hash, "URL hashing should be case insensitive");
 
         // Test trailing slash insensitivity
-        let slash_url = if url.ends_with('/') { url.to_string() } else { format!("{}/", url) };
+        let slash_url = if url.ends_with('/') {
+            url.to_string()
+        } else {
+            format!("{}/", url)
+        };
         let slash_hash = UrlHash::hash_url(&slash_url);
-        assert_eq!(hash, slash_hash, "URL hashing should be trailing slash insensitive");
+        assert_eq!(
+            hash, slash_hash,
+            "URL hashing should be trailing slash insensitive"
+        );
     }
 }
 
 #[test]
 fn test_transaction_body_builders() {
     // Test send tokens body
-    let send_tokens = TransactionBodyBuilder::send_tokens(vec![
-        accumulate_client::codec::TokenRecipient {
+    let send_tokens =
+        TransactionBodyBuilder::send_tokens(vec![accumulate_client::codec::TokenRecipient {
             url: "acc://bob.acme/tokens".to_string(),
             amount: "1000".to_string(),
-        }
-    ]);
+        }]);
 
     assert_eq!(send_tokens["type"], "send-tokens");
     assert_eq!(send_tokens["to"][0]["url"], "acc://bob.acme/tokens");
@@ -515,9 +548,15 @@ fn test_field_encoding_roundtrip() {
     let field_reader = accumulate_client::codec::FieldReader::new(&encoded).unwrap();
 
     assert_eq!(field_reader.read_uvarint_field(1).unwrap(), Some(42));
-    assert_eq!(field_reader.read_string_field(2).unwrap(), Some("hello world".to_string()));
+    assert_eq!(
+        field_reader.read_string_field(2).unwrap(),
+        Some("hello world".to_string())
+    );
     assert_eq!(field_reader.read_bool_field(3).unwrap(), Some(true));
-    assert_eq!(field_reader.read_bytes_field(4).unwrap(), Some(vec![1, 2, 3, 4]));
+    assert_eq!(
+        field_reader.read_bytes_field(4).unwrap(),
+        Some(vec![1, 2, 3, 4])
+    );
     assert_eq!(field_reader.read_uvarint_field(5).unwrap(), None);
 }
 
@@ -535,22 +574,48 @@ fn test_comprehensive_roundtrip() {
     let mut writer = BinaryWriter::new();
 
     // Encode all test data
-    writer.write_uvarint_field(test_data[0].2 as u64, test_data[0].0).unwrap();
-    writer.write_varint_field(test_data[1].2 as i64, test_data[1].0).unwrap();
-    writer.write_string_field(&test_data[2].2, test_data[2].0).unwrap();
-    writer.write_bytes_field(&test_data[3].2, test_data[3].0).unwrap();
-    writer.write_bool_field(test_data[4].2 as bool, test_data[4].0).unwrap();
+    writer
+        .write_uvarint_field(test_data[0].2 as u64, test_data[0].0)
+        .unwrap();
+    writer
+        .write_varint_field(test_data[1].2 as i64, test_data[1].0)
+        .unwrap();
+    writer
+        .write_string_field(&test_data[2].2, test_data[2].0)
+        .unwrap();
+    writer
+        .write_bytes_field(&test_data[3].2, test_data[3].0)
+        .unwrap();
+    writer
+        .write_bool_field(test_data[4].2 as bool, test_data[4].0)
+        .unwrap();
 
     let encoded = writer.into_bytes();
-    println!("Comprehensive encoded data: {} bytes, hex: {}", encoded.len(), hex::encode(&encoded));
+    println!(
+        "Comprehensive encoded data: {} bytes, hex: {}",
+        encoded.len(),
+        hex::encode(&encoded)
+    );
 
     // Decode all test data
     let field_reader = accumulate_client::codec::FieldReader::new(&encoded).unwrap();
 
-    assert_eq!(field_reader.read_uvarint_field(1).unwrap(), Some(123456789u64));
-    assert_eq!(field_reader.read_varint_field(2).unwrap(), Some(-123456789i64));
-    assert_eq!(field_reader.read_string_field(3).unwrap(), Some("Hello, 世界! 🌍".to_string()));
-    assert_eq!(field_reader.read_bytes_field(4).unwrap(), Some(vec![0, 1, 127, 128, 255]));
+    assert_eq!(
+        field_reader.read_uvarint_field(1).unwrap(),
+        Some(123456789u64)
+    );
+    assert_eq!(
+        field_reader.read_varint_field(2).unwrap(),
+        Some(-123456789i64)
+    );
+    assert_eq!(
+        field_reader.read_string_field(3).unwrap(),
+        Some("Hello, 世界! 🌍".to_string())
+    );
+    assert_eq!(
+        field_reader.read_bytes_field(4).unwrap(),
+        Some(vec![0, 1, 127, 128, 255])
+    );
     assert_eq!(field_reader.read_bool_field(5).unwrap(), Some(true));
 
     // Verify field numbers
@@ -575,7 +640,11 @@ mod benchmark_tests {
             }
         }
         let uvarint_duration = start.elapsed();
-        println!("UVarint encoding: {:?} for {} operations", uvarint_duration, 10000 * vectors.uvarint.len());
+        println!(
+            "UVarint encoding: {:?} for {} operations",
+            uvarint_duration,
+            10000 * vectors.uvarint.len()
+        );
 
         // Benchmark string encoding
         let start = Instant::now();
@@ -585,10 +654,20 @@ mod benchmark_tests {
             }
         }
         let string_duration = start.elapsed();
-        println!("String encoding: {:?} for {} operations", string_duration, 10000 * vectors.strings.len());
+        println!(
+            "String encoding: {:?} for {} operations",
+            string_duration,
+            10000 * vectors.strings.len()
+        );
 
         // Benchmark should complete in reasonable time
-        assert!(uvarint_duration.as_millis() < 1000, "UVarint encoding too slow");
-        assert!(string_duration.as_millis() < 1000, "String encoding too slow");
+        assert!(
+            uvarint_duration.as_millis() < 1000,
+            "UVarint encoding too slow"
+        );
+        assert!(
+            string_duration.as_millis() < 1000,
+            "String encoding too slow"
+        );
     }
 }

@@ -1,25 +1,31 @@
-use accumulate_client::{Accumulate, AccOptions, canonical_json};
+use accumulate_client::{AccOptions, AccumulateClient};
 use serde_json::json;
 use std::time::Duration;
 use url::Url;
 
 #[tokio::test]
 async fn test_client_creation() {
+    let v2_url = Url::parse("http://localhost:26660/v2").unwrap();
+    let v3_url = Url::parse("http://localhost:26661/v3").unwrap();
     let options = AccOptions::default();
 
-    // Test DevNet client creation
-    let result = Accumulate::devnet(options.clone()).await;
-    // We expect this to fail without actual network connectivity, but the client should construct properly
-    assert!(result.is_err() || result.is_ok());
+    let result = AccumulateClient::new_with_options(v2_url, v3_url, options).await;
+    assert!(result.is_ok());
 }
 
 #[tokio::test]
-async fn test_custom_client_creation() {
+async fn test_client_from_endpoints() {
+    let v2_url = Url::parse("http://localhost:26660/v2").unwrap();
+    let v3_url = Url::parse("http://localhost:26661/v3").unwrap();
     let options = AccOptions::default();
 
-    let result = Accumulate::custom("http://localhost:26660", options).await;
-    // We expect this to fail without actual network connectivity, but the client should construct properly
-    assert!(result.is_err() || result.is_ok());
+    let result = AccumulateClient::from_endpoints(v2_url, v3_url, options).await;
+    assert!(result.is_ok());
+
+    let client = result.unwrap();
+    let (v2_base, v3_base) = client.get_urls();
+    assert_eq!(v2_base, "http://localhost:26660/v2");
+    assert_eq!(v3_base, "http://localhost:26661/v3");
 }
 
 #[test]
@@ -41,7 +47,10 @@ fn test_acc_options_custom() {
 
     assert_eq!(options.timeout, Duration::from_secs(60));
     assert_eq!(options.headers.len(), 1);
-    assert_eq!(options.headers.get("Authorization"), Some(&"Bearer token".to_string()));
+    assert_eq!(
+        options.headers.get("Authorization"),
+        Some(&"Bearer token".to_string())
+    );
 }
 
 #[test]
@@ -55,7 +64,7 @@ fn test_canonical_json_ordering() {
         }
     });
 
-    let canonical = canonical_json(&value);
+    let canonical = accumulate_client::codec::canonical_json(&value);
 
     // Keys should be in alphabetical order
     let a_pos = canonical.find(r#""a""#).unwrap();
@@ -80,7 +89,7 @@ fn test_canonical_json_arrays() {
         ]
     });
 
-    let canonical = canonical_json(&value);
+    let canonical = accumulate_client::codec::canonical_json(&value);
 
     // Array elements should maintain order but internal objects should be sorted
     assert!(canonical.contains(r#"[{"a":1,"b":2},{"c":3,"d":4}]"#));
@@ -95,7 +104,7 @@ fn test_canonical_json_primitives() {
         "null": null
     });
 
-    let canonical = canonical_json(&value);
+    let canonical = accumulate_client::codec::canonical_json(&value);
 
     // Should contain all primitive types with keys in order
     assert!(canonical.contains(r#""boolean":true"#));
@@ -104,23 +113,22 @@ fn test_canonical_json_primitives() {
     assert!(canonical.contains(r#""string":"test""#));
 }
 
-#[tokio::test]
-async fn test_network_helpers() {
-    let options = AccOptions::default();
+#[test]
+fn test_keypair_generation() {
+    let keypair = AccumulateClient::generate_keypair();
+    assert_eq!(keypair.public.to_bytes().len(), 32);
+    assert_eq!(keypair.secret.to_bytes().len(), 32);
+}
 
-    // Test all network helpers construct proper URLs
-    let testnet_result = Accumulate::testnet(options.clone()).await;
-    let mainnet_result = Accumulate::mainnet(options.clone()).await;
-    let custom_result = Accumulate::custom_with_versions(
-        "http://localhost:26660/v2",
-        "http://localhost:26661/v3",
-        options
-    ).await;
-
-    // These may fail due to network connectivity, but should not panic
-    assert!(testnet_result.is_err() || testnet_result.is_ok());
-    assert!(mainnet_result.is_err() || mainnet_result.is_ok());
-    assert!(custom_result.is_err() || custom_result.is_ok());
+#[test]
+fn test_validate_account_url() {
+    assert!(AccumulateClient::validate_account_url("acc://alice.acme"));
+    assert!(AccumulateClient::validate_account_url(
+        "acc://alice.acme/tokens"
+    ));
+    assert!(AccumulateClient::validate_account_url("alice.acme/tokens"));
+    assert!(!AccumulateClient::validate_account_url("invalid"));
+    assert!(!AccumulateClient::validate_account_url(""));
 }
 
 #[cfg(feature = "integration")]
@@ -130,7 +138,11 @@ mod integration_tests {
     #[tokio::test]
     async fn test_devnet_status() {
         // This test requires a running DevNet instance
-        let client = Accumulate::devnet(AccOptions::default()).await.expect("Failed to create DevNet client");
+        let v2_url = Url::parse("http://localhost:26660/v2").unwrap();
+        let v3_url = Url::parse("http://localhost:26661/v3").unwrap();
+        let client = AccumulateClient::new_with_options(v2_url, v3_url, AccOptions::default())
+            .await
+            .expect("Failed to create DevNet client");
 
         let status = client.status().await.expect("Failed to get status");
         assert!(!status.network.is_empty());
@@ -140,7 +152,11 @@ mod integration_tests {
     #[tokio::test]
     async fn test_faucet() {
         // This test requires a running DevNet instance
-        let client = Accumulate::devnet(AccOptions::default()).await.expect("Failed to create DevNet client");
+        let v2_url = Url::parse("http://localhost:26660/v2").unwrap();
+        let v3_url = Url::parse("http://localhost:26661/v3").unwrap();
+        let client = AccumulateClient::new_with_options(v2_url, v3_url, AccOptions::default())
+            .await
+            .expect("Failed to create DevNet client");
 
         let result = client.faucet("acc://test-account").await;
         // Faucet may succeed or fail depending on DevNet state, but should not panic
