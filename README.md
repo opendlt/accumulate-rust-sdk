@@ -197,6 +197,82 @@ cargo test --all-features
 RUST_LOG=debug cargo test
 ```
 
+## Parity Gate
+
+The Rust SDK maintains byte-for-byte compatibility with the TypeScript SDK through comprehensive parity testing. The parity gate verifies:
+
+- **Canonical JSON**: Identical deterministic serialization
+- **Cryptographic parity**: Ed25519 signatures match exactly
+- **Transaction hashes**: SHA-256 hashes identical between SDKs
+- **Binary encoding**: Protocol buffers roundtrip correctly
+- **Fuzzing**: 1000+ random TypeScript-generated test vectors
+
+### Running the Parity Gate
+
+```bash
+# Run complete parity validation pipeline
+scripts\run_parity_gate.ps1
+
+# Custom fuzz count and coverage threshold
+scripts\run_parity_gate.ps1 -FuzzCount 2000 -CoverageThreshold 80
+```
+
+### Expected Output
+
+```
+🚀 ACCUMULATE RUST SDK PARITY GATE
+===================================
+
+📁 Entering unified directory...
+🔧 Generating TypeScript fixtures...
+  → Generating standard fixtures...
+  → Generating random test vectors (n=1000)...
+  ✅ Generated 1000 random test vectors
+🎨 Formatting Rust code...
+  ✅ Code formatting complete
+🔍 Running Clippy linter...
+  ✅ Linting passed with no warnings
+🛡️  Running quality gates...
+  → Checking for TODOs and stubs...
+  ✅ No prohibited patterns found
+🧪 Running core functionality tests...
+  → Testing canonical JSON implementation...
+  → Testing cryptographic functions...
+  → Testing codec functionality...
+  ✅ Core functionality tests passed
+🔄 Running parity and roundtrip tests...
+  → Testing TypeScript fuzzing roundtrip...
+  → Testing type matrix roundtrips...
+  → Verifying type matrix coverage...
+  ✅ All parity and roundtrip tests passed
+🎯 Running complete test suite...
+  ✅ All tests passed
+📊 Analyzing code coverage...
+  ✅ Coverage threshold of 70% achieved
+
+📋 PARITY GATE SUMMARY
+======================
+📦 Golden fixtures: 15 files
+🎲 Fuzz vectors: 1000 envelopes
+🎯 Test coverage: 70% threshold
+🔄 Type matrix: 27 protocol types
+
+🟢 Parity locked: binary, canonical JSON, hashes, signatures, fuzz roundtrip = OK
+
+✅ All parity gates passed successfully!
+   The Rust SDK maintains byte-for-byte compatibility with TypeScript SDK
+```
+
+### Components
+
+The parity gate executes:
+
+1. **TypeScript Fixture Generation**: Creates deterministic test vectors
+2. **Code Quality**: Formatting, linting, and prohibition scanning
+3. **Core Tests**: Canonical JSON, cryptography, and codec validation
+4. **Roundtrip Verification**: Type matrix and fuzzing roundtrips
+5. **Coverage Analysis**: Ensures adequate test coverage (configurable threshold)
+
 ## Production Tooling
 
 The SDK includes comprehensive production-ready tooling:
