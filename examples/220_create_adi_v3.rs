@@ -5,8 +5,8 @@
 //! - Using V3 transaction envelope format
 //! - Setting up key books and pages
 
-use accumulate_client::{Accumulate, AccOptions, AccumulateClient};
-use accumulate_client::protocol::{EnvelopeBuilder, helpers};
+use accumulate_client::protocol::{helpers, EnvelopeBuilder};
+use accumulate_client::{AccOptions, Accumulate, AccumulateClient};
 use dotenvy::dotenv;
 use serde_json::json;
 use std::env;
@@ -60,7 +60,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("   ✅ Envelope created successfully");
     println!("   Signatures: {}", envelope.signatures.len());
-    println!("   Transaction hash: {}", envelope.signatures[0].transaction_hash);
+    println!(
+        "   Transaction hash: {}",
+        envelope.signatures[0].transaction_hash
+    );
     println!("   ⚠️  Would submit to V3 API in full implementation");
 
     Ok(())

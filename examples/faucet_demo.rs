@@ -1,4 +1,4 @@
-use accumulate_client::{Accumulate, AccOptions};
+use accumulate_client::{AccOptions, Accumulate};
 use std::env;
 
 #[tokio::main]
@@ -20,7 +20,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Check if the account URL is valid format
     if !client.validate_account_url(&account_url) {
-        eprintln!("⚠ Warning: Account URL '{}' may not be in the correct format", account_url);
+        eprintln!(
+            "⚠ Warning: Account URL '{}' may not be in the correct format",
+            account_url
+        );
         println!("Expected format: acc://account-name or account/path");
     }
 

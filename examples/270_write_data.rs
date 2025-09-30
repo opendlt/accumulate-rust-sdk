@@ -5,7 +5,7 @@
 //! - Writing structured data to the blockchain
 //! - Data account management
 
-use accumulate_client::{Accumulate, AccOptions, AccumulateClient};
+use accumulate_client::{AccOptions, Accumulate, AccumulateClient};
 use dotenvy::dotenv;
 use serde_json::json;
 use std::env;
@@ -64,7 +64,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("   ✅ Write data transaction prepared");
     println!("   Target account: {}", data_account_url);
-    println!("   Data size: {} bytes", serde_json::to_string(&data_payload)?.len());
+    println!(
+        "   Data size: {} bytes",
+        serde_json::to_string(&data_payload)?.len()
+    );
     println!("   ⚠️  Would submit to network in full implementation");
 
     Ok(())

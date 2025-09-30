@@ -1,4 +1,4 @@
-use accumulate_client::{Accumulate, AccOptions};
+use accumulate_client::{AccOptions, Accumulate};
 use std::env;
 
 #[tokio::main]

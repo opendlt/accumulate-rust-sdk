@@ -5,7 +5,7 @@
 //! - Lite Token Account (LTA) to ADI transfers
 //! - Transaction signing and submission patterns
 
-use accumulate_client::{Accumulate, AccOptions, AccumulateClient};
+use accumulate_client::{AccOptions, Accumulate, AccumulateClient};
 use dotenvy::dotenv;
 use std::env;
 
