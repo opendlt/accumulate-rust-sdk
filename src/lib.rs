@@ -11,11 +11,13 @@ pub use crate::codec::{
 };
 pub use crate::canonjson::{dumps_canonical, canonicalize};
 pub use crate::crypto::{Ed25519Signer, verify, verify_prehashed, verify_signature, verify_signature_prehashed};
+pub use crate::generated::enums::*;
 
 pub mod canonjson;
 pub mod client;
 pub mod codec;
 pub mod crypto;
+pub mod generated;
 pub mod json_rpc_client;
 pub mod types;
 pub mod types_matrix;
