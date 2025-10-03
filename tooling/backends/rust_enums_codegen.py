@@ -90,7 +90,7 @@ def generate_enum_rust_code(enum_name, variants_data):
                 variants.append(f'    #[serde(rename = "{wire_tag}")]\n    {rust_variant},')
 
     # Generate the enum
-    enum_code = f'''#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+    enum_code = f'''#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum {enum_name} {{
 {chr(10).join(variants)}
 }}'''
