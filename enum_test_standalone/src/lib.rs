@@ -6,6 +6,9 @@ use std::path::PathBuf;
 // Include the generated enums directly
 include!("../../src/generated/enums.rs");
 
+// Include comprehensive tests
+pub mod comprehensive_tests;
+
 pub fn test_enum_roundtrips() -> Result<(), Box<dyn std::error::Error>> {
     let manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent().unwrap()
