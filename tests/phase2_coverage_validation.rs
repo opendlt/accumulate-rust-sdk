@@ -139,13 +139,13 @@ fn test_phase2_json_canonical_format() {
 
     let serialized = serde_json::to_value(&header).unwrap();
 
-    // Verify camelCase field naming (from serde rename attributes)
-    assert!(serialized.get("Principal").is_some(), "Header should have Principal field");
-    assert!(serialized.get("Initiator").is_some(), "Header should have Initiator field");
+    // Verify camelCase field naming (per Go canonical format)
+    assert!(serialized.get("principal").is_some(), "Header should have principal field");
+    assert!(serialized.get("initiator").is_some(), "Header should have initiator field");
 
     let json_str = serde_json::to_string(&serialized).unwrap();
-    assert!(json_str.contains("\"Principal\""), "Should use PascalCase for Principal");
-    assert!(json_str.contains("\"Initiator\""), "Should use PascalCase for Initiator");
+    assert!(json_str.contains("\"principal\""), "Should use camelCase for principal");
+    assert!(json_str.contains("\"initiator\""), "Should use camelCase for initiator");
 
     println!("✓ JSON canonical format validated");
 }

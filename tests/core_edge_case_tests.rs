@@ -281,14 +281,14 @@ fn test_field_naming_format() {
 
     let json_value = serde_json::to_value(&header).unwrap();
 
-    // Verify field naming follows the expected format
-    assert!(json_value.get("Principal").is_some(), "Should have Principal field");
-    assert!(json_value.get("Initiator").is_some(), "Should have Initiator field");
-    assert!(json_value.get("Memo").is_some(), "Should have Memo field");
-    assert!(json_value.get("Metadata").is_some(), "Should have Metadata field");
-    assert!(json_value.get("Expire").is_some(), "Should have Expire field");
-    assert!(json_value.get("HoldUntil").is_some(), "Should have HoldUntil field");
-    assert!(json_value.get("Authorities").is_some(), "Should have Authorities field");
+    // Verify field naming follows the expected format (camelCase per Go source truth)
+    assert!(json_value.get("principal").is_some(), "Should have principal field");
+    assert!(json_value.get("initiator").is_some(), "Should have initiator field");
+    assert!(json_value.get("memo").is_some(), "Should have memo field");
+    assert!(json_value.get("metadata").is_some(), "Should have metadata field");
+    assert!(json_value.get("expire").is_some(), "Should have expire field");
+    assert!(json_value.get("holdUntil").is_some(), "Should have holdUntil field");
+    assert!(json_value.get("authorities").is_some(), "Should have authorities field");
 
     // Test that the JSON can be roundtripped
     let json_str = serde_json::to_string(&json_value).unwrap();
