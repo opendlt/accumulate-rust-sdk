@@ -347,22 +347,22 @@ impl RoundtripTestable for crate::codec::TransactionKeyPage {}
 impl RoundtripTestable for crate::codec::TokenRecipient {}
 impl RoundtripTestable for crate::codec::KeySpec {}
 
-// Also implement for types from the types.rs file
-impl RoundtripTestable for crate::types::StatusResponse {}
-impl RoundtripTestable for crate::types::NodeInfo {}
-impl RoundtripTestable for crate::types::TransactionResponse {}
-impl RoundtripTestable for crate::types::TransactionResult {}
-impl RoundtripTestable for crate::types::Event {}
-impl RoundtripTestable for crate::types::Attribute {}
-impl RoundtripTestable for crate::types::SignedTransaction {}
-impl RoundtripTestable for crate::types::Signature {}
-impl RoundtripTestable for crate::types::Account {}
-impl RoundtripTestable for crate::types::FaucetResponse {}
-impl RoundtripTestable for crate::types::V3SubmitRequest {}
-impl RoundtripTestable for crate::types::V3SubmitResponse {}
-impl RoundtripTestable for crate::types::SubmitResult {}
-impl RoundtripTestable for crate::types::TransactionEnvelope {}
-impl RoundtripTestable for crate::types::V3Signature {}
+// Also implement for types from the sdk_types.rs file
+impl RoundtripTestable for crate::generated::sdk_types::StatusResponse {}
+impl RoundtripTestable for crate::generated::sdk_types::NodeInfo {}
+impl RoundtripTestable for crate::generated::sdk_types::TransactionResponse {}
+impl RoundtripTestable for crate::generated::sdk_types::TransactionResult {}
+impl RoundtripTestable for crate::generated::sdk_types::Event {}
+impl RoundtripTestable for crate::generated::sdk_types::Attribute {}
+impl RoundtripTestable for crate::generated::sdk_types::SignedTransaction {}
+impl RoundtripTestable for crate::generated::sdk_types::Signature {}
+impl RoundtripTestable for crate::generated::sdk_types::Account {}
+impl RoundtripTestable for crate::generated::sdk_types::FaucetResponse {}
+impl RoundtripTestable for crate::generated::sdk_types::V3SubmitRequest {}
+impl RoundtripTestable for crate::generated::sdk_types::V3SubmitResponse {}
+impl RoundtripTestable for crate::generated::sdk_types::SubmitResult {}
+impl RoundtripTestable for crate::generated::sdk_types::TransactionEnvelope {}
+impl RoundtripTestable for crate::generated::sdk_types::V3Signature {}
 
 /// Get type name for a given type (for debugging and reporting)
 pub fn get_type_name<T>() -> &'static str {

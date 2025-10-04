@@ -21,7 +21,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuration
-const TS_SDK_ROOT = 'C:\\Accumulate_Stuff\\accumulate-javascript-client';
+const TS_SDK_ROOT = process.env.TS_SDK_ROOT || '../../../accumulate-javascript-client';
 const OUTPUT_DIR = path.join(__dirname, '..', '..', 'tests', 'golden');
 
 // Ensure output directory exists

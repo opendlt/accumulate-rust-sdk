@@ -4,7 +4,7 @@
 //! networks, supporting both V2 and V3 protocol versions.
 
 // Import the main V2/V3 client as the primary AccumulateClient
-pub use crate::client::AccumulateClient;
+pub use crate::generated::client::AccumulateClient;
 
 /// Type alias for convenient access to AccumulateClient methods
 pub type Accumulate = AccumulateClient;
@@ -40,14 +40,11 @@ pub use crate::runtime::rpc::*;
 pub use crate::runtime::signing_test_shims;
 
 pub mod canonjson;
-pub mod client;
 pub mod codec;
 pub mod crypto;
 pub mod errors;
 pub mod generated;
-pub mod json_rpc_client;
 pub mod runtime;
-pub mod types;
 pub mod types_matrix;
 
 use anyhow::Result;

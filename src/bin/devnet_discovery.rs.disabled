@@ -18,7 +18,7 @@ use std::path::Path;
 use std::process::Command;
 use std::process::Command;
 
-const DEFAULT_DEVNET_DIR: &str = r"C:\Accumulate_Stuff\devnet-accumulate-instance";
+const DEFAULT_DEVNET_DIR: &str = "../Devnet";
 const ENV_FILE: &str = ".env.local";
 
 /// DevNet configuration discovered from environment

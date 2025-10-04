@@ -27,17 +27,17 @@ import re
 from datetime import datetime
 
 # Constants
-GO_REPO = Path(r"C:\Accumulate_Stuff\accumulate")
-GO_ANALYSIS = Path(r"C:\Accumulate_Stuff\accumulate\_analysis_codegen")
-GO_AUDIT = Path(r"C:\Accumulate_Stuff\accumulate\_claude_audit")
+GO_REPO = Path(os.environ.get("ACCUMULATE_REPO", "../accumulate"))
+GO_ANALYSIS = GO_REPO / "_analysis_codegen"
+GO_AUDIT = GO_REPO / "_claude_audit"
 
-RUST_ROOT = Path(r"C:\Accumulate_Stuff\opendlt-rust-v2v3-sdk\unified")
+RUST_ROOT = Path(os.environ.get("RUST_SDK_ROOT", "."))
 SRC_DIR = RUST_ROOT / "src"
 GEN_DIR = SRC_DIR / "generated"
 TESTS_DIR = RUST_ROOT / "tests"
 GOLDEN_TYPES = TESTS_DIR / "golden_vectors" / "types"
 
-AUDIT_DIR = Path(r"C:\Accumulate_Stuff\rust_parity_audit")
+AUDIT_DIR = Path(os.environ.get("AUDIT_DIR", "../rust_parity_audit"))
 
 class RustTypeGenerator:
     """Generates Rust code for protocol types"""

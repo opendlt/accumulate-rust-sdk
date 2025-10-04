@@ -362,7 +362,7 @@ pub struct ReceiptSignature {
     #[serde(rename = "SourceNetwork")]
     pub source_network: String,
     #[serde(rename = "Proof")]
-    pub proof: crate::types::MerkleReceipt,
+    pub proof: crate::generated::sdk_types::MerkleReceipt,
     #[serde(rename = "TransactionHash", with = "hex_option")]
     pub transaction_hash: Option<[u8; 32]>,
 }

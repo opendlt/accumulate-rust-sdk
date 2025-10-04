@@ -16,7 +16,8 @@ from pathlib import Path
 
 def load_signatures_yaml():
     """Load signature definitions from Go YAML truth source."""
-    yaml_path = Path("C:/Accumulate_Stuff/accumulate/protocol/signatures.yml")
+    accumulate_repo = os.environ.get("ACCUMULATE_REPO", Path.cwd().parent.parent / "accumulate")
+    yaml_path = Path(accumulate_repo) / "protocol/signatures.yml"
     if not yaml_path.exists():
         print(f"ERROR: YAML file not found: {yaml_path}")
         sys.exit(1)
@@ -493,7 +494,8 @@ def main():
     rust_code = generate_signatures_rust_file(signatures_data)
 
     # Write signatures.rs
-    output_dir = Path("C:/Accumulate_Stuff/opendlt-rust-v2v3-sdk/unified/src/generated")
+    rust_sdk_root = os.environ.get("RUST_SDK_ROOT", Path.cwd().parent.parent)
+    output_dir = Path(rust_sdk_root) / "src/generated"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     rust_file = output_dir / "signatures.rs"

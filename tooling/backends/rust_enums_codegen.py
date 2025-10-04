@@ -12,8 +12,8 @@ from datetime import datetime
 from pathlib import Path
 
 # Paths
-GO_REPO = r"C:\Accumulate_Stuff\accumulate"
-RUST_ROOT = r"C:\Accumulate_Stuff\opendlt-rust-v2v3-sdk\unified"
+GO_REPO = os.environ.get("ACCUMULATE_REPO", "../accumulate")
+RUST_ROOT = os.environ.get("RUST_SDK_ROOT", ".")
 SRC_DIR = os.path.join(RUST_ROOT, "src")
 GEN_DIR = os.path.join(SRC_DIR, "generated")
 
