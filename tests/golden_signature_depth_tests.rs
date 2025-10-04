@@ -5,7 +5,7 @@ use std::{fs, path::PathBuf};
 fn mk_delegated_chain(depth: usize) -> generated::signatures::Signature {
     // Create a leaf ED25519 signature
     let leaf = generated::signatures::Signature::ED25519(
-        generated::signatures::Ed25519Signature {
+        generated::signatures::ED25519Signature {
             public_key: vec![0u8; 32],
             signature: vec![0u8; 64],
             signer: "acc://leaf.acme/book/1".to_string(),
@@ -80,9 +80,10 @@ fn delegated_depth_golden() {
         "rule": "depth <= 5 passes, depth > 5 fails"
     });
 
-    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") && !p.exists() {
+    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") || !p.exists() {
         fs::create_dir_all(p.parent().unwrap()).ok();
         fs::write(&p, actual.to_string()).unwrap();
+        return; // In write mode, just generate and exit
     }
 
     let expected: serde_json::Value =
@@ -95,7 +96,7 @@ fn delegated_depth_golden() {
 fn delegated_smart_constructor_golden() {
     // Test the smart constructor that enforces depth
     let leaf = generated::signatures::Signature::ED25519(
-        generated::signatures::Ed25519Signature {
+        generated::signatures::ED25519Signature {
             public_key: vec![0u8; 32],
             signature: vec![0u8; 64],
             signer: "acc://leaf.acme/book/1".to_string(),
@@ -134,9 +135,10 @@ fn delegated_smart_constructor_golden() {
         "over_limit_error": format!("{}", invalid_result.unwrap_err())
     });
 
-    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") && !p.exists() {
+    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") || !p.exists() {
         fs::create_dir_all(p.parent().unwrap()).ok();
         fs::write(&p, actual.to_string()).unwrap();
+        return; // In write mode, just generate and exit
     }
 
     let expected: serde_json::Value =
@@ -150,7 +152,7 @@ fn signature_depth_edge_cases_golden() {
     // Test edge cases and different signature types as leaves
     let test_cases = vec![
         ("ed25519_leaf", generated::signatures::Signature::ED25519(
-            generated::signatures::Ed25519Signature {
+            generated::signatures::ED25519Signature {
                 public_key: vec![0u8; 32],
                 signature: vec![0u8; 64],
                 signer: "acc://ed.acme/book/1".to_string(),
@@ -163,7 +165,7 @@ fn signature_depth_edge_cases_golden() {
             }
         )),
         ("legacy_ed25519_leaf", generated::signatures::Signature::LegacyED25519(
-            generated::signatures::LegacyEd25519Signature {
+            generated::signatures::LegacyED25519Signature {
                 timestamp: 1234567890,
                 public_key: vec![0u8; 32],
                 signature: vec![0u8; 64],
@@ -174,7 +176,7 @@ fn signature_depth_edge_cases_golden() {
             }
         )),
         ("rcd1_leaf", generated::signatures::Signature::RCD1(
-            generated::signatures::Rcd1Signature {
+            generated::signatures::RCD1Signature {
                 public_key: vec![0u8; 32],
                 signature: vec![0u8; 64],
                 signer: "acc://rcd1.acme/book/1".to_string(),
@@ -222,9 +224,10 @@ fn signature_depth_edge_cases_golden() {
         "description": "Testing delegation depth with different leaf signature types"
     });
 
-    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") && !p.exists() {
+    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") || !p.exists() {
         fs::create_dir_all(p.parent().unwrap()).ok();
         fs::write(&p, actual.to_string()).unwrap();
+        return; // In write mode, just generate and exit
     }
 
     let expected: serde_json::Value =

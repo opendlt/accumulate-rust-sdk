@@ -27,7 +27,7 @@ fn transaction_header_hash_golden() {
     let actual = hex::encode(h);
 
     let p = gpath("transaction_header_hash");
-    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") && !p.exists() {
+    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") || !p.exists() {
         fs::create_dir_all(p.parent().unwrap()).ok();
         let golden = json!({
             "input_header": hdr,
@@ -35,6 +35,7 @@ fn transaction_header_hash_golden() {
             "hash": actual
         });
         fs::write(&p, golden.to_string()).unwrap();
+        return; // In write mode, just generate and exit
     }
 
     let expected: serde_json::Value =
@@ -65,7 +66,7 @@ fn transaction_header_with_optional_fields_hash_golden() {
     let actual = hex::encode(h);
 
     let p = gpath("transaction_header_with_fields_hash");
-    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") && !p.exists() {
+    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") || !p.exists() {
         fs::create_dir_all(p.parent().unwrap()).ok();
         let golden = json!({
             "input_header": hdr,
@@ -73,6 +74,7 @@ fn transaction_header_with_optional_fields_hash_golden() {
             "hash": actual
         });
         fs::write(&p, golden.to_string()).unwrap();
+        return; // In write mode, just generate and exit
     }
 
     let expected: serde_json::Value =
@@ -99,7 +101,7 @@ fn url_hash_golden() {
         let safe_name = url.replace("://", "_").replace("/", "_").replace(".", "_").to_lowercase();
         let p = gpath(&format!("url_hash_{}", safe_name));
 
-        if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") && !p.exists() {
+        if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") || !p.exists() {
             fs::create_dir_all(p.parent().unwrap()).ok();
             let golden = json!({
                 "original_url": url,
@@ -107,6 +109,7 @@ fn url_hash_golden() {
                 "hash": hash_hex
             });
             fs::write(&p, golden.to_string()).unwrap();
+            continue; // In write mode, just generate and continue to next
         }
 
         let expected: serde_json::Value =
@@ -133,7 +136,7 @@ fn sha256_deterministic_golden() {
 
         let p = gpath(&format!("sha256_test_{}", i));
 
-        if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") && !p.exists() {
+        if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") || !p.exists() {
             fs::create_dir_all(p.parent().unwrap()).ok();
             let golden = json!({
                 "input": hex::encode(input),
@@ -141,6 +144,7 @@ fn sha256_deterministic_golden() {
                 "hash": hash_hex
             });
             fs::write(&p, golden.to_string()).unwrap();
+            continue; // In write mode, just generate and continue to next
         }
 
         let expected: serde_json::Value =

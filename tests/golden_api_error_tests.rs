@@ -29,9 +29,10 @@ impl generated::api_methods::AccumulateRpc for MockErrorTransport {
 }
 
 fn write_or_read_golden(path: &PathBuf, golden: &serde_json::Value) -> serde_json::Value {
-    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") && !path.exists() {
+    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") || !path.exists() {
         fs::create_dir_all(path.parent().unwrap()).ok();
         fs::write(path, golden.to_string()).unwrap();
+        return golden.clone(); // In write mode, just return the input
     }
     serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap()
 }
@@ -54,15 +55,14 @@ async fn api_error_shape_parity() {
         // Test with a simple query call (using minimal params)
         let params = generated::api_methods::QueryParams {
             url: "acc://test.acme".to_string(),
-            prove: None,
-            scratch: None,
+            options: Some(json!({"prove": false})),
         };
 
         let err = client.query(params).await.unwrap_err();
 
         // Extract error details
-        let (actual_code, actual_message) = match err {
-            errors::Error::Rpc { code, message } => (code, message),
+        let (actual_code, actual_message) = match &err {
+            errors::Error::Rpc { code, message } => (*code, message.clone()),
             _ => panic!("Expected RPC error, got: {:?}", err),
         };
 

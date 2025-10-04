@@ -3,9 +3,10 @@ use serde_json::json;
 use std::{fs, path::PathBuf};
 
 fn write_or_read(path: &PathBuf, v: &serde_json::Value) -> serde_json::Value {
-    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") && !path.exists() {
+    if std::env::var("INSTA_UPDATE").ok().as_deref() == Some("auto") || !path.exists() {
         fs::create_dir_all(path.parent().unwrap()).ok();
         fs::write(path, v.to_string()).unwrap();
+        return v.clone(); // In write mode, just return the input
     }
     serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap()
 }
@@ -44,11 +45,13 @@ fn canonical_send_tokens_tx() {
     // Build a sendTokens transaction body
     let body = generated::transactions::TransactionBody::SendTokens(
         generated::transactions::SendTokensBody {
+            hash: None,
+            meta: None,
             to: vec![
-                generated::transactions::TokenRecipient {
-                    url: "acc://bob.acme/tokens".to_string(),
-                    amount: "1000".to_string(),
-                }
+                json!({
+                    "Url": "acc://bob.acme/tokens",
+                    "Amount": "1000"
+                })
             ]
         }
     );
@@ -74,8 +77,9 @@ fn canonical_create_identity_tx() {
     let body = generated::transactions::TransactionBody::CreateIdentity(
         generated::transactions::CreateIdentityBody {
             url: "acc://alice.acme".to_string(),
-            key_book: Some("acc://alice.acme/book".to_string()),
-            key_page: None,
+            key_hash: None,
+            key_book_url: Some("acc://alice.acme/book".to_string()),
+            authorities: None,
         }
     );
 
@@ -101,7 +105,7 @@ fn canonical_add_credits_tx() {
         generated::transactions::AddCreditsBody {
             recipient: "acc://alice.acme".to_string(),
             amount: "100000".to_string(),
-            oracle: Some(0.05),
+            oracle: 500000,
         }
     );
 
@@ -196,7 +200,7 @@ fn canonical_signature_types() {
     // Test canonical JSON for different signature types
     let signatures = vec![
         ("ed25519", generated::signatures::Signature::ED25519(
-            generated::signatures::Ed25519Signature {
+            generated::signatures::ED25519Signature {
                 public_key: vec![0u8; 32],
                 signature: vec![0u8; 64],
                 signer: "acc://signer.acme/book/1".to_string(),
@@ -209,7 +213,7 @@ fn canonical_signature_types() {
             }
         )),
         ("legacy_ed25519", generated::signatures::Signature::LegacyED25519(
-            generated::signatures::LegacyEd25519Signature {
+            generated::signatures::LegacyED25519Signature {
                 timestamp: 1234567890,
                 public_key: vec![0u8; 32],
                 signature: vec![0u8; 64],
@@ -222,7 +226,7 @@ fn canonical_signature_types() {
         ("delegated", generated::signatures::Signature::Delegated(
             generated::signatures::DelegatedSignature {
                 signature: Box::new(generated::signatures::Signature::ED25519(
-                    generated::signatures::Ed25519Signature {
+                    generated::signatures::ED25519Signature {
                         public_key: vec![0u8; 32],
                         signature: vec![0u8; 64],
                         signer: "acc://inner.acme/book/1".to_string(),
@@ -293,7 +297,7 @@ fn canonical_complex_nested_objects() {
         let canonical = canonical_json(&test_value);
 
         let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-          .join("tests/golden_vectors/types")
+          .join("tests/golden_vectors/canonical")
           .join(format!("canonical_{}.json", name));
 
         let golden = json!({
@@ -331,7 +335,7 @@ fn canonical_deterministic_ordering() {
     assert_eq!(canonical1, expected_canonical);
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-      .join("tests/golden_vectors/types/canonical_deterministic.json");
+      .join("tests/golden_vectors/canonical/canonical_deterministic.json");
 
     let golden = json!({
         "input1": input1,
