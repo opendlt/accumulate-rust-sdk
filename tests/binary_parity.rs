@@ -563,31 +563,29 @@ fn test_field_encoding_roundtrip() {
 #[test]
 fn test_comprehensive_roundtrip() {
     // Test all data types in a comprehensive roundtrip
-    let test_data = vec![
-        (1u32, "uvarint", 123456789u64),
-        (2u32, "varint", -123456789i64),
-        (3u32, "string", "Hello, 世界! 🌍".to_string()),
-        (4u32, "bytes", vec![0, 1, 127, 128, 255]),
-        (5u32, "bool", true),
-    ];
+    let test_uvarint = 123456789u64;
+    let test_varint = -123456789i64;
+    let test_string = "Hello, 世界! 🌍".to_string();
+    let test_bytes = vec![0, 1, 127, 128, 255];
+    let test_bool = true;
 
     let mut writer = BinaryWriter::new();
 
     // Encode all test data
     writer
-        .write_uvarint_field(test_data[0].2 as u64, test_data[0].0)
+        .write_uvarint_field(test_uvarint, 1)
         .unwrap();
     writer
-        .write_varint_field(test_data[1].2 as i64, test_data[1].0)
+        .write_varint_field(test_varint, 2)
         .unwrap();
     writer
-        .write_string_field(&test_data[2].2, test_data[2].0)
+        .write_string_field(&test_string, 3)
         .unwrap();
     writer
-        .write_bytes_field(&test_data[3].2, test_data[3].0)
+        .write_bytes_field(&test_bytes, 4)
         .unwrap();
     writer
-        .write_bool_field(test_data[4].2 as bool, test_data[4].0)
+        .write_bool_field(test_bool, 5)
         .unwrap();
 
     let encoded = writer.into_bytes();
@@ -602,21 +600,21 @@ fn test_comprehensive_roundtrip() {
 
     assert_eq!(
         field_reader.read_uvarint_field(1).unwrap(),
-        Some(123456789u64)
+        Some(test_uvarint)
     );
     assert_eq!(
         field_reader.read_varint_field(2).unwrap(),
-        Some(-123456789i64)
+        Some(test_varint)
     );
     assert_eq!(
         field_reader.read_string_field(3).unwrap(),
-        Some("Hello, 世界! 🌍".to_string())
+        Some(test_string)
     );
     assert_eq!(
         field_reader.read_bytes_field(4).unwrap(),
-        Some(vec![0, 1, 127, 128, 255])
+        Some(test_bytes)
     );
-    assert_eq!(field_reader.read_bool_field(5).unwrap(), Some(true));
+    assert_eq!(field_reader.read_bool_field(5).unwrap(), Some(test_bool));
 
     // Verify field numbers
     let field_numbers = field_reader.field_numbers();

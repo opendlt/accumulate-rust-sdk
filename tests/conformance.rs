@@ -75,7 +75,7 @@ fn test_sha256_conformance() {
     });
 
     let canonical = accumulate_client::codec::canonical_json(&value);
-    let hash = AccumulateHash::sha256_hex(&value);
+    let hash = AccumulateHash::sha256_json_hex(&value);
 
     // These values should match the TypeScript SDK exactly
     let expected_canonical = r#"{"body":{"to":[{"amount":"1000","url":"acc://bob.acme/tokens"}],"type":"send-tokens"},"header":{"principal":"acc://alice.acme/tokens","timestamp":1234567890123}}"#;

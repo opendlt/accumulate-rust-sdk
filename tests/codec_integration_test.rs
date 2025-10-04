@@ -1,15 +1,12 @@
 //! Integration test to verify codec wiring with the main client
 
-use accumulate_client::{AccumulateClient, TransactionBodyBuilder, TokenRecipient, canonical_json, sha256_bytes};
-use ed25519_dalek::Keypair;
-use rand::rngs::OsRng;
+use accumulate_client::{AccumulateClient, TransactionBodyBuilder, TokenRecipient, canonical_json, sha256_bytes, Ed25519Signer};
 use serde_json::json;
 
-#[test]
-fn test_codec_integration_with_client() {
-    // Generate a keypair
-    let mut rng = OsRng;
-    let keypair = Keypair::generate(&mut rng);
+#[tokio::test]
+async fn test_codec_integration_with_client() {
+    // Generate a keypair using Ed25519Signer
+    let _signer = Ed25519Signer::generate();
 
     // Create a transaction body
     let body = TransactionBodyBuilder::send_tokens(vec![TokenRecipient {
@@ -24,10 +21,10 @@ fn test_codec_integration_with_client() {
         v2_url,
         v3_url,
         accumulate_client::AccOptions::default()
-    );
+    ).await.unwrap();
 
-    // This will fail with network error, but that's OK - we just want to verify compilation
-    let _result = client.await;
+    // Client created successfully - this verifies compilation
+    let _client = client;
 
     println!("✅ Codec integration test compiled successfully");
 }
