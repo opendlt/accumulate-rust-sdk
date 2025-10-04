@@ -12,7 +12,7 @@ The TypeScript test vectors in `tests/golden/typescript_sdk_vectors.json` contai
 
 ## Use These Instead
 
-✅ **Canonical Source**: Go implementation in `C:\Accumulate_Stuff\accumulate\pkg\types\encoding\`
+✅ **Canonical Source**: Go implementation in [gitlab.com/accumulatenetwork/accumulate](https://gitlab.com/accumulatenetwork/accumulate) at `pkg/types/encoding/`
 ✅ **Verification Tool**: `accumulate-debug.exe verify` command
 ✅ **Reference Algorithms**: Go's `encoding/binary` package
 

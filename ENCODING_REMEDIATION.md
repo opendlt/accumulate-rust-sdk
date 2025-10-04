@@ -6,7 +6,7 @@ After deep analysis of the Go canonical implementation vs TypeScript SDK test ve
 
 ## Canonical Implementation Source
 
-✅ **Ground Truth**: Go implementation in `C:\Accumulate_Stuff\accumulate\pkg\types\encoding\`
+✅ **Ground Truth**: Go implementation in [gitlab.com/accumulatenetwork/accumulate](https://gitlab.com/accumulatenetwork/accumulate) at `pkg/types/encoding/`
 ✅ **Verification Tool**: `accumulate-debug.exe verify` command
 ✅ **Reference Algorithms**: Go's `encoding/binary.PutUvarint()` and `encoding/binary.PutVarint()`
 
@@ -311,7 +311,7 @@ Signature (base interface)
 
 ```bash
 # Verify canonical encoding
-cd "C:\Accumulate_Stuff\accumulate"
+cd "$ACCUMULATE_REPO"  # Clone from https://gitlab.com/accumulatenetwork/accumulate
 ./tools/cmd/debug/accumulate-debug.exe verify test_envelope.json
 
 # Expected output shows TLV structure:

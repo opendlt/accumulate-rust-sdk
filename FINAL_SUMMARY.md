@@ -10,7 +10,7 @@ We have successfully analyzed and remediated the Rust SDK encoding implementatio
 The TypeScript SDK test vectors contain **multiple critical encoding bugs** and should not be used as canonical reference. See `TYPESCRIPT_VECTORS_WARNING.md` for details.
 
 ### ✅ Canonical Implementation Verified
-- **Source of Truth**: Go implementation in `C:\Accumulate_Stuff\accumulate\pkg\types\encoding\`
+- **Source of Truth**: Go implementation in [gitlab.com/accumulatenetwork/accumulate](https://gitlab.com/accumulatenetwork/accumulate) at `pkg/types/encoding/`
 - **Verification Tool**: `accumulate-debug.exe verify` command
 - **Standard**: Go's `encoding/binary` package algorithms
 
@@ -89,7 +89,7 @@ type TransactionHeader struct {
 
 ```bash
 # ✅ Working with canonical Accumulate debug tool
-cd "C:\Accumulate_Stuff\accumulate"
+cd "$ACCUMULATE_REPO"  # Clone from https://gitlab.com/accumulatenetwork/accumulate
 ./tools/cmd/debug/accumulate-debug.exe verify test_envelope.json
 
 # Output confirms:

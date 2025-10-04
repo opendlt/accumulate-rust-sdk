@@ -129,7 +129,7 @@ pwsh .\tool\parity_gate.ps1
 - **Deterministic Results**: Reproducible across environments
 
 ### Protocol Compliance
-- **Ground Truth**: Go YAMLs in C:\Accumulate_Stuff\accumulate (read-only)
+- **Ground Truth**: Go YAMLs in [gitlab.com/accumulatenetwork/accumulate](https://gitlab.com/accumulatenetwork/accumulate) (read-only)
 - **Verification**: Accumulate debug tool compatibility confirmed
 - **Standards**: RFC-compliant canonical JSON, Go binary encoding
 
