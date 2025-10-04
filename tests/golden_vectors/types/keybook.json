@@ -1,0 +1,21 @@
+{
+  "type_name": "KeyBook",
+  "generated_at": "2025-10-04T06:10:50.924370",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "BookType": "sample_booktype",
+    "PageCount": 42
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for KeyBook",
+      "data": {
+        "Url": "acc://example.acme",
+        "BookType": "sample_booktype",
+        "PageCount": 42
+      }
+    }
+  ]
+}

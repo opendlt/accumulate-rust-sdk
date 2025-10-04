@@ -1,0 +1,17 @@
+{
+  "type_name": "RemoveAccountAuthorityOperation",
+  "generated_at": "2025-10-04T06:10:50.949033",
+  "stage": "3.3",
+  "json_data": {
+    "Authority": "acc://example.acme"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for RemoveAccountAuthorityOperation",
+      "data": {
+        "Authority": "acc://example.acme"
+      }
+    }
+  ]
+}

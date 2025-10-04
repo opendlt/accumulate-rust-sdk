@@ -1,0 +1,21 @@
+{
+  "type_name": "KeySpec",
+  "generated_at": "2025-10-04T06:10:50.926520",
+  "stage": "3.3",
+  "json_data": {
+    "PublicKeyHash": "SGVsbG8gV29ybGQ=",
+    "LastUsedOn": 42,
+    "Delegate": "acc://example.acme"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for KeySpec",
+      "data": {
+        "PublicKeyHash": "SGVsbG8gV29ybGQ=",
+        "LastUsedOn": 42,
+        "Delegate": "acc://example.acme"
+      }
+    }
+  ]
+}

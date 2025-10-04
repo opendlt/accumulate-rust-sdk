@@ -1,0 +1,17 @@
+{
+  "type_name": "BlockValidatorAnchor",
+  "generated_at": "2025-10-04T06:10:50.898820",
+  "stage": "3.3",
+  "json_data": {
+    "AcmeBurnt": "1234567890"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for BlockValidatorAnchor",
+      "data": {
+        "AcmeBurnt": "1234567890"
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "type_name": "SyntheticForwardTransaction",
+  "generated_at": "2025-10-04T06:10:50.958123",
+  "stage": "3.3",
+  "json_data": {
+    "Signatures": "sample_remotesignature",
+    "Transaction": "sample_transaction"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for SyntheticForwardTransaction",
+      "data": {
+        "Signatures": "sample_remotesignature",
+        "Transaction": "sample_transaction"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "type_name": "AcmeFaucet",
+  "generated_at": "2025-10-04T06:10:50.888664",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for AcmeFaucet",
+      "data": {
+        "Url": "acc://example.acme"
+      }
+    }
+  ]
+}

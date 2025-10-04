@@ -1,0 +1,25 @@
+{
+  "type_name": "Transaction",
+  "generated_at": "2025-10-04T06:10:50.966812",
+  "stage": "3.3",
+  "json_data": {
+    "Header": "sample_transactionheader",
+    "Body": "sample_transactionbody",
+    "hash": "SGVsbG8gV29ybGQ=",
+    "header64bytes": true,
+    "body64bytes": true
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for Transaction",
+      "data": {
+        "Header": "sample_transactionheader",
+        "Body": "sample_transactionbody",
+        "hash": "SGVsbG8gV29ybGQ=",
+        "header64bytes": true,
+        "body64bytes": true
+      }
+    }
+  ]
+}

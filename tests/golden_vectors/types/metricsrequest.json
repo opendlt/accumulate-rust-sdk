@@ -1,0 +1,19 @@
+{
+  "type_name": "MetricsRequest",
+  "generated_at": "2025-10-04T06:10:50.931210",
+  "stage": "3.3",
+  "json_data": {
+    "Metric": "sample_string",
+    "Duration": "1h30m"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for MetricsRequest",
+      "data": {
+        "Metric": "sample_string",
+        "Duration": "1h30m"
+      }
+    }
+  ]
+}

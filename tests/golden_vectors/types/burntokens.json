@@ -1,0 +1,17 @@
+{
+  "type_name": "BurnTokens",
+  "generated_at": "2025-10-04T06:10:50.900355",
+  "stage": "3.3",
+  "json_data": {
+    "Amount": "1234567890"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for BurnTokens",
+      "data": {
+        "Amount": "1234567890"
+      }
+    }
+  ]
+}

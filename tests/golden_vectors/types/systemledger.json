@@ -1,0 +1,31 @@
+{
+  "type_name": "SystemLedger",
+  "generated_at": "2025-10-04T06:10:50.961001",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "Index": 42,
+    "Timestamp": "2023-01-01T12:00:00Z",
+    "AcmeBurnt": "1234567890",
+    "PendingUpdates": "sample_networkaccountupdate",
+    "Anchor": "sample_anchorbody",
+    "ExecutorVersion": "sample_executorversion",
+    "BvnExecutorVersions": "sample_partitionexecutorversion"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for SystemLedger",
+      "data": {
+        "Url": "acc://example.acme",
+        "Index": 42,
+        "Timestamp": "2023-01-01T12:00:00Z",
+        "AcmeBurnt": "1234567890",
+        "PendingUpdates": "sample_networkaccountupdate",
+        "Anchor": "sample_anchorbody",
+        "ExecutorVersion": "sample_executorversion",
+        "BvnExecutorVersions": "sample_partitionexecutorversion"
+      }
+    }
+  ]
+}

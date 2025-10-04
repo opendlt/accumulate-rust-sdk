@@ -1,0 +1,29 @@
+{
+  "type_name": "TransactionHeader",
+  "generated_at": "2025-10-04T06:10:50.967997",
+  "stage": "3.3",
+  "json_data": {
+    "Principal": "acc://example.acme",
+    "Initiator": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "Memo": "sample_string",
+    "Metadata": "SGVsbG8gV29ybGQ=",
+    "Expire": "sample_expireoptions",
+    "HoldUntil": "sample_holduntiloptions",
+    "Authorities": "acc://example.acme"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for TransactionHeader",
+      "data": {
+        "Principal": "acc://example.acme",
+        "Initiator": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "Memo": "sample_string",
+        "Metadata": "SGVsbG8gV29ybGQ=",
+        "Expire": "sample_expireoptions",
+        "HoldUntil": "sample_holduntiloptions",
+        "Authorities": "acc://example.acme"
+      }
+    }
+  ]
+}

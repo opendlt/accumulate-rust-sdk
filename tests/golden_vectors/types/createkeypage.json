@@ -1,0 +1,17 @@
+{
+  "type_name": "CreateKeyPage",
+  "generated_at": "2025-10-04T06:10:50.904839",
+  "stage": "3.3",
+  "json_data": {
+    "Keys": "sample_keyspecparams"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for CreateKeyPage",
+      "data": {
+        "Keys": "sample_keyspecparams"
+      }
+    }
+  ]
+}

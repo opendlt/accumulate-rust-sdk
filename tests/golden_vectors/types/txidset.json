@@ -1,0 +1,17 @@
+{
+  "type_name": "TxIdSet",
+  "generated_at": "2025-10-04T06:10:50.975290",
+  "stage": "3.3",
+  "json_data": {
+    "Entries": "sample_txid"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for TxIdSet",
+      "data": {
+        "Entries": "sample_txid"
+      }
+    }
+  ]
+}

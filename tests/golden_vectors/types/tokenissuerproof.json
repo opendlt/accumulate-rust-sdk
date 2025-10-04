@@ -1,0 +1,19 @@
+{
+  "type_name": "TokenIssuerProof",
+  "generated_at": "2025-10-04T06:10:50.964915",
+  "stage": "3.3",
+  "json_data": {
+    "Transaction": "sample_createtoken",
+    "Receipt": "sample_merkle.receipt"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for TokenIssuerProof",
+      "data": {
+        "Transaction": "sample_createtoken",
+        "Receipt": "sample_merkle.receipt"
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "type_name": "ValidatorInfo",
+  "generated_at": "2025-10-04T06:10:50.984345",
+  "stage": "3.3",
+  "json_data": {
+    "PublicKey": "SGVsbG8gV29ybGQ=",
+    "PublicKeyHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "Operator": "acc://example.acme",
+    "Partitions": "sample_validatorpartitioninfo"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for ValidatorInfo",
+      "data": {
+        "PublicKey": "SGVsbG8gV29ybGQ=",
+        "PublicKeyHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "Operator": "acc://example.acme",
+        "Partitions": "sample_validatorpartitioninfo"
+      }
+    }
+  ]
+}

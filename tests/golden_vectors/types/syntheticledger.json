@@ -1,0 +1,19 @@
+{
+  "type_name": "SyntheticLedger",
+  "generated_at": "2025-10-04T06:10:50.958625",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "Sequence": "sample_partitionsyntheticledger"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for SyntheticLedger",
+      "data": {
+        "Url": "acc://example.acme",
+        "Sequence": "sample_partitionsyntheticledger"
+      }
+    }
+  ]
+}

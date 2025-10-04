@@ -1,0 +1,35 @@
+{
+  "type_name": "KeyPage",
+  "generated_at": "2025-10-04T06:10:50.925006",
+  "stage": "3.3",
+  "json_data": {
+    "KeyBook": "acc://example.acme",
+    "Url": "acc://example.acme",
+    "CreditBalance": 42,
+    "AcceptThreshold": 42,
+    "RejectThreshold": 42,
+    "ResponseThreshold": 42,
+    "BlockThreshold": 42,
+    "Version": 42,
+    "Keys": "sample_keyspec",
+    "TransactionBlacklist": "sample_allowedtransactions"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for KeyPage",
+      "data": {
+        "KeyBook": "acc://example.acme",
+        "Url": "acc://example.acme",
+        "CreditBalance": 42,
+        "AcceptThreshold": 42,
+        "RejectThreshold": 42,
+        "ResponseThreshold": 42,
+        "BlockThreshold": 42,
+        "Version": 42,
+        "Keys": "sample_keyspec",
+        "TransactionBlacklist": "sample_allowedtransactions"
+      }
+    }
+  ]
+}

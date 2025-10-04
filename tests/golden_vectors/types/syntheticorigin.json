@@ -1,0 +1,25 @@
+{
+  "type_name": "SyntheticOrigin",
+  "generated_at": "2025-10-04T06:10:50.959165",
+  "stage": "3.3",
+  "json_data": {
+    "Cause": "sample_txid",
+    "Source": "acc://example.acme",
+    "Initiator": "acc://example.acme",
+    "FeeRefund": 42,
+    "Index": 42
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for SyntheticOrigin",
+      "data": {
+        "Cause": "sample_txid",
+        "Source": "acc://example.acme",
+        "Initiator": "acc://example.acme",
+        "FeeRefund": 42,
+        "Index": 42
+      }
+    }
+  ]
+}

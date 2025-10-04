@@ -1,0 +1,19 @@
+{
+  "type_name": "ValidatorPartitionInfo",
+  "generated_at": "2025-10-04T06:10:50.985744",
+  "stage": "3.3",
+  "json_data": {
+    "ID": "sample_string",
+    "Active": true
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for ValidatorPartitionInfo",
+      "data": {
+        "ID": "sample_string",
+        "Active": true
+      }
+    }
+  ]
+}

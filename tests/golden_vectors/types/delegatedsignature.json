@@ -1,0 +1,19 @@
+{
+  "type_name": "DelegatedSignature",
+  "generated_at": "2025-10-04T06:10:50.909065",
+  "stage": "3.3",
+  "json_data": {
+    "Signature": "sample_signature",
+    "Delegator": "acc://example.acme"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for DelegatedSignature",
+      "data": {
+        "Signature": "sample_signature",
+        "Delegator": "acc://example.acme"
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "type_name": "BlockEntry",
+  "generated_at": "2025-10-04T06:10:50.897673",
+  "stage": "3.3",
+  "json_data": {
+    "Account": "acc://example.acme",
+    "Chain": "sample_string",
+    "Index": 42
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for BlockEntry",
+      "data": {
+        "Account": "acc://example.acme",
+        "Chain": "sample_string",
+        "Index": 42
+      }
+    }
+  ]
+}

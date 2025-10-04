@@ -1,0 +1,19 @@
+{
+  "type_name": "SyntheticBurnTokens",
+  "generated_at": "2025-10-04T06:10:50.955914",
+  "stage": "3.3",
+  "json_data": {
+    "Amount": "1234567890",
+    "IsRefund": true
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for SyntheticBurnTokens",
+      "data": {
+        "Amount": "1234567890",
+        "IsRefund": true
+      }
+    }
+  ]
+}

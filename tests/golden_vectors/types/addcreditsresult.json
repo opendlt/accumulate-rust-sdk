@@ -1,0 +1,21 @@
+{
+  "type_name": "AddCreditsResult",
+  "generated_at": "2025-10-04T06:10:50.891447",
+  "stage": "3.3",
+  "json_data": {
+    "Amount": "1234567890",
+    "Credits": 42,
+    "Oracle": 42
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for AddCreditsResult",
+      "data": {
+        "Amount": "1234567890",
+        "Credits": 42,
+        "Oracle": 42
+      }
+    }
+  ]
+}

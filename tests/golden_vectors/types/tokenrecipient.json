@@ -1,0 +1,19 @@
+{
+  "type_name": "TokenRecipient",
+  "generated_at": "2025-10-04T06:10:50.965859",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "Amount": "1234567890"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for TokenRecipient",
+      "data": {
+        "Url": "acc://example.acme",
+        "Amount": "1234567890"
+      }
+    }
+  ]
+}

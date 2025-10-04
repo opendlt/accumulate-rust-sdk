@@ -1,0 +1,17 @@
+{
+  "type_name": "SyntheticCreateIdentity",
+  "generated_at": "2025-10-04T06:10:50.956498",
+  "stage": "3.3",
+  "json_data": {
+    "Accounts": "sample_account"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for SyntheticCreateIdentity",
+      "data": {
+        "Accounts": "sample_account"
+      }
+    }
+  ]
+}

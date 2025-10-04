@@ -1,0 +1,19 @@
+{
+  "type_name": "SystemWriteData",
+  "generated_at": "2025-10-04T06:10:50.961779",
+  "stage": "3.3",
+  "json_data": {
+    "Entry": "sample_dataentry",
+    "WriteToState": true
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for SystemWriteData",
+      "data": {
+        "Entry": "sample_dataentry",
+        "WriteToState": true
+      }
+    }
+  ]
+}

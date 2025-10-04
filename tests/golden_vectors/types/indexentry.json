@@ -1,0 +1,25 @@
+{
+  "type_name": "IndexEntry",
+  "generated_at": "2025-10-04T06:10:50.922476",
+  "stage": "3.3",
+  "json_data": {
+    "Source": 42,
+    "Anchor": 42,
+    "BlockIndex": 42,
+    "BlockTime": "2023-01-01T12:00:00Z",
+    "RootIndexIndex": 42
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for IndexEntry",
+      "data": {
+        "Source": 42,
+        "Anchor": 42,
+        "BlockIndex": 42,
+        "BlockTime": "2023-01-01T12:00:00Z",
+        "RootIndexIndex": 42
+      }
+    }
+  ]
+}

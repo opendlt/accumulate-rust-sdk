@@ -1,0 +1,17 @@
+{
+  "type_name": "RemoteTransaction",
+  "generated_at": "2025-10-04T06:10:50.947727",
+  "stage": "3.3",
+  "json_data": {
+    "Hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for RemoteTransaction",
+      "data": {
+        "Hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    }
+  ]
+}

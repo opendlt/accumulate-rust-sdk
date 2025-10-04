@@ -1,0 +1,19 @@
+{
+  "type_name": "AuthorityEntry",
+  "generated_at": "2025-10-04T06:10:50.894952",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "Disabled": true
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for AuthorityEntry",
+      "data": {
+        "Url": "acc://example.acme",
+        "Disabled": true
+      }
+    }
+  ]
+}

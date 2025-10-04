@@ -1,0 +1,17 @@
+{
+  "type_name": "UpdateKey",
+  "generated_at": "2025-10-04T06:10:50.980352",
+  "stage": "3.3",
+  "json_data": {
+    "NewKeyHash": "SGVsbG8gV29ybGQ="
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for UpdateKey",
+      "data": {
+        "NewKeyHash": "SGVsbG8gV29ybGQ="
+      }
+    }
+  ]
+}

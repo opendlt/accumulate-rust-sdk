@@ -1,0 +1,17 @@
+{
+  "type_name": "NetworkMaintenance",
+  "generated_at": "2025-10-04T06:10:50.935169",
+  "stage": "3.3",
+  "json_data": {
+    "Operations": "sample_networkmaintenanceoperation"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for NetworkMaintenance",
+      "data": {
+        "Operations": "sample_networkmaintenanceoperation"
+      }
+    }
+  ]
+}

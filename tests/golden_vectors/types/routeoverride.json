@@ -1,0 +1,19 @@
+{
+  "type_name": "RouteOverride",
+  "generated_at": "2025-10-04T06:10:50.950668",
+  "stage": "3.3",
+  "json_data": {
+    "Account": "acc://example.acme",
+    "Partition": "sample_string"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for RouteOverride",
+      "data": {
+        "Account": "acc://example.acme",
+        "Partition": "sample_string"
+      }
+    }
+  ]
+}

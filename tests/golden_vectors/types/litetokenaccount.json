@@ -1,0 +1,23 @@
+{
+  "type_name": "LiteTokenAccount",
+  "generated_at": "2025-10-04T06:10:50.929920",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "TokenUrl": "acc://example.acme",
+    "Balance": "1234567890",
+    "LockHeight": 42
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for LiteTokenAccount",
+      "data": {
+        "Url": "acc://example.acme",
+        "TokenUrl": "acc://example.acme",
+        "Balance": "1234567890",
+        "LockHeight": 42
+      }
+    }
+  ]
+}
