@@ -1,4 +1,5 @@
 use accumulate_client::*;
+use accumulate_client::errors::Error;
 use async_trait::async_trait;
 use serde_json::json;
 use std::collections::HashMap;
@@ -73,7 +74,7 @@ impl AccumulateRpc for MockTransport {
 #[tokio::test]
 async fn test_status_method_transport() {
     let transport = MockTransport::new();
-    let client = AccumulateClient::new(transport.clone());
+    let client = GenericAccumulateClient::new(transport.clone());
 
     let params = StatusParams {};
     let response = client.status(params).await.unwrap();
@@ -92,7 +93,7 @@ async fn test_status_method_transport() {
 #[tokio::test]
 async fn test_query_method_transport() {
     let transport = MockTransport::new();
-    let client = AccumulateClient::new(transport.clone());
+    let client = GenericAccumulateClient::new(transport.clone());
 
     let params = QueryParams {
         url: "acc://test.acme".to_string(),
@@ -115,7 +116,7 @@ async fn test_query_method_transport() {
 #[tokio::test]
 async fn test_faucet_method_transport() {
     let transport = MockTransport::new();
-    let client = AccumulateClient::new(transport.clone());
+    let client = GenericAccumulateClient::new(transport.clone());
 
     let params = FaucetParams {
         url: "acc://faucet-test.acme".to_string(),
@@ -140,7 +141,7 @@ async fn test_faucet_method_transport() {
 #[tokio::test]
 async fn test_execute_method_transport() {
     let transport = MockTransport::new();
-    let client = AccumulateClient::new(transport.clone());
+    let client = GenericAccumulateClient::new(transport.clone());
 
     let params = ExecuteParams {
         params: json!({"transaction": {"header": {}, "body": {}}}),
@@ -161,7 +162,7 @@ async fn test_execute_method_transport() {
 #[tokio::test]
 async fn test_multiple_method_calls() {
     let transport = MockTransport::new();
-    let client = AccumulateClient::new(transport.clone());
+    let client = GenericAccumulateClient::new(transport.clone());
 
     // Make multiple calls
     let _status = client.status(StatusParams {}).await.unwrap();
@@ -182,34 +183,34 @@ async fn test_multiple_method_calls() {
 #[tokio::test]
 async fn test_method_name_correctness() {
     let transport = MockTransport::new();
-    let client = AccumulateClient::new(transport.clone());
+    let client = GenericAccumulateClient::new(transport.clone());
 
-    // Test that Rust method names map to correct RPC method names
+    // Test that Rust method names map to correct RPC method names using different approach
     let test_cases = vec![
-        (|| async { client.query_directory(QueryDirectoryParams { url: "acc://test.acme".to_string(), options: None }).await }, "query-directory"),
-        (|| async { client.query_tx(QueryTxParams { url: "acc://test.acme".to_string(), options: None }).await }, "query-tx"),
-        (|| async { client.query_tx_local(QueryTxLocalParams { url: "acc://test.acme".to_string(), options: None }).await }, "query-tx-local"),
-        (|| async { client.execute_create_identity(ExecuteCreateIdentityParams { params: json!({}) }).await }, "create-identity"),
-        (|| async { client.execute_send_tokens(ExecuteSendTokensParams { params: json!({}) }).await }, "send-tokens"),
+        ("query-directory", "query_directory"),
+        ("query-tx", "query_tx"),
+        ("query-tx-local", "query_tx_local"),
+        ("create-identity", "execute_create_identity"),
+        ("send-tokens", "execute_send_tokens"),
     ];
 
-    for (i, (call_fn, expected_method)) in test_cases.into_iter().enumerate() {
+    for (i, (expected_rpc_method, rust_method)) in test_cases.into_iter().enumerate() {
         let fresh_transport = MockTransport::new();
-        let fresh_client = AccumulateClient::new(fresh_transport.clone());
+        let fresh_client = GenericAccumulateClient::new(fresh_transport.clone());
 
-        // Make the call - note: we need to handle the closure properly
-        match expected_method {
-            "query-directory" => { let _ = fresh_client.query_directory(QueryDirectoryParams { url: "acc://test.acme".to_string(), options: None }).await; },
-            "query-tx" => { let _ = fresh_client.query_tx(QueryTxParams { url: "acc://test.acme".to_string(), options: None }).await; },
-            "query-tx-local" => { let _ = fresh_client.query_tx_local(QueryTxLocalParams { url: "acc://test.acme".to_string(), options: None }).await; },
-            "create-identity" => { let _ = fresh_client.execute_create_identity(ExecuteCreateIdentityParams { params: json!({}) }).await; },
-            "send-tokens" => { let _ = fresh_client.execute_send_tokens(ExecuteSendTokensParams { params: json!({}) }).await; },
+        // Make the call based on the rust method name
+        match rust_method {
+            "query_directory" => { let _ = fresh_client.query_directory(QueryDirectoryParams { url: "acc://test.acme".to_string(), options: None }).await; },
+            "query_tx" => { let _ = fresh_client.query_tx(QueryTxParams { url: "acc://test.acme".to_string(), options: None }).await; },
+            "query_tx_local" => { let _ = fresh_client.query_tx_local(QueryTxLocalParams { url: "acc://test.acme".to_string(), options: None }).await; },
+            "execute_create_identity" => { let _ = fresh_client.execute_create_identity(ExecuteCreateIdentityParams { params: json!({}) }).await; },
+            "execute_send_tokens" => { let _ = fresh_client.execute_send_tokens(ExecuteSendTokensParams { params: json!({}) }).await; },
             _ => {}
         }
 
         let calls = fresh_transport.get_recorded_calls();
         if !calls.is_empty() {
-            assert_eq!(calls[0].0, expected_method, "Method {} should map to RPC method {}", i, expected_method);
+            assert_eq!(calls[0].0, expected_rpc_method, "Method {} should map to RPC method {}", i, expected_rpc_method);
         }
     }
 
@@ -230,7 +231,7 @@ async fn test_error_handling() {
         }
     }
 
-    let client = AccumulateClient::new(ErrorTransport);
+    let client = GenericAccumulateClient::new(ErrorTransport);
     let result = client.status(StatusParams {}).await;
 
     assert!(result.is_err(), "Should return error from transport");
@@ -276,7 +277,7 @@ async fn test_json_rpc_payload_structure() {
     }
 
     let transport = PayloadInspectorTransport::new();
-    let client = AccumulateClient::new(transport.clone());
+    let client = GenericAccumulateClient::new(transport.clone());
 
     let _result = client.status(StatusParams {}).await.unwrap();
 
@@ -296,8 +297,8 @@ async fn test_client_wrapper_functionality() {
     let transport = MockTransport::new();
 
     // Test both construction methods
-    let client1 = AccumulateClient::new(transport.clone());
-    let client2 = AccumulateClient { transport: transport.clone() };
+    let client1 = GenericAccumulateClient::new(transport.clone());
+    let client2 = GenericAccumulateClient { transport: transport.clone() };
 
     // Both should work identically
     let _result1 = client1.status(StatusParams {}).await.unwrap();
