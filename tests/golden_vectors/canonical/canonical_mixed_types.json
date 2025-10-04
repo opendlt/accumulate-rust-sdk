@@ -1,1 +1,0 @@
-{"canonical_json":"{\"array\":[1,2,3],\"boolean\":true,\"null\":null,\"number\":42,\"object\":{\"nested\":\"value\"},\"string\":\"value\"}","input":{"array":[1,2,3],"boolean":true,"null":null,"number":42,"object":{"nested":"value"},"string":"value"}}
