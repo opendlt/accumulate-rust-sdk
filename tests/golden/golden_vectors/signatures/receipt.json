@@ -1,0 +1,8 @@
+{
+  "Proof": {
+    "data": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "SourceNetwork": "acc://test.acme",
+  "TransactionHash": null,
+  "type": "receipt"
+}

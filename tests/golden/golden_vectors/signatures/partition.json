@@ -1,0 +1,7 @@
+{
+  "DestinationNetwork": "acc://dest.acme",
+  "SequenceNumber": 12345,
+  "SourceNetwork": "acc://source.acme",
+  "TransactionHash": null,
+  "type": "partition"
+}

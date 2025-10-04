@@ -1,0 +1,36 @@
+{
+  "type": "delegated",
+  "Signature": {
+    "type": "delegated",
+    "Signature": {
+      "type": "delegated",
+      "Signature": {
+        "type": "delegated",
+        "Signature": {
+          "type": "delegated",
+          "Signature": {
+            "type": "delegated",
+            "Signature": {
+              "type": "ed25519",
+              "PublicKey": "0000000000000000000000000000000000000000000000000000000000000000",
+              "Signature": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+              "Signer": "acc://test.acme/signer",
+              "SignerVersion": 1,
+              "Timestamp": 1234567890,
+              "Vote": null,
+              "TransactionHash": null,
+              "Memo": null,
+              "Data": null
+            },
+            "Delegator": "acc://authority-5"
+          },
+          "Delegator": "acc://authority-4"
+        },
+        "Delegator": "acc://authority-3"
+      },
+      "Delegator": "acc://authority-2"
+    },
+    "Delegator": "acc://authority-1"
+  },
+  "Delegator": "acc://authority-0"
+}

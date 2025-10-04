@@ -1,0 +1,20 @@
+{
+  "body": {
+    "To": [
+      {
+        "Amount": "100",
+        "Url": "acc://recipient1.acme"
+      },
+      {
+        "Amount": "200",
+        "Url": "acc://recipient2.acme"
+      }
+    ],
+    "type": "sendTokens"
+  },
+  "header": {
+    "initiator": "deadbeef",
+    "principal": "acc://test.acme"
+  },
+  "signatures": []
+}

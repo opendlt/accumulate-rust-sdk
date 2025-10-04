@@ -1,0 +1,25 @@
+{
+  "type_name": "AnchorMetadata",
+  "generated_at": "2025-10-04T06:10:50.893684",
+  "stage": "3.3",
+  "json_data": {
+    "Account": "acc://example.acme",
+    "Index": 42,
+    "SourceIndex": 42,
+    "SourceBlock": 42,
+    "Entry": "SGVsbG8gV29ybGQ="
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for AnchorMetadata",
+      "data": {
+        "Account": "acc://example.acme",
+        "Index": 42,
+        "SourceIndex": 42,
+        "SourceBlock": 42,
+        "Entry": "SGVsbG8gV29ybGQ="
+      }
+    }
+  ]
+}

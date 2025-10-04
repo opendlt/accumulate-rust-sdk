@@ -1,0 +1,33 @@
+{
+  "type_name": "RsaSha256Signature",
+  "generated_at": "2025-10-04T06:10:50.951790",
+  "stage": "3.3",
+  "json_data": {
+    "PublicKey": "SGVsbG8gV29ybGQ=",
+    "Signature": "SGVsbG8gV29ybGQ=",
+    "Signer": "acc://example.acme",
+    "SignerVersion": 42,
+    "Timestamp": 42,
+    "Vote": "sample_votetype",
+    "TransactionHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "Memo": "sample_string",
+    "Data": "SGVsbG8gV29ybGQ="
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for RsaSha256Signature",
+      "data": {
+        "PublicKey": "SGVsbG8gV29ybGQ=",
+        "Signature": "SGVsbG8gV29ybGQ=",
+        "Signer": "acc://example.acme",
+        "SignerVersion": 42,
+        "Timestamp": 42,
+        "Vote": "sample_votetype",
+        "TransactionHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "Memo": "sample_string",
+        "Data": "SGVsbG8gV29ybGQ="
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "type_name": "LiteIdentity",
+  "generated_at": "2025-10-04T06:10:50.929325",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "CreditBalance": 42,
+    "LastUsedOn": 42
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for LiteIdentity",
+      "data": {
+        "Url": "acc://example.acme",
+        "CreditBalance": 42,
+        "LastUsedOn": 42
+      }
+    }
+  ]
+}

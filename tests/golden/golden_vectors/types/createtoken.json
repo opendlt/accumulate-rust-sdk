@@ -1,0 +1,27 @@
+{
+  "type_name": "CreateToken",
+  "generated_at": "2025-10-04T06:10:50.906295",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "Symbol": "sample_string",
+    "Precision": 42,
+    "Properties": "acc://example.acme",
+    "SupplyLimit": "1234567890",
+    "Authorities": "acc://example.acme"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for CreateToken",
+      "data": {
+        "Url": "acc://example.acme",
+        "Symbol": "sample_string",
+        "Precision": 42,
+        "Properties": "acc://example.acme",
+        "SupplyLimit": "1234567890",
+        "Authorities": "acc://example.acme"
+      }
+    }
+  ]
+}

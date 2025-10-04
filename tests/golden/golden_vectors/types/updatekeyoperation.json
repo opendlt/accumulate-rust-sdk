@@ -1,0 +1,19 @@
+{
+  "type_name": "UpdateKeyOperation",
+  "generated_at": "2025-10-04T06:10:50.981839",
+  "stage": "3.3",
+  "json_data": {
+    "OldEntry": "sample_keyspecparams",
+    "NewEntry": "sample_keyspecparams"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for UpdateKeyOperation",
+      "data": {
+        "OldEntry": "sample_keyspecparams",
+        "NewEntry": "sample_keyspecparams"
+      }
+    }
+  ]
+}

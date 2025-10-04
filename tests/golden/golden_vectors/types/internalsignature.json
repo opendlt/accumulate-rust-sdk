@@ -1,0 +1,19 @@
+{
+  "type_name": "InternalSignature",
+  "generated_at": "2025-10-04T06:10:50.923094",
+  "stage": "3.3",
+  "json_data": {
+    "Cause": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "TransactionHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for InternalSignature",
+      "data": {
+        "Cause": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "TransactionHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    }
+  ]
+}

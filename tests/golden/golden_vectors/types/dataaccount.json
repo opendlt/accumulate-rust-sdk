@@ -1,0 +1,19 @@
+{
+  "type_name": "DataAccount",
+  "generated_at": "2025-10-04T06:10:50.908022",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "Entry": "sample_dataentry"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for DataAccount",
+      "data": {
+        "Url": "acc://example.acme",
+        "Entry": "sample_dataentry"
+      }
+    }
+  ]
+}

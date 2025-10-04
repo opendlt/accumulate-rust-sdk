@@ -1,0 +1,29 @@
+{
+  "type_name": "NetworkLimits",
+  "generated_at": "2025-10-04T06:10:50.934402",
+  "stage": "3.3",
+  "json_data": {
+    "DataEntryParts": 42,
+    "AccountAuthorities": 42,
+    "BookPages": 42,
+    "PageEntries": 42,
+    "IdentityAccounts": 42,
+    "PendingMajorBlocks": 42,
+    "EventsPerBlock": 42
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for NetworkLimits",
+      "data": {
+        "DataEntryParts": 42,
+        "AccountAuthorities": 42,
+        "BookPages": 42,
+        "PageEntries": 42,
+        "IdentityAccounts": 42,
+        "PendingMajorBlocks": 42,
+        "EventsPerBlock": 42
+      }
+    }
+  ]
+}

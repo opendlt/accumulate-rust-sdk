@@ -1,0 +1,51 @@
+{
+  "type_name": "TransactionStatus",
+  "generated_at": "2025-10-04T06:10:50.971656",
+  "stage": "3.3",
+  "json_data": {
+    "TxID": "sample_txid",
+    "Code": "sample_errors2.status",
+    "Remote": true,
+    "Delivered": true,
+    "Pending": true,
+    "Failed": true,
+    "CodeNum": 42,
+    "Error": "sample_errors2.error",
+    "Result": "sample_transactionresult",
+    "Received": 42,
+    "Initiator": "acc://example.acme",
+    "Signers": "sample_signer",
+    "SourceNetwork": "acc://example.acme",
+    "DestinationNetwork": "acc://example.acme",
+    "SequenceNumber": 42,
+    "GotDirectoryReceipt": true,
+    "Proof": "sample_merkle.receipt",
+    "AnchorSigners": "SGVsbG8gV29ybGQ="
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for TransactionStatus",
+      "data": {
+        "TxID": "sample_txid",
+        "Code": "sample_errors2.status",
+        "Remote": true,
+        "Delivered": true,
+        "Pending": true,
+        "Failed": true,
+        "CodeNum": 42,
+        "Error": "sample_errors2.error",
+        "Result": "sample_transactionresult",
+        "Received": 42,
+        "Initiator": "acc://example.acme",
+        "Signers": "sample_signer",
+        "SourceNetwork": "acc://example.acme",
+        "DestinationNetwork": "acc://example.acme",
+        "SequenceNumber": 42,
+        "GotDirectoryReceipt": true,
+        "Proof": "sample_merkle.receipt",
+        "AnchorSigners": "SGVsbG8gV29ybGQ="
+      }
+    }
+  ]
+}

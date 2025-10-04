@@ -1,0 +1,17 @@
+{
+  "type_name": "AddKeyOperation",
+  "generated_at": "2025-10-04T06:10:50.891995",
+  "stage": "3.3",
+  "json_data": {
+    "Entry": "sample_keyspecparams"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for AddKeyOperation",
+      "data": {
+        "Entry": "sample_keyspecparams"
+      }
+    }
+  ]
+}

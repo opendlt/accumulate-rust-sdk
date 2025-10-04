@@ -1,0 +1,27 @@
+{
+  "type_name": "AnchorLedger",
+  "generated_at": "2025-10-04T06:10:50.893011",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "MinorBlockSequenceNumber": 42,
+    "MajorBlockIndex": 42,
+    "MajorBlockTime": "2023-01-01T12:00:00Z",
+    "PendingMajorBlockAnchors": "acc://example.acme",
+    "Sequence": "sample_partitionsyntheticledger"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for AnchorLedger",
+      "data": {
+        "Url": "acc://example.acme",
+        "MinorBlockSequenceNumber": 42,
+        "MajorBlockIndex": 42,
+        "MajorBlockTime": "2023-01-01T12:00:00Z",
+        "PendingMajorBlockAnchors": "acc://example.acme",
+        "Sequence": "sample_partitionsyntheticledger"
+      }
+    }
+  ]
+}

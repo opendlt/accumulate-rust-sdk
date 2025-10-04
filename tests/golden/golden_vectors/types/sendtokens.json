@@ -1,0 +1,21 @@
+{
+  "type_name": "SendTokens",
+  "generated_at": "2025-10-04T06:10:50.952404",
+  "stage": "3.3",
+  "json_data": {
+    "Hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "Meta": "sample_rawjson",
+    "To": "sample_tokenrecipient"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for SendTokens",
+      "data": {
+        "Hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "Meta": "sample_rawjson",
+        "To": "sample_tokenrecipient"
+      }
+    }
+  ]
+}

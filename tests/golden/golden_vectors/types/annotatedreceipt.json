@@ -1,0 +1,19 @@
+{
+  "type_name": "AnnotatedReceipt",
+  "generated_at": "2025-10-04T06:10:50.894358",
+  "stage": "3.3",
+  "json_data": {
+    "Receipt": "sample_merkle.receipt",
+    "Anchor": "sample_anchormetadata"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for AnnotatedReceipt",
+      "data": {
+        "Receipt": "sample_merkle.receipt",
+        "Anchor": "sample_anchormetadata"
+      }
+    }
+  ]
+}

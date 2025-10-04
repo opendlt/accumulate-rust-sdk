@@ -1,0 +1,38 @@
+{
+  "type": "signatureSet",
+  "Vote": null,
+  "Signer": "acc://test.acme/signer",
+  "TransactionHash": null,
+  "Signatures": [
+    {
+      "type": "ed25519",
+      "PublicKey": "0000000000000000000000000000000000000000000000000000000000000000",
+      "Signature": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "Signer": "acc://test.acme/signer1",
+      "SignerVersion": 1,
+      "Timestamp": 1234567890,
+      "Vote": null,
+      "TransactionHash": null,
+      "Memo": null,
+      "Data": null
+    },
+    {
+      "type": "ed25519",
+      "PublicKey": "0000000000000000000000000000000000000000000000000000000000000000",
+      "Signature": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "Signer": "acc://test.acme/signer2",
+      "SignerVersion": 1,
+      "Timestamp": 1234567890,
+      "Vote": null,
+      "TransactionHash": null,
+      "Memo": null,
+      "Data": null
+    },
+    {
+      "type": "internal",
+      "Cause": "0000000000000000000000000000000000000000000000000000000000000000",
+      "TransactionHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "Authority": "acc://test.acme/authority"
+}

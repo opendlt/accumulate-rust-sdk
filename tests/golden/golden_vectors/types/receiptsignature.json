@@ -1,0 +1,21 @@
+{
+  "type_name": "ReceiptSignature",
+  "generated_at": "2025-10-04T06:10:50.945656",
+  "stage": "3.3",
+  "json_data": {
+    "SourceNetwork": "acc://example.acme",
+    "Proof": "sample_merkle.receipt",
+    "TransactionHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for ReceiptSignature",
+      "data": {
+        "SourceNetwork": "acc://example.acme",
+        "Proof": "sample_merkle.receipt",
+        "TransactionHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    }
+  ]
+}

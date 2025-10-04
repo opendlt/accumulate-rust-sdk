@@ -1,0 +1,1 @@
+{"canonical_json":"{\"initiator\":\"0101010101010101010101010101010101010101010101010101010101010101\",\"memo\":\"test memo\",\"principal\":\"acc://test.acme/tokens\"}","header":{"initiator":"0101010101010101010101010101010101010101010101010101010101010101","memo":"test memo","principal":"acc://test.acme/tokens"}}

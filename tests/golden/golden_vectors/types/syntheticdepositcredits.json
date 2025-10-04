@@ -1,0 +1,21 @@
+{
+  "type_name": "SyntheticDepositCredits",
+  "generated_at": "2025-10-04T06:10:50.957045",
+  "stage": "3.3",
+  "json_data": {
+    "Amount": 42,
+    "AcmeRefundAmount": "1234567890",
+    "IsRefund": true
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for SyntheticDepositCredits",
+      "data": {
+        "Amount": 42,
+        "AcmeRefundAmount": "1234567890",
+        "IsRefund": true
+      }
+    }
+  ]
+}

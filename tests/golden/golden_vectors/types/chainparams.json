@@ -1,0 +1,19 @@
+{
+  "type_name": "ChainParams",
+  "generated_at": "2025-10-04T06:10:50.901636",
+  "stage": "3.3",
+  "json_data": {
+    "Data": "SGVsbG8gV29ybGQ=",
+    "IsUpdate": true
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for ChainParams",
+      "data": {
+        "Data": "SGVsbG8gV29ybGQ=",
+        "IsUpdate": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"error":{"code":500,"message":"internal server error","type":"rpc"},"formatted":"RPC error: code=500, message=internal server error","input":{"code":500,"message":"internal server error"}}

@@ -1,0 +1,23 @@
+{
+  "type_name": "CreateTokenAccount",
+  "generated_at": "2025-10-04T06:10:50.906869",
+  "stage": "3.3",
+  "json_data": {
+    "Url": "acc://example.acme",
+    "TokenUrl": "acc://example.acme",
+    "Authorities": "acc://example.acme",
+    "Proof": "sample_tokenissuerproof"
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for CreateTokenAccount",
+      "data": {
+        "Url": "acc://example.acme",
+        "TokenUrl": "acc://example.acme",
+        "Authorities": "acc://example.acme",
+        "Proof": "sample_tokenissuerproof"
+      }
+    }
+  ]
+}

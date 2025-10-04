@@ -1,0 +1,1 @@
+{"canonical_json":"{\"Entry\":{\"data\":\"test data\",\"value\":42},\"Scratch\":false,\"WriteToState\":true,\"type\":\"writeData\"}","transaction_body":{"Entry":{"data":"test data","value":42},"Scratch":false,"WriteToState":true,"type":"writeData"}}

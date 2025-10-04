@@ -1,0 +1,17 @@
+{
+  "type_name": "AcmeOracle",
+  "generated_at": "2025-10-04T06:10:50.889167",
+  "stage": "3.3",
+  "json_data": {
+    "Price": 42
+  },
+  "test_scenarios": [
+    {
+      "name": "basic_serialization",
+      "description": "Basic JSON serialization/deserialization for AcmeOracle",
+      "data": {
+        "Price": 42
+      }
+    }
+  ]
+}

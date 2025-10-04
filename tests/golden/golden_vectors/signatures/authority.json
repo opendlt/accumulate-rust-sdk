@@ -1,0 +1,10 @@
+{
+  "Authority": "acc://test.acme/authority",
+  "Cause": "test-cause",
+  "Delegator": [],
+  "Memo": null,
+  "Origin": "acc://test.acme/origin",
+  "TxID": "test-tx-id",
+  "Vote": null,
+  "type": "authority"
+}
