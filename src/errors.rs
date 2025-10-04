@@ -20,6 +20,9 @@ pub enum Error {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 
+    #[error("RPC error: code={code}, message={message}")]
+    Rpc { code: i32, message: String },
+
     #[error("General error: {0}")]
     General(String),
 }
@@ -55,5 +58,12 @@ impl From<String> for Error {
 impl From<&str> for Error {
     fn from(s: &str) -> Self {
         Error::General(s.to_string())
+    }
+}
+
+impl Error {
+    /// Create an RPC error with code and message
+    pub fn rpc(code: i32, message: String) -> Self {
+        Error::Rpc { code, message }
     }
 }

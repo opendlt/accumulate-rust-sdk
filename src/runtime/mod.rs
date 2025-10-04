@@ -4,3 +4,4 @@ pub mod signing;
 pub mod signing_test_shims;
 
 pub mod rpc;
+pub mod hashing;
