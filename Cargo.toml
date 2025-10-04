@@ -21,6 +21,7 @@ path = "src/lib.rs"
 default = ["async-client"]
 async-client = ["reqwest/json","reqwest/rustls-tls","tokio","tokio/macros"]
 blocking-client = ["reqwest/blocking","reqwest/json","reqwest/rustls-tls"]
+typescript-compat-tests = []  # Optional TypeScript compatibility tests (known to have buggy test vectors)
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
