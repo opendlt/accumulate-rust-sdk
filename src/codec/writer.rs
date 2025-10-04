@@ -78,14 +78,15 @@ impl BinaryWriter {
         Ok(())
     }
 
-    /// Encode an unsigned varint
-    /// Matches TS: uvarintMarshalBinary(val: number | bigint, field?: number)
+    /// Encode an unsigned varint using Go's canonical encoding/binary algorithm
+    /// Matches Go: binary.PutUvarint(buf, x)
     pub fn write_uvarint(&mut self, mut value: u64) -> Result<(), EncodingError> {
+        // Use Go's canonical varint algorithm - no special cases needed
         while value >= 0x80 {
-            self.buffer.push((value as u8 & 0xFF) | 0x80);
+            self.buffer.push((value as u8) | 0x80);
             value >>= 7;
         }
-        self.buffer.push(value as u8 & 0xFF);
+        self.buffer.push(value as u8);
         Ok(())
     }
 
@@ -97,11 +98,11 @@ impl BinaryWriter {
         Ok(())
     }
 
-    /// Encode a signed varint using zigzag encoding
-    /// Matches TS: varintMarshalBinary(val: number | bigint, field?: number)
+    /// Encode a signed varint using Go's canonical zigzag encoding
+    /// Matches Go: binary.PutVarint(buf, x)
     pub fn write_varint(&mut self, value: i64) -> Result<(), EncodingError> {
-        // Zigzag encoding: map signed to unsigned
-        let unsigned = ((value << 1) ^ (value >> 63)) as u64;
+        // Go's canonical zigzag encoding algorithm
+        let unsigned = ((value as u64) << 1) ^ ((value >> 63) as u64);
         self.write_uvarint(unsigned)
     }
 

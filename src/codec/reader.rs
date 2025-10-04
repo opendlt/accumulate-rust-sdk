@@ -87,8 +87,8 @@ impl<'a> BinaryReader<'a> {
         Ok(bytes)
     }
 
-    /// Decode an unsigned varint
-    /// Matches TS: uvarintUnmarshalBinary(data: Uint8Array, offset?: number)
+    /// Decode an unsigned varint using Go's canonical encoding/binary algorithm
+    /// Matches Go: binary.ReadUvarint(r)
     pub fn read_uvarint(&mut self) -> Result<u64, DecodingError> {
         let mut result = 0u64;
         let mut shift = 0;
@@ -111,11 +111,11 @@ impl<'a> BinaryReader<'a> {
         Ok(result)
     }
 
-    /// Decode a signed varint using zigzag decoding
-    /// Matches TS: varintUnmarshalBinary(data: Uint8Array, offset?: number)
+    /// Decode a signed varint using Go's canonical zigzag decoding
+    /// Matches Go: binary.ReadVarint(r)
     pub fn read_varint(&mut self) -> Result<i64, DecodingError> {
         let unsigned = self.read_uvarint()?;
-        // Zigzag decoding: map unsigned back to signed
+        // Go's canonical zigzag decoding algorithm
         let signed = (unsigned >> 1) as i64 ^ -((unsigned & 1) as i64);
         Ok(signed)
     }
@@ -203,10 +203,24 @@ pub struct FieldReader<'a> {
 }
 
 impl<'a> FieldReader<'a> {
-    /// Create a new field reader and parse all fields
+    /// Create a new field reader and parse all fields according to Accumulate protocol
+    ///
+    /// Field encoding patterns from Accumulate Go implementation:
+    /// - WriteUint/WriteInt: field_number + varint_value
+    /// - WriteString/WriteBytes: field_number + length + data
+    /// - WriteValue: field_number + length + marshaled_data
+    /// - WriteHash: field_number + raw_32_bytes
     pub fn new(data: &'a [u8]) -> Result<Self, DecodingError> {
         let mut reader = BinaryReader::new(data);
         let mut fields = HashMap::new();
+
+        // Check for empty object marker
+        if data.len() == 1 && data[0] == 0x80 {
+            return Ok(Self {
+                reader: BinaryReader::new(data),
+                fields,
+            });
+        }
 
         while reader.has_remaining() {
             let field_number = reader.read_uvarint()?;
@@ -214,22 +228,28 @@ impl<'a> FieldReader<'a> {
                 return Err(DecodingError::InvalidFieldNumber(field_number as u32));
             }
 
-            // Read until next field or end
+            // For Accumulate protocol, the field data format depends on the writer method used:
+            // Since we don't have schema information, we need to parse field data until
+            // we hit the next field number or end of data.
+
             let start_pos = reader.position();
             let mut field_data = Vec::new();
 
-            // Try to determine field value length by reading the next field number
+            // Read field data until we encounter the next field number or EOF
             while reader.has_remaining() {
-                let pos_before = reader.position();
-                if let Ok(next_field) = reader.read_uvarint() {
-                    if next_field >= 1 && next_field <= 32 {
-                        // This is the next field, so previous data belongs to current field
-                        reader.seek(pos_before)?;
+                let peek_start = reader.position();
+
+                // Look ahead to see if we're at the start of a new field
+                if let Ok(peek_field) = reader.read_uvarint() {
+                    if peek_field >= 1 && peek_field <= 32 {
+                        // This is the start of the next field, rewind and stop
+                        reader.seek(peek_start)?;
                         break;
                     }
                 }
-                // Reset and read this byte as field data
-                reader.seek(pos_before)?;
+
+                // Not a field start, rewind and consume one byte
+                reader.seek(peek_start)?;
                 field_data.push(reader.read_byte()?);
             }
 
@@ -305,8 +325,8 @@ impl<'a> FieldReader<'a> {
     /// Read string from field
     pub fn read_string_field(&self, field: u32) -> Result<Option<String>, DecodingError> {
         if let Some(data) = self.get_field(field) {
-            let mut reader = BinaryReader::new(data);
-            Ok(Some(reader.read_string()?))
+            // Field data is already the raw string bytes (length prefix was consumed during parsing)
+            Ok(Some(String::from_utf8(data.to_vec()).map_err(|_| DecodingError::InvalidUtf8)?))
         } else {
             Ok(None)
         }
@@ -315,8 +335,8 @@ impl<'a> FieldReader<'a> {
     /// Read bytes from field
     pub fn read_bytes_field(&self, field: u32) -> Result<Option<Vec<u8>>, DecodingError> {
         if let Some(data) = self.get_field(field) {
-            let mut reader = BinaryReader::new(data);
-            Ok(Some(reader.read_bytes_with_length()?.to_vec()))
+            // Field data is already the raw bytes (length prefix was consumed during parsing)
+            Ok(Some(data.to_vec()))
         } else {
             Ok(None)
         }

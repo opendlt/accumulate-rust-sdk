@@ -54,19 +54,19 @@ impl TransactionCodec {
     pub fn encode_envelope(envelope: &TransactionEnvelope) -> Result<Vec<u8>, EncodingError> {
         let mut writer = BinaryWriter::new();
 
-        // Field 1: Header
+        // Field 1: Header (use length-prefixed encoding to match Go)
         let header_data = Self::encode_header(&envelope.header)?;
-        writer.write_field(1, &header_data)?;
+        writer.write_bytes_field(&header_data, 1)?;
 
         // Field 2: Body (JSON encoded as bytes)
         let body_json =
             serde_json::to_vec(&envelope.body).map_err(|_| EncodingError::InvalidUtf8)?;
         writer.write_bytes_field(&body_json, 2)?;
 
-        // Field 3: Signatures
+        // Field 3: Signatures (use length-prefixed encoding to match Go)
         for signature in &envelope.signatures {
             let sig_data = Self::encode_signature(signature)?;
-            writer.write_field(3, &sig_data)?;
+            writer.write_bytes_field(&sig_data, 3)?;
         }
 
         Ok(writer.into_bytes())
@@ -204,10 +204,10 @@ impl TransactionCodec {
             writer.write_bytes_field(public_key, 5)?;
         }
 
-        // Field 6: Key page (optional)
+        // Field 6: Key page (optional) - use length-prefixed encoding to match Go
         if let Some(ref key_page) = signature.key_page {
             let key_page_data = Self::encode_key_page(key_page)?;
-            writer.write_field(6, &key_page_data)?;
+            writer.write_bytes_field(&key_page_data, 6)?;
         }
 
         Ok(writer.into_bytes())
@@ -285,7 +285,7 @@ impl TransactionCodec {
         let mut writer = BinaryWriter::new();
 
         let header_data = Self::encode_header(&envelope.header)?;
-        writer.write_field(1, &header_data)?;
+        writer.write_bytes_field(&header_data, 1)?;
 
         let body_json =
             serde_json::to_vec(&envelope.body).map_err(|_| EncodingError::InvalidUtf8)?;

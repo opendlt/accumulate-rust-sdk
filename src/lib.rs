@@ -19,6 +19,8 @@ pub use crate::generated::enums::*;
 pub use crate::generated::signatures::*;
 pub use crate::generated::header::*;
 pub use crate::generated::transactions::*;
+// Import protocol types from generated module
+pub use crate::generated::types as protocol_types;
 // Import what's actually available from api_methods
 pub use crate::generated::api_methods::{
     AccumulateRpc,

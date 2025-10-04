@@ -25,7 +25,7 @@ fn canonicalize_internal(value: &Value) -> String {
             format!("[{}]", elements.join(","))
         }
         Value::Object(obj) => {
-            // Convert to BTreeMap to ensure sorted keys
+            // Convert to BTreeMap to ensure sorted keys (canonical ordering)
             let mut sorted: BTreeMap<String, String> = BTreeMap::new();
             for (key, val) in obj {
                 sorted.insert(key.clone(), canonicalize_internal(val));
