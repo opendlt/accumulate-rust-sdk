@@ -74,6 +74,68 @@ fn minimal_body_json_for_wire(wire_tag: &str) -> Value {
             "Amount": "0",
             "To": []
         }),
+        "acmeFaucet" => json::json!({
+            "type": "acmeFaucet",
+            "Url": ""
+        }),
+        "activateProtocolVersion" => json::json!({
+            "type": "activateProtocolVersion"
+        }),
+        "addCredits" => json::json!({
+            "type": "addCredits",
+            "Recipient": "",
+            "Amount": "0",
+            "Oracle": 0
+        }),
+        "createDataAccount" => json::json!({
+            "type": "createDataAccount",
+            "Url": ""
+        }),
+        "createKeyBook" => json::json!({
+            "type": "createKeyBook",
+            "Url": "",
+            "PublicKeyHash": "00"
+        }),
+        "createKeyPage" => json::json!({
+            "type": "createKeyPage",
+            "Keys": []
+        }),
+        "createTokenAccount" => json::json!({
+            "type": "createTokenAccount",
+            "Url": "",
+            "TokenUrl": ""
+        }),
+        "burnTokens" => json::json!({
+            "type": "burnTokens",
+            "Amount": "0"
+        }),
+        "updateKey" => json::json!({
+            "type": "updateKey",
+            "NewKeyHash": ""
+        }),
+        "updateKeyPage" => json::json!({
+            "type": "updateKeyPage",
+            "Operation": 0
+        }),
+        "blockValidatorAnchor" => json::json!({
+            "type": "blockValidatorAnchor",
+            "AcmeBurnt": "0"
+        }),
+        "burnCredits" => json::json!({
+            "type": "burnCredits",
+            "Amount": 0
+        }),
+        "directoryAnchor" => json::json!({
+            "type": "directoryAnchor",
+            "Updates": [],
+            "Receipts": [],
+            "MakeMajorBlock": 0,
+            "MakeMajorBlockTime": 0
+        }),
+        "lockAccount" => json::json!({
+            "type": "lockAccount",
+            "Height": 0
+        }),
         _ => json::json!({"type": wire_tag})
     }
 }
@@ -189,7 +251,7 @@ fn test_specific_transaction_types() {
 fn test_transaction_count() {
     let m = manifest();
     let count = m["counts"]["transactions"].as_u64().unwrap();
-    assert_eq!(count, 24, "Expected 24 transaction types in manifest");
+    assert_eq!(count, 27, "Expected 27 transaction types in manifest");
 }
 
 #[test]
@@ -262,7 +324,7 @@ fn test_all_roundtrips() {
 
     for body_info in bodies {
         let wire = body_info["wire"].as_str().unwrap();
-        let original = minimal_body_json_for_wire(wire);
+        let original = minimal_body_json(body_info);
         let body: TransactionBody = serde_json::from_value(original.clone()).unwrap();
         let serialized = serde_json::to_value(&body).unwrap();
 

@@ -65,7 +65,7 @@ mod test_data {
                 "Signer": variations["signer"][signer_idx].clone(),
                 "SignerVersion": variation as u64 + 1,
                 "Timestamp": 1234567890u64 + variation as u64,
-                "Vote": if variation % 3 == 0 { serde_json::Value::Null } else { json!("approve") },
+                "Vote": if variation % 3 == 0 { serde_json::Value::Null } else { json!("accept") },
                 "TransactionHash": if variation % 2 == 0 {
                     serde_json::Value::Null
                 } else {
@@ -292,7 +292,11 @@ fn test_large_data_handling() {
             "Signature": hex::encode([0u8; 64]),
             "Signer": "acc://test.acme/signer",
             "SignerVersion": 1,
-            "Timestamp": 1234567890
+            "Timestamp": 1234567890,
+            "Vote": null,
+            "TransactionHash": null,
+            "Memo": null,
+            "Data": null
         })),
 
         ("large_signature", serde_json::json!({
@@ -301,7 +305,11 @@ fn test_large_data_handling() {
             "Signature": hex::encode(vec![0u8; 2048]), // Very large signature
             "Signer": "acc://test.acme/signer",
             "SignerVersion": 1,
-            "Timestamp": 1234567890
+            "Timestamp": 1234567890,
+            "Vote": null,
+            "TransactionHash": null,
+            "Memo": null,
+            "Data": null
         })),
 
         ("large_signer_url", serde_json::json!({
@@ -310,7 +318,11 @@ fn test_large_data_handling() {
             "Signature": hex::encode([0u8; 64]),
             "Signer": format!("acc://{}/signer", "a".repeat(1000)), // Very long URL
             "SignerVersion": 1,
-            "Timestamp": 1234567890
+            "Timestamp": 1234567890,
+            "Vote": null,
+            "TransactionHash": null,
+            "Memo": null,
+            "Data": null
         })),
     ];
 

@@ -22,6 +22,18 @@ fn minimal_header_json(manifest: &Value) -> Value {
             let field_name = field["name"].as_str().unwrap();
             let field_type = field["type"].as_str().unwrap();
 
+            // Convert PascalCase field names to camelCase
+            let camel_case_name = match field_name {
+                "Principal" => "principal",
+                "Initiator" => "initiator",
+                "Memo" => "memo",
+                "Metadata" => "metadata",
+                "Expire" => "expire",
+                "HoldUntil" => "holdUntil",
+                "Authorities" => "authorities",
+                _ => field_name, // fallback
+            };
+
             let value = match field_type {
                 "url" => json::json!("acc://test.acme"),
                 "hash" => json::json!("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"),
@@ -33,7 +45,7 @@ fn minimal_header_json(manifest: &Value) -> Value {
                 _ => json::json!({}), // Complex types
             };
 
-            json_obj[field_name] = value;
+            json_obj[camel_case_name] = value;
         }
     }
 
@@ -60,8 +72,8 @@ fn header_roundtrip_and_validate() {
     let back = back_result.unwrap();
 
     // Check that required fields are preserved
-    assert_eq!(val["Principal"], back["Principal"], "Principal mismatch");
-    assert_eq!(val["Initiator"], back["Initiator"], "Initiator mismatch");
+    assert_eq!(val["principal"], back["principal"], "Principal mismatch");
+    assert_eq!(val["initiator"], back["initiator"], "Initiator mismatch");
 
     // Test validation
     let validate_result = hdr.validate();
@@ -72,9 +84,9 @@ fn header_roundtrip_and_validate() {
 
 #[test]
 fn header_missing_required_fails() {
-    // Test with missing Principal (required field)
+    // Test with missing principal (required field)
     let incomplete = json::json!({
-        "Initiator": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        "initiator": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     });
 
     let result: Result<TransactionHeader, _> = serde_json::from_value(incomplete);
@@ -86,8 +98,8 @@ fn header_empty_principal_fails_validation() {
     let m = manifest();
     let mut val = minimal_header_json(&m);
 
-    // Set Principal to empty string
-    val["Principal"] = json::json!("");
+    // Set principal to empty string
+    val["principal"] = json::json!("");
 
     let hdr: TransactionHeader = serde_json::from_value(val).unwrap();
     let validation_result = hdr.validate();
@@ -101,9 +113,9 @@ fn header_with_optional_fields() {
     let mut val = minimal_header_json(&m);
 
     // Add optional fields
-    val["Memo"] = json::json!("Test transaction memo");
-    val["Metadata"] = json::json!("cafebabe");
-    val["Authorities"] = json::json!(["acc://authority1.acme", "acc://authority2.acme"]);
+    val["memo"] = json::json!("Test transaction memo");
+    val["metadata"] = json::json!("cafebabe");
+    val["authorities"] = json::json!(["acc://authority1.acme", "acc://authority2.acme"]);
 
     let hdr_result: Result<TransactionHeader, _> = serde_json::from_value(val.clone());
     assert!(hdr_result.is_ok(), "Failed to deserialize header with optional fields");
@@ -113,9 +125,9 @@ fn header_with_optional_fields() {
 
     // Test serialization back
     let back = serde_json::to_value(&hdr).unwrap();
-    assert_eq!(val["Memo"], back["Memo"], "Memo should be preserved");
-    assert_eq!(val["Metadata"], back["Metadata"], "Metadata should be preserved");
-    assert_eq!(val["Authorities"], back["Authorities"], "Authorities should be preserved");
+    assert_eq!(val["memo"], back["memo"], "Memo should be preserved");
+    assert_eq!(val["metadata"], back["metadata"], "Metadata should be preserved");
+    assert_eq!(val["authorities"], back["authorities"], "Authorities should be preserved");
 }
 
 #[test]
@@ -124,8 +136,8 @@ fn header_with_expire_options() {
     let mut val = minimal_header_json(&m);
 
     // Add ExpireOptions
-    val["Expire"] = json::json!({
-        "AtTime": 1640995200
+    val["expire"] = json::json!({
+        "atTime": 1640995200
     });
 
     let hdr_result: Result<TransactionHeader, _> = serde_json::from_value(val.clone());
@@ -146,8 +158,8 @@ fn header_with_hold_until_options() {
     let mut val = minimal_header_json(&m);
 
     // Add HoldUntilOptions
-    val["HoldUntil"] = json::json!({
-        "MinorBlock": 12345
+    val["holdUntil"] = json::json!({
+        "minorBlock": 12345
     });
 
     let hdr_result: Result<TransactionHeader, _> = serde_json::from_value(val.clone());

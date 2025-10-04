@@ -225,6 +225,161 @@ fn create_test_signature_json(wire: &str) -> serde_json::Value {
             "Memo": null,
             "Data": null
         }),
+        "btc" => json!({
+            "type": "btc",
+            "PublicKey": hex::encode([7u8; 32]),
+            "Signature": hex::encode([8u8; 64]),
+            "Signer": "acc://test.acme/signer",
+            "SignerVersion": 1,
+            "Timestamp": 1234567890,
+            "Vote": null,
+            "TransactionHash": null,
+            "Memo": null,
+            "Data": null
+        }),
+        "btcLegacy" => json!({
+            "type": "btcLegacy",
+            "PublicKey": hex::encode([9u8; 32]),
+            "Signature": hex::encode([10u8; 64]),
+            "Signer": "acc://test.acme/signer",
+            "SignerVersion": 1,
+            "Timestamp": 1234567890,
+            "Vote": null,
+            "TransactionHash": null,
+            "Memo": null,
+            "Data": null
+        }),
+        "eth" => json!({
+            "type": "eth",
+            "PublicKey": hex::encode([11u8; 32]),
+            "Signature": hex::encode([12u8; 64]),
+            "Signer": "acc://test.acme/signer",
+            "SignerVersion": 1,
+            "Timestamp": 1234567890,
+            "Vote": null,
+            "TransactionHash": null,
+            "Memo": null,
+            "Data": null
+        }),
+        "rsaSha256" => json!({
+            "type": "rsaSha256",
+            "PublicKey": hex::encode([13u8; 32]),
+            "Signature": hex::encode([14u8; 64]),
+            "Signer": "acc://test.acme/signer",
+            "SignerVersion": 1,
+            "Timestamp": 1234567890,
+            "Vote": null,
+            "TransactionHash": null,
+            "Memo": null,
+            "Data": null
+        }),
+        "ecdsaSha256" => json!({
+            "type": "ecdsaSha256",
+            "PublicKey": hex::encode([15u8; 32]),
+            "Signature": hex::encode([16u8; 64]),
+            "Signer": "acc://test.acme/signer",
+            "SignerVersion": 1,
+            "Timestamp": 1234567890,
+            "Vote": null,
+            "TransactionHash": null,
+            "Memo": null,
+            "Data": null
+        }),
+        "typedData" => json!({
+            "type": "typedData",
+            "PublicKey": hex::encode([17u8; 32]),
+            "Signature": hex::encode([18u8; 64]),
+            "Signer": "acc://test.acme/signer",
+            "SignerVersion": 1,
+            "Timestamp": 1234567890,
+            "Vote": null,
+            "TransactionHash": null,
+            "Memo": null,
+            "Data": null,
+            "ChainID": "1"
+        }),
+        "receipt" => json!({
+            "type": "receipt",
+            "SourceNetwork": "acc://bvn-mainnet.acme",
+            "Proof": json!({"data": hex::encode([19u8; 32])}),
+            "TransactionHash": hex::encode([20u8; 32])
+        }),
+        "partition" => json!({
+            "type": "partition",
+            "SourceNetwork": "acc://bvn-mainnet.acme",
+            "DestinationNetwork": "acc://bvn-devnet.acme",
+            "SequenceNumber": 12345,
+            "TransactionHash": hex::encode([21u8; 32])
+        }),
+        "signatureSet" => json!({
+            "type": "signatureSet",
+            "Vote": null,
+            "Signer": "acc://test.acme/signer",
+            "TransactionHash": hex::encode([22u8; 32]),
+            "Signatures": [
+                json!({
+                    "type": "ed25519",
+                    "PublicKey": hex::encode([23u8; 32]),
+                    "Signature": hex::encode([24u8; 64]),
+                    "Signer": "acc://test.acme/signer",
+                    "SignerVersion": 1,
+                    "Timestamp": 1234567890,
+                    "Vote": null,
+                    "TransactionHash": null,
+                    "Memo": null,
+                    "Data": null
+                })
+            ],
+            "Authority": "acc://test.acme/authority"
+        }),
+        "remote" => json!({
+            "type": "remote",
+            "Destination": "acc://test.acme/destination",
+            "Signature": json!({
+                "type": "ed25519",
+                "PublicKey": hex::encode([25u8; 32]),
+                "Signature": hex::encode([26u8; 64]),
+                "Signer": "acc://test.acme/signer",
+                "SignerVersion": 1,
+                "Timestamp": 1234567890,
+                "Vote": null,
+                "TransactionHash": null,
+                "Memo": null,
+                "Data": null
+            }),
+            "Cause": [hex::encode([27u8; 32])]
+        }),
+        "delegated" => json!({
+            "type": "delegated",
+            "Signature": json!({
+                "type": "ed25519",
+                "PublicKey": hex::encode([28u8; 32]),
+                "Signature": hex::encode([29u8; 64]),
+                "Signer": "acc://test.acme/signer",
+                "SignerVersion": 1,
+                "Timestamp": 1234567890,
+                "Vote": null,
+                "TransactionHash": null,
+                "Memo": null,
+                "Data": null
+            }),
+            "Delegator": "acc://test.acme/delegator"
+        }),
+        "internal" => json!({
+            "type": "internal",
+            "Cause": hex::encode([30u8; 32]),
+            "TransactionHash": hex::encode([31u8; 32])
+        }),
+        "authority" => json!({
+            "type": "authority",
+            "Origin": "acc://test.acme/origin",
+            "Authority": "acc://test.acme/authority",
+            "Vote": null,
+            "TxID": hex::encode([32u8; 32]),
+            "Cause": hex::encode([33u8; 32]),
+            "Delegator": ["acc://test.acme/delegator"],
+            "Memo": "test memo"
+        }),
         _ => json!({
             "type": wire,
             "test": true
@@ -237,7 +392,19 @@ fn create_all_test_signatures() -> Vec<(&'static str, serde_json::Value)> {
         ("ed25519", create_test_signature_json("ed25519")),
         ("legacyED25519", create_test_signature_json("legacyED25519")),
         ("rcd1", create_test_signature_json("rcd1")),
-        // Add more as needed
+        ("btc", create_test_signature_json("btc")),
+        ("btcLegacy", create_test_signature_json("btcLegacy")),
+        ("eth", create_test_signature_json("eth")),
+        ("rsaSha256", create_test_signature_json("rsaSha256")),
+        ("ecdsaSha256", create_test_signature_json("ecdsaSha256")),
+        ("typedData", create_test_signature_json("typedData")),
+        ("receipt", create_test_signature_json("receipt")),
+        ("partition", create_test_signature_json("partition")),
+        ("signatureSet", create_test_signature_json("signatureSet")),
+        ("remote", create_test_signature_json("remote")),
+        ("delegated", create_test_signature_json("delegated")),
+        ("internal", create_test_signature_json("internal")),
+        ("authority", create_test_signature_json("authority")),
     ]
 }
 
