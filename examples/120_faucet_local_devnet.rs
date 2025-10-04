@@ -146,8 +146,8 @@ async fn request_faucet_tokens(
         Ok(response) => {
             println!("✅ Success!");
             println!("    Transaction ID: {}", response.txid);
-            if let Some(amount) = response.amount.as_ref() {
-                println!("    Amount: {}", amount);
+            if !response.amount.is_empty() {
+                println!("    Amount: {}", response.amount);
             }
 
             // Wait for transaction processing

@@ -197,8 +197,8 @@ async fn request_faucet_tokens(
     match client.faucet(&test_account.acme_account).await {
         Ok(response) => {
             println!("   ✅ Faucet Success! TX: {}", response.txid);
-            if let Some(amount) = response.amount.as_ref() {
-                println!("   Amount: {}", amount);
+            if !response.amount.is_empty() {
+                println!("   Amount: {}", response.amount);
             }
 
             // Wait for transaction processing

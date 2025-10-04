@@ -133,8 +133,8 @@ async fn generate_keypairs() -> Result<(), Box<dyn std::error::Error>> {
     let signature = deterministic_signer.sign(message);
 
     println!("    Message:     {:?}", String::from_utf8_lossy(message));
-    println!("    Signature:   {}", hex::encode(signature.to_bytes()));
-    println!("    Sig length:  {} bytes", signature.to_bytes().len());
+    println!("    Signature:   {}", hex::encode(signature));
+    println!("    Sig length:  {} bytes", signature.len());
 
     // Test message hashing
     println!("\n  🔐 Testing message hashing...");

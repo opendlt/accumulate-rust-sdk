@@ -5,7 +5,6 @@
 //! - Using V3 transaction envelope format
 //! - Setting up key books and pages
 
-use accumulate_client::protocol::{helpers, EnvelopeBuilder};
 use accumulate_client::{AccOptions, Accumulate, AccumulateClient};
 use dotenvy::dotenv;
 use serde_json::json;
@@ -50,30 +49,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create signed envelope
     println!("✍️  Creating signed envelope...");
-    let envelope = EnvelopeBuilder::create_envelope_from_json(
-        &adi_url,
-        adi_tx_body,
-        &keypair,
-        &format!("{}/book/1", adi_url),
-        1,
-    )?;
+    let envelope = client.create_envelope(&adi_tx_body, &keypair)?;
 
     println!("   ✅ Envelope created successfully");
     println!("   Signatures: {}", envelope.signatures.len());
-    println!(
-        "   Transaction hash: {}",
-        envelope.signatures[0].transaction_hash
-    );
-    println!("   ⚠️  Would submit to V3 API in full implementation");
+    if !envelope.signatures.is_empty() {
+        println!("   Signature bytes length: {}", envelope.signatures[0].signature.len());
+    }
+
+    // Submit to V3 API
+    println!("🚀 Submitting to V3 API...");
+    match client.submit(&envelope).await {
+        Ok(response) => {
+            println!("   ✅ Transaction submitted successfully!");
+            println!("   Transaction ID: {:?}", response);
+        }
+        Err(e) => {
+            println!("   ❌ Failed to submit transaction: {}", e);
+            println!("   This is expected on DevNet if the ADI already exists or keys are invalid");
+        }
+    }
 
     Ok(())
 }
 
-fn derive_lite_identity_url(public_key: &[u8; 32]) -> String {
-    use sha2::{Digest, Sha256};
-    let mut hasher = Sha256::new();
-    hasher.update(public_key);
-    let hash = hasher.finalize();
-    let lite_id_hex = hex::encode(&hash[0..20]);
-    format!("acc://{}.acme", lite_id_hex)
-}
