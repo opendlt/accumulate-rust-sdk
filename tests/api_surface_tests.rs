@@ -1,4 +1,5 @@
 use accumulate_client::*;
+use accumulate_client::generated::api_methods::FaucetResponse;
 use serde_json as json;
 use std::fs;
 use std::path::PathBuf;
@@ -176,8 +177,12 @@ fn golden_vector_consistency() {
             let params_content = fs::read_to_string(&params_file).unwrap();
             let results_content = fs::read_to_string(&results_file).unwrap();
 
-            let params_json: json::Value = json::from_str(&params_content).unwrap();
-            let results_json: json::Value = json::from_str(&results_content).unwrap();
+            let params_json: json::Value = json::from_str(&params_content)
+                .map_err(|e| panic!("Failed to parse params for {}: {} (content: '{}')", name, e, params_content))
+                .unwrap();
+            let results_json: json::Value = json::from_str(&results_content)
+                .map_err(|e| panic!("Failed to parse results for {}: {} (content: '{}')", name, e, results_content))
+                .unwrap();
 
             // Verify they're valid JSON
             assert!(params_json.is_object() || params_json.is_array() || params_json.is_null());
