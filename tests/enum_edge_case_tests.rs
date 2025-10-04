@@ -58,21 +58,25 @@ fn test_enum_whitespace_sensitivity() {
 
 #[test]
 fn test_enum_special_characters() {
-    // Test enums with special characters (hyphens, etc.)
+    // Test enum format validation (camelCase vs other formats)
 
-    // These contain hyphens and should work
-    let v1_sig: Result<ExecutorVersion, _> = serde_json::from_str("\"v1-signatureAnchoring\"");
-    assert!(v1_sig.is_ok(), "Should accept hyphenated variants");
+    // Test camelCase variants (canonical format)
+    let v1_sig: Result<ExecutorVersion, _> = serde_json::from_str("\"v1SignatureAnchoring\"");
+    assert!(v1_sig.is_ok(), "Should accept camelCase variants");
 
-    let block_validator: Result<PartitionType, _> = serde_json::from_str("\"block-validator\"");
-    assert!(block_validator.is_ok(), "Should accept hyphenated partition types");
+    let block_validator: Result<PartitionType, _> = serde_json::from_str("\"blockValidator\"");
+    assert!(block_validator.is_ok(), "Should accept camelCase partition types");
 
-    let block_summary: Result<PartitionType, _> = serde_json::from_str("\"block-summary\"");
-    assert!(block_summary.is_ok(), "Should accept hyphenated summary type");
+    let block_summary: Result<PartitionType, _> = serde_json::from_str("\"blockSummary\"");
+    assert!(block_summary.is_ok(), "Should accept camelCase summary type");
 
-    // Test that underscore variants are rejected (we use hyphens, not underscores)
+    // Test that underscore variants are rejected (we use camelCase, but accept legacy hyphenated)
     let underscore: Result<PartitionType, _> = serde_json::from_str("\"block_validator\"");
     assert!(underscore.is_err(), "Should reject underscore variants");
+
+    // Test that hyphenated variants are accepted for backward compatibility
+    let hyphenated: Result<PartitionType, _> = serde_json::from_str("\"block-validator\"");
+    assert!(hyphenated.is_ok(), "Should accept hyphenated variants for backward compatibility");
 }
 
 #[test]

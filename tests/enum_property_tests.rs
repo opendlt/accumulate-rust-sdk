@@ -148,8 +148,8 @@ fn test_signature_type_injection_resistance() {
         "\"%s%s%s%s\"",
         "\"%n%n%n%n\"",
 
-        // Unicode normalization attacks
-        "\"\\u0065\\u0064\\u0032\\u0035\\u0035\\u0031\\u0039\"", // "ed25519" in unicode escapes
+        // Unicode normalization - this is actually valid JSON and should decode to "ed25519"
+        // Removed: "\"\\u0065\\u0064\\u0032\\u0035\\u0035\\u0031\\u0039\"" - this is legitimate
 
         // Null byte injection
         "\"ed25519\\u0000malicious\"",

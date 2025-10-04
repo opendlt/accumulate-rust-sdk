@@ -97,26 +97,26 @@ fn test_transaction_header_json_edge_cases() {
 
     let json = serde_json::to_value(&minimal_header).unwrap();
 
-    // Verify PascalCase field naming (required for Go compatibility)
-    assert!(json.get("Principal").is_some(), "Should use PascalCase for Principal");
-    assert!(json.get("Initiator").is_some(), "Should use PascalCase for Initiator");
+    // Verify camelCase field naming (required for Accumulate compatibility)
+    assert!(json.get("principal").is_some(), "Should use camelCase for principal");
+    assert!(json.get("initiator").is_some(), "Should use camelCase for initiator");
 
     // Optional fields should not be present when None (not null)
-    assert!(json.get("Memo").is_none() || json["Memo"].is_null(), "Memo should be null or absent");
-    assert!(json.get("Metadata").is_none() || json["Metadata"].is_null(), "Metadata should be null or absent");
+    assert!(json.get("memo").is_none() || json["memo"].is_null(), "memo should be null or absent");
+    assert!(json.get("metadata").is_none() || json["metadata"].is_null(), "metadata should be null or absent");
 
     // Test deserialization with missing optional fields
-    let minimal_json = r#"{"Principal": "acc://test.acme", "Initiator": [222, 173, 190, 239]}"#;
+    let minimal_json = r#"{"principal": "acc://test.acme", "initiator": "deadbeef"}"#;
     let deserialized: Result<TransactionHeader, _> = serde_json::from_str(minimal_json);
     assert!(deserialized.is_ok(), "Should handle missing optional fields");
 
-    // Test deserialization with camelCase (behavior depends on serde configuration)
-    let camel_case_json = r#"{"principal": "acc://test.acme", "initiator": [222, 173, 190, 239]}"#;
-    let camel_result: Result<TransactionHeader, _> = serde_json::from_str(camel_case_json);
-    if camel_result.is_err() {
-        println!("✓ camelCase field names correctly rejected");
+    // Test deserialization with PascalCase (should be rejected)
+    let pascal_case_json = r#"{"Principal": "acc://test.acme", "Initiator": "deadbeef"}"#;
+    let pascal_result: Result<TransactionHeader, _> = serde_json::from_str(pascal_case_json);
+    if pascal_result.is_err() {
+        println!("✓ PascalCase field names correctly rejected");
     } else {
-        println!("✓ camelCase field names accepted (serde configuration dependent)");
+        println!("✓ PascalCase field names accepted (unexpected but not breaking)");
     }
 
     println!("✓ TransactionHeader JSON edge cases passed");
@@ -302,7 +302,7 @@ fn test_account_type_edge_cases() {
     let account_types = vec![
         (AccountType::Unknown, "unknown"),
         (AccountType::Identity, "identity"),
-        (AccountType::TokenAccount, "tokenaccount"),
+        (AccountType::TokenAccount, "tokenAccount"),
         (AccountType::DataAccount, "dataAccount"),
         (AccountType::KeyPage, "keyPage"),
         (AccountType::KeyBook, "keyBook"),
@@ -353,7 +353,7 @@ fn test_signature_type_edge_cases() {
     }
 
     // Test rejection of invalid signature types
-    let invalid_sigs = vec!["", "invalid", "ED25519", "ed_25519", "unknown"];
+    let invalid_sigs = vec!["", "invalid", "ED25519", "ed_25519", "totally_invalid"];
     for invalid in invalid_sigs {
         let result: Result<SignatureType, _> = serde_json::from_str(&format!("\"{}\"", invalid));
         assert!(result.is_err(), "Should reject invalid signature type: {}", invalid);

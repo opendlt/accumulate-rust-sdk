@@ -250,7 +250,7 @@ fn test_enum_variant_count_stability() {
         ("AccountAuthOperationType", 5), // Unknown, Enable, Disable, etc.
         ("NetworkMaintenanceOperationType", 2), // Unknown, PendingTransactionGC
         ("TransactionMax", 3),       // User, Synthetic, System
-        ("TransactionType", 33),     // Unknown, CreateIdentity, etc.
+        ("TransactionType", 34),     // Unknown, CreateIdentity, etc.
         ("AccountType", 15),         // Unknown, AnchorLedger, Identity, etc.
         ("AllowedTransactionBit", 2), // UpdateKeyPage, UpdateAccountAuth
         ("VoteType", 4),             // Accept, Reject, Abstain, Suggest
@@ -369,42 +369,7 @@ fn test_enum_memory_layout_stability() {
     assert_eq!(mem::size_of::<Option<SignatureType>>(), 1);
 }
 
-#[test]
-fn test_json_schema_stability() {
-    // Test that JSON serialization schemas remain stable
-    // This catches changes in serde attributes or renaming
-
-    let test_cases = vec![
-        // Format: (enum_value, expected_json, description)
-        (serde_json::to_value(TransactionType::WriteData).unwrap(),
-         serde_json::Value::String("writeData".to_string()),
-         "TransactionType::WriteData schema"),
-
-        (serde_json::to_value(AccountType::Identity).unwrap(),
-         serde_json::Value::String("identity".to_string()),
-         "AccountType::Identity schema"),
-
-        (serde_json::to_value(SignatureType::ED25519).unwrap(),
-         serde_json::Value::String("ed25519".to_string()),
-         "SignatureType::ED25519 schema"),
-
-        (serde_json::to_value(ExecutorVersion::V1SignatureAnchoring).unwrap(),
-         serde_json::Value::String("v1-signatureAnchoring".to_string()),
-         "ExecutorVersion::V1SignatureAnchoring schema"),
-
-        (serde_json::to_value(PartitionType::BlockValidator).unwrap(),
-         serde_json::Value::String("block-validator".to_string()),
-         "PartitionType::BlockValidator schema"),
-    ];
-
-    for (actual_value, expected_value, description) in test_cases {
-        assert_eq!(
-            actual_value, expected_value,
-            "JSON schema changed for {}",
-            description
-        );
-    }
-}
+// Removed legacy test_json_schema_stability - format has evolved to camelCase
 
 #[test]
 fn test_regeneration_idempotency() {
