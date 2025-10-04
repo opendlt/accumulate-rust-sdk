@@ -133,7 +133,7 @@ fn test_enum_hashing_performance() {
 
     for i in 0..iterations {
         let tx_type = &tx_types[i % tx_types.len()];
-        map.insert(*tx_type, i as u32);
+        map.insert(tx_type.clone(), i as u32);
     }
 
     let insert_duration = start.elapsed();
@@ -352,7 +352,7 @@ fn test_enum_bulk_operations() {
 
     let start = Instant::now();
     for i in 0..size {
-        transactions.push(tx_variants[i % tx_variants.len()]);
+        transactions.push(tx_variants[i % tx_variants.len()].clone());
     }
     let creation_duration = start.elapsed();
 
@@ -361,7 +361,7 @@ fn test_enum_bulk_operations() {
     // Test bulk filtering
     let start = Instant::now();
     let user_transactions: Vec<_> = transactions.iter()
-        .filter(|&&tx| matches!(tx,
+        .filter(|&tx| matches!(tx,
             TransactionType::WriteData |
             TransactionType::CreateIdentity |
             TransactionType::SendTokens |
@@ -377,8 +377,8 @@ fn test_enum_bulk_operations() {
     // Test bulk counting
     let start = Instant::now();
     let mut counts = HashMap::new();
-    for &tx in &transactions {
-        *counts.entry(tx).or_insert(0) += 1;
+    for tx in &transactions {
+        *counts.entry(tx.clone()).or_insert(0) += 1;
     }
     let count_duration = start.elapsed();
 

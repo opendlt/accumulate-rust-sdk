@@ -1,5 +1,4 @@
 // Integration tests with real JSON payloads that would be seen in production
-use serde::{Deserialize, Serialize};
 use serde_json;
 use std::collections::HashMap;
 

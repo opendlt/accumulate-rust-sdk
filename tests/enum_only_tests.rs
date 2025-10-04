@@ -1,5 +1,4 @@
 // Standalone enum tests that don't depend on the broken codebase
-use serde::{Serialize, Deserialize};
 use serde_json;
 use std::collections::HashMap;
 use std::fs;

@@ -9,46 +9,28 @@ include!("../src/generated/enums.rs");
 fn test_enum_serialization_properties() {
     // Property: For any enum variant, serialize(deserialize(serialize(x))) == serialize(x)
 
-    let test_cases = vec![
-        // TransactionType variants
-        Box::new(TransactionType::WriteData) as Box<dyn serde::Serialize>,
-        Box::new(TransactionType::CreateIdentity) as Box<dyn serde::Serialize>,
-        Box::new(TransactionType::SendTokens) as Box<dyn serde::Serialize>,
-        Box::new(TransactionType::SystemGenesis) as Box<dyn serde::Serialize>,
+    // Test TransactionType variants
+    test_enum_serialization_property(TransactionType::WriteData);
+    test_enum_serialization_property(TransactionType::CreateIdentity);
+    test_enum_serialization_property(TransactionType::SendTokens);
+    test_enum_serialization_property(TransactionType::SystemGenesis);
 
-        // AccountType variants
-        Box::new(AccountType::Identity) as Box<dyn serde::Serialize>,
-        Box::new(AccountType::TokenAccount) as Box<dyn serde::Serialize>,
-        Box::new(AccountType::DataAccount) as Box<dyn serde::Serialize>,
+    // Test AccountType variants
+    test_enum_serialization_property(AccountType::Identity);
+    test_enum_serialization_property(AccountType::TokenAccount);
+    test_enum_serialization_property(AccountType::DataAccount);
 
-        // SignatureType variants
-        Box::new(SignatureType::ED25519) as Box<dyn serde::Serialize>,
-        Box::new(SignatureType::Delegated) as Box<dyn serde::Serialize>,
-        Box::new(SignatureType::BTC) as Box<dyn serde::Serialize>,
+    // Test SignatureType variants
+    test_enum_serialization_property(SignatureType::ED25519);
+    test_enum_serialization_property(SignatureType::Delegated);
+    test_enum_serialization_property(SignatureType::BTC);
 
-        // ExecutorVersion variants
-        Box::new(ExecutorVersion::V1) as Box<dyn serde::Serialize>,
-        Box::new(ExecutorVersion::V2) as Box<dyn serde::Serialize>,
-        Box::new(ExecutorVersion::V2Baikonur) as Box<dyn serde::Serialize>,
-    ];
+    // Test ExecutorVersion variants
+    test_enum_serialization_property(ExecutorVersion::V1);
+    test_enum_serialization_property(ExecutorVersion::V2);
+    test_enum_serialization_property(ExecutorVersion::V2Baikonur);
 
-    for case in test_cases {
-        let json1 = serde_json::to_string(&case).unwrap();
-
-        // Property: JSON serialization should be valid JSON
-        let _parsed: serde_json::Value = serde_json::from_str(&json1).unwrap();
-
-        // Property: Should be a string (enum wire format)
-        assert!(json1.starts_with('"') && json1.ends_with('"'),
-               "Enum should serialize to JSON string: {}", json1);
-
-        // Property: Should contain no whitespace (compact format)
-        assert!(!json1.contains(' ') && !json1.contains('\t') && !json1.contains('\n'),
-               "Enum JSON should be compact: {}", json1);
-
-        // Property: Should be ASCII only (no unicode)
-        assert!(json1.is_ascii(), "Enum JSON should be ASCII only: {}", json1);
-    }
+    println!("✓ All enum serialization properties verified");
 }
 
 #[test]
@@ -176,14 +158,15 @@ fn test_signature_type_injection_resistance() {
         "\"ed25519\\r\\n\"",
         "\"ed25519\\t\"",
 
-        // Overly long strings
-        &format!("\"{}\"", "a".repeat(1000)),
-
         // Binary data as JSON string
         "\"\\x00\\x01\\x02\\x03\"",
     ];
 
-    for malicious_input in malicious_inputs {
+    // Add overly long string separately to avoid lifetime issues
+    let long_string = format!("\"{}\"", "a".repeat(1000));
+
+    // Test all malicious inputs
+    for malicious_input in malicious_inputs.iter().chain(std::iter::once(&long_string.as_str())) {
         let result: Result<SignatureType, _> = serde_json::from_str(malicious_input);
         assert!(result.is_err(),
                "Should reject malicious input: {}", malicious_input);
@@ -445,4 +428,28 @@ fn test_enum_fuzzing_simulation() {
         assert!(sig_result.is_err(), "SignatureType should reject: {}", input);
         assert!(exec_result.is_err(), "ExecutorVersion should reject: {}", input);
     }
+}
+
+// Helper function for testing enum serialization properties
+fn test_enum_serialization_property<T>(value: T)
+where
+    T: serde::Serialize + for<'de> serde::Deserialize<'de> + std::fmt::Debug,
+{
+    let json1 = serde_json::to_string(&value).unwrap();
+
+    // Property: JSON serialization should be valid JSON
+    let _parsed: serde_json::Value = serde_json::from_str(&json1).unwrap();
+
+    // Property: Should be a string (enum wire format)
+    assert!(json1.starts_with('"') && json1.ends_with('"'),
+           "Enum should serialize to JSON string: {}", json1);
+
+    // Property: Should contain no whitespace (compact format)
+    assert!(!json1.contains(' ') && !json1.contains('\t') && !json1.contains('\n'),
+           "Enum JSON should be compact: {}", json1);
+
+    // Property: Should be ASCII only (no unicode)
+    assert!(json1.is_ascii(), "Enum JSON should be ASCII only: {}", json1);
+
+    println!("✓ Enum serialization property verified for: {}", json1);
 }

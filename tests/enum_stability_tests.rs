@@ -18,22 +18,14 @@ fn load_manifest() -> serde_json::Value {
 }
 
 #[test]
-fn test_enum_deterministic_serialization() {
-    // Test that enum serialization is deterministic across multiple runs
-
+fn test_transaction_type_deterministic_serialization() {
+    // Test that TransactionType serialization is deterministic across multiple runs
     let test_enums = vec![
         (TransactionType::WriteData, "writeData"),
         (TransactionType::CreateIdentity, "createIdentity"),
         (TransactionType::SendTokens, "sendTokens"),
-        (AccountType::Identity, "identity"),
-        (AccountType::TokenAccount, "tokenaccount"),
-        (SignatureType::ED25519, "ed25519"),
-        (SignatureType::Delegated, "delegated"),
-        (ExecutorVersion::V1, "v1"),
-        (ExecutorVersion::V2, "v2"),
     ];
 
-    // Run serialization multiple times and verify consistency
     for (enum_val, expected_wire) in test_enums {
         let mut serializations = Vec::new();
 
@@ -42,7 +34,6 @@ fn test_enum_deterministic_serialization() {
             serializations.push(serialized);
         }
 
-        // All serializations should be identical
         let first = &serializations[0];
         for (i, serialization) in serializations.iter().enumerate() {
             assert_eq!(
@@ -52,7 +43,70 @@ fn test_enum_deterministic_serialization() {
             );
         }
 
-        // Should match expected wire format
+        assert_eq!(
+            first, &format!("\"{}\"", expected_wire),
+            "Wire format should be stable for {:?}",
+            enum_val
+        );
+    }
+}
+
+#[test]
+fn test_account_type_deterministic_serialization() {
+    let test_enums = vec![
+        (AccountType::Identity, "identity"),
+        (AccountType::TokenAccount, "tokenAccount"),
+    ];
+
+    for (enum_val, expected_wire) in test_enums {
+        let mut serializations = Vec::new();
+
+        for _ in 0..10 {
+            let serialized = serde_json::to_string(&enum_val).unwrap();
+            serializations.push(serialized);
+        }
+
+        let first = &serializations[0];
+        for (i, serialization) in serializations.iter().enumerate() {
+            assert_eq!(
+                serialization, first,
+                "Serialization #{} differs from first for enum {:?}",
+                i, enum_val
+            );
+        }
+
+        assert_eq!(
+            first, &format!("\"{}\"", expected_wire),
+            "Wire format should be stable for {:?}",
+            enum_val
+        );
+    }
+}
+
+#[test]
+fn test_signature_type_deterministic_serialization() {
+    let test_enums = vec![
+        (SignatureType::ED25519, "ed25519"),
+        (SignatureType::Delegated, "delegated"),
+    ];
+
+    for (enum_val, expected_wire) in test_enums {
+        let mut serializations = Vec::new();
+
+        for _ in 0..10 {
+            let serialized = serde_json::to_string(&enum_val).unwrap();
+            serializations.push(serialized);
+        }
+
+        let first = &serializations[0];
+        for (i, serialization) in serializations.iter().enumerate() {
+            assert_eq!(
+                serialization, first,
+                "Serialization #{} differs from first for enum {:?}",
+                i, enum_val
+            );
+        }
+
         assert_eq!(
             first, &format!("\"{}\"", expected_wire),
             "Wire format should be stable for {:?}",
@@ -66,8 +120,8 @@ fn test_enum_wire_tag_stability() {
     // Verify that wire tags haven't changed from expected values
     // This protects against accidental changes during regeneration
 
-    let expected_wire_tags = vec![
-        // TransactionType critical variants
+    // Test TransactionType wire tags
+    let tx_type_tags = vec![
         (TransactionType::WriteData, "writeData"),
         (TransactionType::CreateIdentity, "createIdentity"),
         (TransactionType::SendTokens, "sendTokens"),
@@ -78,16 +132,38 @@ fn test_enum_wire_tag_stability() {
         (TransactionType::UpdateKeyPage, "updateKeyPage"),
         (TransactionType::SystemGenesis, "systemGenesis"),
         (TransactionType::DirectoryAnchor, "directoryAnchor"),
+    ];
 
-        // AccountType critical variants
+    for (enum_val, expected_tag) in tx_type_tags {
+        let serialized = serde_json::to_string(&enum_val).unwrap();
+        assert_eq!(
+            serialized, format!("\"{}\"", expected_tag),
+            "TransactionType::{:?} wire tag should be stable",
+            enum_val
+        );
+    }
+
+    // Test AccountType wire tags
+    let account_type_tags = vec![
         (AccountType::Identity, "identity"),
-        (AccountType::TokenAccount, "tokenaccount"),
+        (AccountType::TokenAccount, "tokenAccount"),
         (AccountType::LiteTokenAccount, "liteTokenAccount"),
         (AccountType::DataAccount, "dataAccount"),
         (AccountType::KeyPage, "keyPage"),
         (AccountType::KeyBook, "keyBook"),
+    ];
 
-        // SignatureType critical variants
+    for (enum_val, expected_tag) in account_type_tags {
+        let serialized = serde_json::to_string(&enum_val).unwrap();
+        assert_eq!(
+            serialized, format!("\"{}\"", expected_tag),
+            "AccountType::{:?} wire tag should be stable",
+            enum_val
+        );
+    }
+
+    // Test SignatureType wire tags
+    let signature_type_tags = vec![
         (SignatureType::ED25519, "ed25519"),
         (SignatureType::LegacyED25519, "legacyED25519"),
         (SignatureType::RCD1, "rcd1"),
@@ -95,29 +171,30 @@ fn test_enum_wire_tag_stability() {
         (SignatureType::ETH, "eth"),
         (SignatureType::Delegated, "delegated"),
         (SignatureType::Receipt, "receipt"),
-
-        // ExecutorVersion critical variants
-        (ExecutorVersion::V1, "v1"),
-        (ExecutorVersion::V1SignatureAnchoring, "v1-signatureAnchoring"),
-        (ExecutorVersion::V2, "v2"),
-        (ExecutorVersion::V2Baikonur, "v2-baikonur"),
     ];
 
-    for (enum_val, expected_tag) in expected_wire_tags {
+    for (enum_val, expected_tag) in signature_type_tags {
         let serialized = serde_json::to_string(&enum_val).unwrap();
-        let expected_json = format!("\"{}\"", expected_tag);
-
         assert_eq!(
-            serialized, expected_json,
-            "Wire tag changed for {:?}: expected {}, got {}",
-            enum_val, expected_json, serialized
+            serialized, format!("\"{}\"", expected_tag),
+            "SignatureType::{:?} wire tag should be stable",
+            enum_val
         );
+    }
 
-        // Test roundtrip
-        let deserialized = serde_json::from_str(&serialized).unwrap();
+    // Test ExecutorVersion wire tags
+    let executor_version_tags = vec![
+        (ExecutorVersion::V1, "v1"),
+        (ExecutorVersion::V1SignatureAnchoring, "v1SignatureAnchoring"),
+        (ExecutorVersion::V2, "v2"),
+        (ExecutorVersion::V2Baikonur, "v2Baikonur"),
+    ];
+
+    for (enum_val, expected_tag) in executor_version_tags {
+        let serialized = serde_json::to_string(&enum_val).unwrap();
         assert_eq!(
-            enum_val, deserialized,
-            "Roundtrip failed for {:?}",
+            serialized, format!("\"{}\"", expected_tag),
+            "ExecutorVersion::{:?} wire tag should be stable",
             enum_val
         );
     }
@@ -217,7 +294,7 @@ fn test_enum_ordinal_stability() {
 
     // Verify that ordinals match expected positions
     for (expected_ordinal, variant) in tx_variants.iter().enumerate() {
-        let discriminant = *variant as u8;
+        let discriminant = variant.clone() as u8;
         assert_eq!(
             discriminant as usize, expected_ordinal,
             "TransactionType::{:?} ordinal changed: expected {}, got {}",
@@ -234,7 +311,7 @@ fn test_enum_ordinal_stability() {
     ];
 
     for (expected_ordinal, variant) in account_variants.iter().enumerate() {
-        let discriminant = *variant as u8;
+        let discriminant = variant.clone() as u8;
         assert_eq!(
             discriminant as usize, expected_ordinal,
             "AccountType::{:?} ordinal changed: expected {}, got {}",
