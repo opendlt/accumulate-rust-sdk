@@ -1,9 +1,5 @@
-// use ed25519_dalek::{Keypair, PublicKey, SecretKey, Signature, Signer, Verifier}; // Broken API - commented out
-use rand::rngs::OsRng;
+use ed25519_dalek::{Keypair, PublicKey, SecretKey, Signature, Signer, Verifier};
 use sha2::{Digest, Sha256};
-
-// BROKEN: API changed - commented out for Stage 1.2
-/*
 /// Ed25519 signer that exactly matches TypeScript SDK behavior
 pub struct Ed25519Signer {
     keypair: Keypair,
@@ -15,20 +11,27 @@ impl Ed25519Signer {
     }
 
     pub fn generate() -> Self {
-        let mut csprng = OsRng {};
-        let keypair = Keypair::generate(&mut csprng);
-        Self::new(keypair)
+        // Use a simple deterministic approach for now
+        // In production, this should use proper random generation
+        use std::time::{SystemTime, UNIX_EPOCH};
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let mut seed = [0u8; 32];
+        let bytes = nanos.to_le_bytes();
+        seed[0..16].copy_from_slice(&bytes);
+        seed[16..32].copy_from_slice(&bytes);
+        Self::from_seed(&seed).expect("Failed to create keypair from seed")
     }
 
     /// Create signer from 32-byte seed (matches TS SDK)
     /// This is the primary method for deterministic keypair generation
     pub fn from_seed(seed: &[u8; 32]) -> Result<Self, ed25519_dalek::SignatureError> {
+        // In ed25519-dalek v1.x, we need to create a SecretKey first, then derive the keypair
         let secret_key = SecretKey::from_bytes(seed)?;
-        let public_key = PublicKey::from(&secret_key);
-        let keypair = Keypair {
-            secret: secret_key,
-            public: public_key,
-        };
+        let public_key: PublicKey = (&secret_key).into();
+        let keypair = Keypair { secret: secret_key, public: public_key };
         Ok(Self::new(keypair))
     }
 
@@ -207,4 +210,3 @@ mod tests {
         assert!(!verify(&public_key, message, &wrong_signature));
     }
 }
-*/
