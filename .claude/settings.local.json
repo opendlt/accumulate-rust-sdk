@@ -27,7 +27,10 @@
       "Bash(\"C:\\Accumulate_Stuff\\accumulate\\tools\\cmd\\debug\\accumulate-debug.exe\" encode transaction test_transaction.json)",
       "Bash(\"C:\\Accumulate_Stuff\\accumulate\\tools\\cmd\\debug\\accumulate-debug.exe\" verify test_envelope.json)",
       "Bash(chmod:*)",
-      "Bash(INSTA_UPDATE=auto cargo test --test golden_hash_tests transaction_header_hash_golden -- --nocapture)"
+      "Bash(INSTA_UPDATE=auto cargo test --test golden_hash_tests transaction_header_hash_golden -- --nocapture)",
+      "Bash(set INSTA_UPDATE=auto)",
+      "Bash(cmd /c:*)",
+      "Bash(del \"C:\\Accumulate_Stuff\\opendlt-rust-v2v3-sdk\\unified\\tests\\golden_vectors\\hash\\transaction_header_hash.json\")"
     ],
     "deny": [],
     "ask": []
