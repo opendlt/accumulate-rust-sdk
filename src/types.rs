@@ -101,6 +101,13 @@ pub struct FaucetResponse {
     pub amount: String,
 }
 
+// Placeholder for Merkle receipt
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct MerkleReceipt {
+    #[serde(with = "hex::serde")]
+    pub data: Vec<u8>,  // Placeholder - will be properly implemented later
+}
+
 // V3 specific types
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct V3SubmitRequest {

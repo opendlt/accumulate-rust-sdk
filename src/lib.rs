@@ -5,20 +5,28 @@
 
 pub use crate::client::AccumulateClient;
 pub use crate::codec::{
-    TransactionCodec, TransactionEnvelope, TransactionHeader, TransactionSignature,
+    TransactionCodec, TransactionEnvelope, TransactionSignature,
     TransactionBodyBuilder, TokenRecipient, KeySpec, BinaryReader, BinaryWriter,
     AccumulateHash, UrlHash, canonical_json, sha256_bytes, to_canonical_string
 };
 pub use crate::canonjson::{dumps_canonical, canonicalize};
-pub use crate::crypto::{Ed25519Signer, verify, verify_prehashed, verify_signature, verify_signature_prehashed};
+// pub use crate::crypto::{Ed25519Signer, verify, verify_prehashed, verify_signature, verify_signature_prehashed}; // Broken - commented out
 pub use crate::generated::enums::*;
+pub use crate::generated::signatures::*;
+pub use crate::generated::header::*;
+pub use crate::generated::transactions::*;
+pub use crate::runtime::signing::*;
+#[cfg(test)]
+pub use crate::runtime::signing_test_shims;
 
 pub mod canonjson;
 pub mod client;
 pub mod codec;
 pub mod crypto;
+pub mod errors;
 pub mod generated;
 pub mod json_rpc_client;
+pub mod runtime;
 pub mod types;
 pub mod types_matrix;
 
@@ -58,7 +66,7 @@ impl AccumulateClient {
     /// - `ACCUMULATE_V2_URL`: V2 endpoint URL
     /// - `ACCUMULATE_V3_URL`: V3 endpoint URL
     /// - `ACCUMULATE_TIMEOUT_MS`: Request timeout in milliseconds (optional, defaults to 30000)
-    pub fn from_env() -> Result<Self> {
+    pub async fn from_env() -> Result<Self> {
         dotenvy::dotenv().ok(); // Load .env file if present, ignore errors
 
         let v2_url = std::env::var("ACCUMULATE_V2_URL")

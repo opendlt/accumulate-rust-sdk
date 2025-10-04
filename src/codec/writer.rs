@@ -227,14 +227,15 @@ impl BinaryWriter {
     }
 
     /// Write an optional value (None = skip, Some = encode)
-    pub fn write_optional<F>(
+    pub fn write_optional<T, F>(
         &mut self,
-        value: Option<&impl Clone>,
+        value: Option<&T>,
         field: u32,
         writer_fn: F,
     ) -> Result<(), EncodingError>
     where
-        F: FnOnce(&mut Self, &impl Clone) -> Result<(), EncodingError>,
+        T: Clone,
+        F: FnOnce(&mut Self, &T) -> Result<(), EncodingError>,
     {
         if let Some(val) = value {
             writer_fn(self, val)?;

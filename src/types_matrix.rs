@@ -6,6 +6,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
+use crate::codec::transaction_codec::{TransactionHeader, TransactionSignature};
 
 /// All protocol type names that must pass roundtrip tests
 pub const TYPE_NAMES: &[&str] = &[
@@ -315,11 +316,11 @@ impl SampleGenerator for crate::codec::TokenRecipient {
     }
 }
 
-impl SampleGenerator for crate::codec::KeySpec {
+impl SampleGenerator for crate::codec::transaction_codec::KeySpec {
     fn generate_sample() -> Self {
         Self {
             public_key_hash: "abcdef1234567890abcdef1234567890abcdef12".to_string(),
-            priority: 128,
+            delegate: None,
         }
     }
 
@@ -328,11 +329,11 @@ impl SampleGenerator for crate::codec::KeySpec {
             Self::generate_sample(),
             Self {
                 public_key_hash: "0000000000000000000000000000000000000000".to_string(),
-                priority: 0,
+                delegate: None,
             },
             Self {
                 public_key_hash: "ffffffffffffffffffffffffffffffffffffffff".to_string(),
-                priority: 255,
+                delegate: Some("acc://example.acme/delegate".to_string()),
             }
         ]
     }

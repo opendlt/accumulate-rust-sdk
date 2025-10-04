@@ -9,7 +9,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 
 /// Transaction envelope that matches TypeScript SDK structure
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TransactionEnvelope {
     pub header: TransactionHeader,
     pub body: Value,
@@ -17,7 +17,7 @@ pub struct TransactionEnvelope {
 }
 
 /// Transaction header that matches TypeScript SDK structure
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct TransactionHeader {
     pub principal: String,
     pub initiator: Option<String>,
@@ -28,7 +28,7 @@ pub struct TransactionHeader {
 }
 
 /// Transaction signature that matches TypeScript SDK structure
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct TransactionSignature {
     pub signature: Vec<u8>,
     pub signer: String,
@@ -39,7 +39,7 @@ pub struct TransactionSignature {
 }
 
 /// Key page information for transaction signatures
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct TransactionKeyPage {
     pub height: u64,
     pub index: u32,
@@ -438,14 +438,14 @@ impl TransactionBodyBuilder {
 }
 
 /// Token recipient for send-tokens transactions
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct TokenRecipient {
     pub url: String,
     pub amount: String,
 }
 
 /// Key specification for key page operations
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct KeySpec {
     #[serde(rename = "publicKeyHash")]
     pub public_key_hash: String,
