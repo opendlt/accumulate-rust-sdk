@@ -15,7 +15,9 @@ pub use crate::generated::enums::*;
 pub use crate::generated::signatures::*;
 pub use crate::generated::header::*;
 pub use crate::generated::transactions::*;
+pub use crate::generated::api_methods::*;
 pub use crate::runtime::signing::*;
+pub use crate::runtime::rpc::*;
 #[cfg(test)]
 pub use crate::runtime::signing_test_shims;
 
