@@ -19,7 +19,15 @@
       "Bash(for method in status version describe metrics faucet)",
       "Bash(do echo \"=== $method ===\")",
       "Bash(cat:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(set RUST_BACKTRACE=1)",
+      "Read(//c/Accumulate_Stuff/**)",
+      "Bash(go run:*)",
+      "Bash(./tools/cmd/debug/accumulate-debug.exe:*)",
+      "Bash(\"C:\\Accumulate_Stuff\\accumulate\\tools\\cmd\\debug\\accumulate-debug.exe\" encode transaction test_transaction.json)",
+      "Bash(\"C:\\Accumulate_Stuff\\accumulate\\tools\\cmd\\debug\\accumulate-debug.exe\" verify test_envelope.json)",
+      "Bash(chmod:*)",
+      "Bash(INSTA_UPDATE=auto cargo test --test golden_hash_tests transaction_header_hash_golden -- --nocapture)"
     ],
     "deny": [],
     "ask": []
