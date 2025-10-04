@@ -21,7 +21,6 @@ fn ensure_golden_tx_dir() {
 pub struct TestTransactionEnvelope {
     pub header: TransactionHeader,
     pub body: TransactionBody,
-    #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub signatures: Vec<serde_json::Value>,
 }
 
@@ -71,8 +70,8 @@ fn test_write_data_envelope_shape() {
 
     // Verify header structure
     let header_json = serialized.get("header").unwrap();
-    assert!(header_json.get("Principal").is_some());
-    assert!(header_json.get("Initiator").is_some());
+    assert!(header_json.get("principal").is_some());
+    assert!(header_json.get("initiator").is_some());
 
     // Verify body structure (should have type discriminant)
     let body_json = serialized.get("body").unwrap();
@@ -340,9 +339,9 @@ fn test_canonical_json_properties() {
     assert!(json_str.contains("\"body\""));
     assert!(json_str.contains("\"signatures\""));
 
-    // Verify header fields use PascalCase (per YAML truth)
-    assert!(json_str.contains("\"Principal\""));
-    assert!(json_str.contains("\"Initiator\""));
+    // Verify header fields use camelCase (per Go source truth)
+    assert!(json_str.contains("\"principal\""));
+    assert!(json_str.contains("\"initiator\""));
 
     // Verify body fields use PascalCase
     assert!(json_str.contains("\"type\""));

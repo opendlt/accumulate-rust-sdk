@@ -14,6 +14,7 @@ impl generated::api_methods::AccumulateRpc for MockOkTransport {
 
         let result = match method {
             "status" => json!({
+                "ok": true,
                 "network": "devnet",
                 "version": "1.0.0",
                 "commit": "abcd1234",
@@ -107,8 +108,7 @@ async fn smoke_query_methods() {
     // Test query method
     let query_params = generated::api_methods::QueryParams {
         url: "acc://test.acme".to_string(),
-        prove: Some(false),
-        scratch: Some(false),
+        options: Some(json!({"prove": false, "scratch": false})),
     };
     let query_result = client.query(query_params).await.unwrap();
 
@@ -117,9 +117,8 @@ async fn smoke_query_methods() {
 
     // Test query-tx method
     let query_tx_params = generated::api_methods::QueryTxParams {
-        tx_id: "0000000000000000000000000000000000000000000000000000000000000000".to_string(),
-        wait: None,
-        ignore_pending: None,
+        url: "0000000000000000000000000000000000000000000000000000000000000000".to_string(),
+        options: Some(json!({"wait": 0, "ignorePending": false})),
     };
     let query_tx_result = client.query_tx(query_tx_params).await.unwrap();
 
@@ -129,9 +128,7 @@ async fn smoke_query_methods() {
     // Test query-directory method
     let query_dir_params = generated::api_methods::QueryDirectoryParams {
         url: "acc://test.acme".to_string(),
-        start: None,
-        count: None,
-        expand: None,
+        options: Some(json!({"start": 0, "count": 10, "expand": true})),
     };
     let query_dir_result = client.query_directory(query_dir_params).await.unwrap();
 
@@ -145,20 +142,22 @@ async fn smoke_execute_methods() {
 
     // Test execute method with minimal transaction
     let execute_params = generated::api_methods::ExecuteParams {
-        envelope: json!({
-            "transaction": {
-                "header": {
-                    "principal": "acc://test.acme",
-                    "initiator": "0000000000000000000000000000000000000000000000000000000000000000"
+        params: json!({
+            "envelope": {
+                "transaction": {
+                    "header": {
+                        "principal": "acc://test.acme",
+                        "initiator": "0000000000000000000000000000000000000000000000000000000000000000"
+                    },
+                    "body": {
+                        "type": "sendTokens",
+                        "to": []
+                    }
                 },
-                "body": {
-                    "type": "sendTokens",
-                    "to": []
-                }
+                "signatures": []
             },
-            "signatures": []
+            "checkOnly": true
         }),
-        check_only: Some(true),
     };
     let execute_result = client.execute(execute_params).await.unwrap();
 
@@ -195,13 +194,11 @@ async fn smoke_method_names_and_serialization() {
         ("version", json!({})),
         ("query", json!({
             "url": "acc://test.acme",
-            "prove": false,
-            "scratch": false
+            "options": {"prove": false, "scratch": false}
         })),
         ("query-tx", json!({
-            "txid": "0000000000000000000000000000000000000000000000000000000000000000",
-            "wait": 0,
-            "ignorePending": false
+            "url": "0000000000000000000000000000000000000000000000000000000000000000",
+            "options": {"wait": 0, "ignorePending": false}
         })),
         ("execute", json!({
             "envelope": {
@@ -221,9 +218,7 @@ async fn smoke_method_names_and_serialization() {
         })),
         ("query-directory", json!({
             "url": "acc://test.acme",
-            "start": 0,
-            "count": 10,
-            "expand": true
+            "options": {"start": 0, "count": 10, "expand": true}
         })),
         ("faucet", json!({
             "url": "acc://test.acme"
@@ -265,26 +260,21 @@ fn smoke_parameter_types_exist() {
 
     let _query_params = generated::api_methods::QueryParams {
         url: "acc://test.acme".to_string(),
-        prove: Some(false),
-        scratch: Some(false),
+        options: Some(json!({"prove": false, "scratch": false})),
     };
 
     let _query_tx_params = generated::api_methods::QueryTxParams {
-        tx_id: "test".to_string(),
-        wait: Some(1000),
-        ignore_pending: Some(false),
+        url: "test".to_string(),
+        options: Some(json!({"wait": 1000, "ignorePending": false})),
     };
 
     let _execute_params = generated::api_methods::ExecuteParams {
-        envelope: json!({}),
-        check_only: Some(true),
+        params: json!({"envelope": {}, "checkOnly": true}),
     };
 
     let _query_dir_params = generated::api_methods::QueryDirectoryParams {
         url: "acc://test.acme".to_string(),
-        start: Some(0),
-        count: Some(10),
-        expand: Some(true),
+        options: Some(json!({"start": 0, "count": 10, "expand": true})),
     };
 
     let _faucet_params = generated::api_methods::FaucetParams {
