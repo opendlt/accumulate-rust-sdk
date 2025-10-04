@@ -514,7 +514,7 @@ impl AccSignature for LegacyED25519Signature {
     fn verify(&self, message: &[u8]) -> Result<bool, crate::errors::Error> {
         
         // Legacy Ed25519 - use same verification as ED25519Signature for now
-        use ed25519_dalek::{Signature as Ed25519Sig, VerifyingKey};
+        use ed25519_dalek::{Signature as Ed25519Sig, PublicKey as Ed25519Pk, Verifier};
 
         if self.public_key.len() != 32 || self.signature.len() != 64 {
             return Ok(false);
@@ -526,11 +526,11 @@ impl AccSignature for LegacyED25519Signature {
         let mut sig_bytes = [0u8; 64];
         sig_bytes.copy_from_slice(&self.signature);
 
-        match VerifyingKey::from_bytes(&pub_key_bytes) {
+        match Ed25519Pk::from_bytes(&pub_key_bytes) {
             Ok(public_key) => {
-                match Ed25519Sig::from_slice(&sig_bytes) {
+                match Ed25519Sig::from_bytes(&sig_bytes) {
                     Ok(signature) => {
-                        Ok(public_key.verify_strict(message, &signature).is_ok())
+                        Ok(public_key.verify(message, &signature).is_ok())
                     },
                     Err(_) => Ok(false),
                 }
@@ -560,7 +560,7 @@ impl AccSignature for RCD1Signature {
 impl AccSignature for ED25519Signature {
     fn verify(&self, message: &[u8]) -> Result<bool, crate::errors::Error> {
         
-        use ed25519_dalek::{Signature as Ed25519Sig, VerifyingKey};
+        use ed25519_dalek::{Signature as Ed25519Sig, PublicKey as Ed25519Pk, Verifier};
 
         if self.public_key.len() != 32 || self.signature.len() != 64 {
             return Ok(false);
@@ -572,11 +572,11 @@ impl AccSignature for ED25519Signature {
         let mut sig_bytes = [0u8; 64];
         sig_bytes.copy_from_slice(&self.signature);
 
-        match VerifyingKey::from_bytes(&pub_key_bytes) {
+        match Ed25519Pk::from_bytes(&pub_key_bytes) {
             Ok(public_key) => {
-                match Ed25519Sig::from_slice(&sig_bytes) {
+                match Ed25519Sig::from_bytes(&sig_bytes) {
                     Ok(signature) => {
-                        Ok(public_key.verify_strict(message, &signature).is_ok())
+                        Ok(public_key.verify(message, &signature).is_ok())
                     },
                     Err(_) => Ok(false),
                 }
