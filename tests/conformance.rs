@@ -302,6 +302,8 @@ fn test_envelope_binary_conformance() {
 
     // Test binary encoding roundtrip
     let encoded = TransactionCodec::encode_envelope(&envelope).unwrap();
+    println!("Encoded data length: {}", encoded.len());
+    println!("Encoded data: {:?}", encoded);
     let decoded = TransactionCodec::decode_envelope(&encoded).unwrap();
 
     // Verify all fields match

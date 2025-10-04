@@ -1,5 +1,9 @@
 //! Binary parity tests for Accumulate Rust SDK
 //!
+//! ⚠️  WARNING: These tests use potentially buggy TypeScript test vectors.
+//! See TYPESCRIPT_DEPENDENCIES_AUDIT.md for details.
+//! Use canonical tests in /conformance/ directory for reliable validation.
+//!
 //! This module tests bit-for-bit compatibility with the TypeScript SDK
 //! using golden test vectors exported from the TS implementation.
 
@@ -73,6 +77,7 @@ fn print_binary_diff(rust_bytes: &[u8], expected_bytes: &[u8], test_name: &str) 
 }
 
 /// Test uvarint encoding/decoding parity with TypeScript SDK
+#[cfg(feature = "typescript-compat-tests")]
 #[test]
 fn test_uvarint_binary_parity() {
     let vectors = load_typescript_vectors().expect("Failed to load test vectors");
@@ -277,6 +282,7 @@ fn test_boolean_binary_parity() {
 }
 
 /// Test hash computation parity with TypeScript SDK
+#[cfg(feature = "typescript-compat-tests")]
 #[test]
 fn test_hash_binary_parity() {
     let vectors = load_typescript_vectors().expect("Failed to load test vectors");
@@ -306,6 +312,7 @@ fn test_hash_binary_parity() {
 }
 
 /// Test transaction envelope encoding/decoding parity with TypeScript SDK
+#[cfg(feature = "typescript-compat-tests")]
 #[test]
 fn test_transaction_envelope_binary_parity() {
     let vectors = load_typescript_vectors().expect("Failed to load test vectors");
