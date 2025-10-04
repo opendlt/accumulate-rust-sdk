@@ -211,7 +211,7 @@ impl UrlHash {
 
     /// Normalize Accumulate URL for consistent hashing
     /// Matches TS URL normalization rules
-    fn normalize_url(url: &str) -> String {
+    pub fn normalize_url(url: &str) -> String {
         let mut normalized = url.to_lowercase();
 
         // Remove trailing slashes

@@ -3,19 +3,35 @@
 //! This crate provides a unified client for interacting with Accumulate blockchain
 //! networks, supporting both V2 and V3 protocol versions.
 
+// Import the main V2/V3 client as the primary AccumulateClient
 pub use crate::client::AccumulateClient;
+
+/// Type alias for convenient access to AccumulateClient methods
+pub type Accumulate = AccumulateClient;
 pub use crate::codec::{
     TransactionCodec, TransactionEnvelope, TransactionSignature,
     TransactionBodyBuilder, TokenRecipient, KeySpec, BinaryReader, BinaryWriter,
     AccumulateHash, UrlHash, canonical_json, sha256_bytes, to_canonical_string
 };
 pub use crate::canonjson::{dumps_canonical, canonicalize};
-// pub use crate::crypto::{Ed25519Signer, verify, verify_prehashed, verify_signature, verify_signature_prehashed}; // Broken - commented out
+pub use crate::crypto::ed25519::{Ed25519Signer, verify, verify_prehashed, sha256};
 pub use crate::generated::enums::*;
 pub use crate::generated::signatures::*;
 pub use crate::generated::header::*;
 pub use crate::generated::transactions::*;
-pub use crate::generated::api_methods::*;
+// Import what's actually available from api_methods
+pub use crate::generated::api_methods::{
+    AccumulateRpc,
+    // Parameter types used in tests
+    StatusParams, QueryParams, ExecuteParams, QueryDirectoryParams, QueryTxParams,
+    QueryTxLocalParams, ExecuteCreateIdentityParams, ExecuteSendTokensParams,
+    FaucetParams, VersionParams, DescribeParams,
+    // Response types used in tests
+    StatusResponse, QueryResponse, ExecuteResponse, QueryDirectoryResponse, QueryTxResponse,
+    QueryTxLocalResponse, ExecuteCreateIdentityResponse, ExecuteSendTokensResponse
+};
+// Export the generic client wrapper as a different name to avoid conflicts
+pub use crate::generated::api_methods::AccumulateClient as GenericAccumulateClient;
 pub use crate::runtime::signing::*;
 pub use crate::runtime::rpc::*;
 #[cfg(test)]
@@ -89,6 +105,35 @@ impl AccumulateClient {
             ..Default::default()
         };
 
+        Self::from_endpoints(v2, v3, opts).await
+    }
+
+    /// Create a client configured for DevNet
+    pub async fn devnet(opts: AccOptions) -> Result<Self> {
+        let v2 = Url::parse("https://testnet.accumulatenetwork.io/v2")?;
+        let v3 = Url::parse("https://testnet.accumulatenetwork.io/v3")?;
+        Self::from_endpoints(v2, v3, opts).await
+    }
+
+    /// Create a client configured for TestNet
+    pub async fn testnet(opts: AccOptions) -> Result<Self> {
+        let v2 = Url::parse("https://testnet.accumulatenetwork.io/v2")?;
+        let v3 = Url::parse("https://testnet.accumulatenetwork.io/v3")?;
+        Self::from_endpoints(v2, v3, opts).await
+    }
+
+    /// Create a client configured for MainNet
+    pub async fn mainnet(opts: AccOptions) -> Result<Self> {
+        let v2 = Url::parse("https://mainnet.accumulatenetwork.io/v2")?;
+        let v3 = Url::parse("https://mainnet.accumulatenetwork.io/v3")?;
+        Self::from_endpoints(v2, v3, opts).await
+    }
+
+    /// Create a client configured for a custom endpoint
+    pub async fn custom(base_url: &str, opts: AccOptions) -> Result<Self> {
+        let base = Url::parse(base_url)?;
+        let v2 = base.join("/v2")?;
+        let v3 = base.join("/v3")?;
         Self::from_endpoints(v2, v3, opts).await
     }
 }

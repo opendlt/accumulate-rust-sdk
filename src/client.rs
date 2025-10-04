@@ -5,7 +5,7 @@ use crate::types::*;
 use crate::codec::{TransactionCodec, TransactionEnvelope as CodecTransactionEnvelope, TransactionHeader, TransactionSignature};
 use crate::AccOptions;
 use anyhow::Result;
-// use ed25519_dalek::{Keypair, Signature, Signer}; // Broken API - commented out
+use ed25519_dalek::{self, Signer};
 use rand::rngs::OsRng;
 use reqwest::Client;
 use serde_json::{json, Value};
@@ -131,12 +131,10 @@ impl AccumulateClient {
     // Transaction Building Helpers
 
     /// Create a signed transaction envelope for V3
-    // BROKEN: API changed - commented out for Stage 1.2
-    /*
     pub fn create_envelope(
         &self,
         tx_body: &Value,
-        keypair: &Keypair,
+        keypair: &ed25519_dalek::Keypair,
     ) -> Result<TransactionEnvelope, JsonRpcError> {
         // Get current timestamp in microseconds
         let timestamp = SystemTime::now()
@@ -159,7 +157,7 @@ impl AccumulateClient {
         let hash = hasher.finalize();
 
         // Sign the hash
-        let signature: Signature = keypair.sign(&hash);
+        let signature = keypair.sign(&hash);
 
         // Create V3 signature
         let v3_sig = V3Signature {
@@ -175,7 +173,6 @@ impl AccumulateClient {
             metadata: None,
         })
     }
-    */
 
     /// Create a binary-encoded transaction envelope using codec for bit-for-bit TS parity
     // BROKEN: API changed - commented out for Stage 1.2
@@ -231,12 +228,15 @@ impl AccumulateClient {
             .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Decoding error: {:?}", e)))
     }
 
-    /// Generate a new keypair for signing
-    // BROKEN: API changed - commented out for Stage 1.2
-    // pub fn generate_keypair() -> Keypair {
-    //     let mut rng = OsRng;
-    //     Keypair::generate(&mut rng)
-    // }
+
+    /// Generate a new Ed25519 keypair using Ed25519Signer
+    pub fn generate_keypair() -> ed25519_dalek::Keypair {
+        // Use our Ed25519Signer which has a working generate method
+        use crate::crypto::ed25519::Ed25519Signer;
+        let signer = Ed25519Signer::generate();
+        let keypair_bytes = signer.keypair_bytes();
+        ed25519_dalek::Keypair::from_bytes(&keypair_bytes).expect("Failed to create keypair")
+    }
 
     /// Create keypair from seed
     // BROKEN: API changed - commented out for Stage 1.2
