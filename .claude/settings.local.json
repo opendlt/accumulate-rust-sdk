@@ -11,7 +11,15 @@
       "Bash(dir tool)",
       "Bash(.toolphase_1_3_1_4_verify.ps1)",
       "Bash(findstr:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cargo clean:*)",
+      "Bash(cargo build:*)",
+      "Bash(cargo:*)",
+      "Bash(xargs:*)",
+      "Bash(for method in status version describe metrics faucet)",
+      "Bash(do echo \"=== $method ===\")",
+      "Bash(cat:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []
