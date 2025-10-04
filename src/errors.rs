@@ -28,7 +28,7 @@ pub enum Error {
 }
 
 /// Signature-specific errors
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone)]
 pub enum SignatureError {
     #[error("Invalid signature format")]
     InvalidFormat,

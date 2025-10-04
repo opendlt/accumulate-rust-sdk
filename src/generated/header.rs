@@ -35,7 +35,6 @@ mod hex_option_vec {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExpireOptions {
-    #[serde(rename = "AtTime")]
     pub at_time: Option<u64>,
 }
 
@@ -49,7 +48,6 @@ impl ExpireOptions {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HoldUntilOptions {
-    #[serde(rename = "MinorBlock")]
     pub minor_block: Option<u64>,
 }
 
@@ -63,25 +61,18 @@ impl HoldUntilOptions {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TransactionHeader {
-    #[serde(rename = "Principal")]
     pub principal: String,
-    #[serde(rename = "Initiator")]
     #[serde(with = "hex::serde")]
     pub initiator: Vec<u8>,
-    #[serde(rename = "Memo")]
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub memo: Option<String>,
-    #[serde(rename = "Metadata")]
     #[serde(skip_serializing_if = "Option::is_none", default)]
     #[serde(with = "hex_option_vec")]
     pub metadata: Option<Vec<u8>>,
-    #[serde(rename = "Expire")]
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub expire: Option<ExpireOptions>,
-    #[serde(rename = "HoldUntil")]
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub hold_until: Option<HoldUntilOptions>,
-    #[serde(rename = "Authorities")]
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub authorities: Option<Vec<String>>,
 }
@@ -90,6 +81,34 @@ impl TransactionHeader {
     /// Field-level validation aligned with YAML truth
     pub fn validate(&self) -> Result<(), crate::errors::Error> {
         if self.principal.is_empty() { return Err(crate::errors::Error::General("Principal URL cannot be empty".to_string())); }
+
+        // Validate principal URL contains only ASCII characters
+        if !self.principal.is_ascii() {
+            return Err(crate::errors::Error::General("Principal URL must contain only ASCII characters".to_string()));
+        }
+
+        // Validate initiator size (reasonable limit: 32KB)
+        const MAX_INITIATOR_SIZE: usize = 32 * 1024;
+        if self.initiator.len() > MAX_INITIATOR_SIZE {
+            return Err(crate::errors::Error::General(format!("Initiator size {} exceeds maximum of {}", self.initiator.len(), MAX_INITIATOR_SIZE)));
+        }
+
+        // Validate authorities - no empty authority URLs allowed
+        if let Some(ref authorities) = self.authorities {
+            for authority in authorities {
+                if authority.is_empty() {
+                    return Err(crate::errors::Error::General("Authority URL cannot be empty".to_string()));
+                }
+            }
+        }
+
+        // Validate metadata - no null bytes allowed in binary metadata
+        if let Some(ref metadata) = self.metadata {
+            if metadata.contains(&0) {
+                return Err(crate::errors::Error::General("Metadata cannot contain null bytes".to_string()));
+            }
+        }
+
         if let Some(ref opts) = self.expire { opts.validate()?; }
         if let Some(ref opts) = self.hold_until { opts.validate()?; }
         Ok(())
