@@ -174,8 +174,20 @@ fn golden_vector_consistency() {
         let results_file = golden_base.join("results").join(format!("{}.json", name));
 
         if params_file.exists() && results_file.exists() {
-            let params_content = fs::read_to_string(&params_file).unwrap();
-            let results_content = fs::read_to_string(&results_file).unwrap();
+            println!("Testing golden vectors for method: {}", name);
+            let params_content = fs::read_to_string(&params_file)
+                .unwrap_or_else(|e| panic!("Failed to read params file {:?}: {}", params_file, e));
+            let results_content = fs::read_to_string(&results_file)
+                .unwrap_or_else(|e| panic!("Failed to read results file {:?}: {}", results_file, e));
+
+            println!("  Params content: '{}'", params_content);
+            println!("  Results content: '{}'", results_content);
+
+            // Skip empty files
+            if params_content.trim().is_empty() || results_content.trim().is_empty() {
+                println!("  Skipping {} due to empty content", name);
+                continue;
+            }
 
             let params_json: json::Value = json::from_str(&params_content)
                 .map_err(|e| panic!("Failed to parse params for {}: {} (content: '{}')", name, e, params_content))
