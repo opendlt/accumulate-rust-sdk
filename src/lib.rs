@@ -14,7 +14,7 @@ pub use crate::codec::{
     AccumulateHash, UrlHash, canonical_json, sha256_bytes, to_canonical_string
 };
 pub use crate::canonjson::{dumps_canonical, canonicalize};
-pub use crate::crypto::ed25519::{Ed25519Signer, verify, verify_prehashed, sha256};
+pub use crate::crypto::ed25519::{Ed25519Signer, verify, verify_prehashed, verify_signature, sha256};
 pub use crate::generated::enums::*;
 pub use crate::generated::signatures::*;
 pub use crate::generated::header::*;

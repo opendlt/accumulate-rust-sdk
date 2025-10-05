@@ -33,7 +33,10 @@
       "Bash(del \"C:\\Accumulate_Stuff\\opendlt-rust-v2v3-sdk\\unified\\tests\\golden_vectors\\hash\\transaction_header_hash.json\")",
       "Bash(git checkout:*)",
       "Bash(git stash pop:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git stash show:*)",
+      "Bash(git add:*)",
+      "Bash(git stash push:*)"
     ],
     "deny": [],
     "ask": []
