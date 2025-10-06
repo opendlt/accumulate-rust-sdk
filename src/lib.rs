@@ -15,6 +15,9 @@ pub use crate::codec::{
 };
 pub use crate::canonjson::{dumps_canonical, canonicalize};
 pub use crate::crypto::ed25519::{Ed25519Signer, verify, verify_prehashed, verify_signature, sha256};
+pub use crate::crypto::ed25519_helper::Ed25519Helper;
+pub use crate::codec::hash_helper::HashHelper;
+pub use crate::protocol::{EnvelopeBuilder, helpers};
 pub use crate::generated::enums::*;
 pub use crate::generated::signatures::*;
 pub use crate::generated::header::*;
@@ -46,6 +49,7 @@ pub mod crypto;
 pub mod errors;
 pub mod generated;
 pub mod json_rpc_client;
+pub mod protocol;
 pub mod runtime;
 pub mod types;
 pub mod types_matrix;

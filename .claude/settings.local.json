@@ -36,7 +36,10 @@
       "Bash(git commit:*)",
       "Bash(git stash show:*)",
       "Bash(git add:*)",
-      "Bash(git stash push:*)"
+      "Bash(git stash push:*)",
+      "Bash(rustc:*)",
+      "Bash(./debug_key_derivation.exe)",
+      "Bash(del debug_key_derivation.rs)"
     ],
     "deny": [],
     "ask": []

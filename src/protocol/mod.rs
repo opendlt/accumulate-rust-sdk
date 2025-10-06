@@ -3,8 +3,9 @@
 //! This module provides transaction envelope building and serialization
 //! that matches the TypeScript SDK implementation exactly.
 
-use crate::codec::{canonical_json, sha256_bytes, Ed25519Helper, HashHelper};
-use ed25519_dalek::{Keypair, Signature};
+use crate::codec::{canonical_json, sha256_bytes, HashHelper};
+use crate::crypto::ed25519_helper::{Ed25519Helper, Keypair};
+use ed25519_dalek::Signature;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -75,7 +76,7 @@ impl EnvelopeBuilder {
         let tx_hash_hex = hex::encode(tx_hash);
 
         // Sign the transaction hash
-        let signature = Ed25519Helper::sign(keypair, &tx_hash);
+        let signature = Ed25519Helper::sign_bytes(keypair, &tx_hash);
 
         // Get current timestamp in microseconds
         let timestamp = SystemTime::now()

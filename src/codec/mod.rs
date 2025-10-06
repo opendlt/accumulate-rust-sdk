@@ -9,6 +9,7 @@ use std::collections::BTreeMap;
 
 pub mod canonical;
 pub mod crypto;
+pub mod hash_helper;
 pub mod hashes;
 pub mod reader;
 pub mod transaction_codec;
@@ -16,6 +17,7 @@ pub mod writer;
 
 pub use canonical::*;
 pub use crypto::*;
+pub use hash_helper::*;
 pub use hashes::*;
 pub use reader::*;
 pub use transaction_codec::*;
