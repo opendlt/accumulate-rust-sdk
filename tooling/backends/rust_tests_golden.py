@@ -273,8 +273,8 @@ fn test_all_protocol_types_coverage() {
 
     def to_snake_case(self, name: str) -> str:
         """Convert CamelCase to snake_case"""
-        s1 = re.sub('(.)([A-Z][a-z]+)', r'\\1_\\2', name)
-        return re.sub('([a-z0-9])([A-Z])', r'\\1_\\2', s1).lower()
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
     def write_conformance_tests(self):
         """Write the conformance test file"""

@@ -16,7 +16,7 @@ use std::collections::HashMap;
 
 /// Load TypeScript SDK test vectors
 fn load_typescript_vectors() -> Result<Value, Box<dyn std::error::Error>> {
-    let vectors_path = "tests/golden/typescript_sdk_vectors.json";
+    let vectors_path = "tests/golden/enums/typescript_sdk_vectors.json";
     let vectors_content = std::fs::read_to_string(vectors_path)?;
     let vectors: Value = serde_json::from_str(&vectors_content)?;
     Ok(vectors)

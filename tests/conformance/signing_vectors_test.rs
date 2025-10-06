@@ -1,4 +1,5 @@
-use accumulate_client::codec::{canonical_json, Ed25519Helper, HashHelper};
+use accumulate_client::codec::{canonical_json, HashHelper};
+use accumulate_client::Ed25519Helper;
 use serde_json::Value;
 use std::fs;
 use std::path::Path;
@@ -8,6 +9,7 @@ fn load_signing_vectors() -> Value {
     let vectors_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("tx_signing_vectors.json");
 
     let content = fs::read_to_string(vectors_path)
@@ -21,6 +23,7 @@ fn load_ed25519_vector() -> Value {
     let sig_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("sig_ed25519.golden.json");
 
     let content = fs::read_to_string(sig_path)

@@ -1,9 +1,30 @@
-//! Conformance tests for TypeScript SDK parity
+//! Accumulate Rust SDK Test Suite
 //!
-//! These tests verify byte-for-byte compatibility with the TypeScript SDK
-//! using golden fixtures exported from the TS implementation.
+//! Comprehensive test organization for the Accumulate Protocol Rust SDK
 
-pub mod binary_parity;
-pub mod canonical_json_test;
-pub mod hash_vectors_test;
-pub mod url_derivation_test;
+// Unit tests organized by module
+pub mod unit;
+
+// Conformance tests for cross-SDK compatibility
+pub mod conformance;
+
+// Integration tests for end-to-end scenarios
+pub mod integration;
+
+// Golden test vectors and fixtures
+pub mod golden;
+
+// Fuzzing and property-based tests
+pub mod fuzz;
+
+// Coverage validation tests
+pub mod coverage;
+
+// Specialized test scenarios
+pub mod specialized;
+
+// Quarantined/experimental tests
+pub mod quarantine;
+
+// Repository-specific tests
+pub mod repo;

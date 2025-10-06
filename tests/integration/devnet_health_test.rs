@@ -5,6 +5,7 @@ use tokio::time::{timeout, Duration};
 
 /// Test DevNet health and basic connectivity
 #[tokio::test]
+#[ignore = "DevNet tests require running local DevNet - not required for SDK usage"]
 async fn test_devnet_connectivity() {
     dotenv().ok();
 
@@ -17,7 +18,7 @@ async fn test_devnet_connectivity() {
     };
 
     // Test with generous timeout
-    let status_result = timeout(Duration::from_secs(10), client.status()).await;
+    let status_result = timeout(Duration::from_secs(30), client.status()).await;
 
     match status_result {
         Ok(Ok(status)) => {

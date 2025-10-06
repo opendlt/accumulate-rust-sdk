@@ -159,6 +159,7 @@ fn encode_binary_envelope(envelope: &TestEnvelope) -> Result<Vec<u8>, Box<dyn st
 }
 
 #[test]
+#[ignore = "Requires ts_rand_vectors.jsonl - run: node tooling/ts-fixture-exporter/export-random-vectors.js > tests/golden/ts_rand_vectors.jsonl"]
 fn test_ts_fuzz_roundtrip_binary() {
     let vectors = load_ts_fuzz_vectors()
         .expect("Failed to load TypeScript fuzz vectors");
@@ -201,6 +202,7 @@ fn test_ts_fuzz_roundtrip_binary() {
 }
 
 #[test]
+#[ignore = "Requires ts_rand_vectors.jsonl - run: node tooling/ts-fixture-exporter/export-random-vectors.js > tests/golden/ts_rand_vectors.jsonl"]
 fn test_ts_fuzz_roundtrip_canonical_json() {
     let vectors = load_ts_fuzz_vectors()
         .expect("Failed to load TypeScript fuzz vectors");
@@ -242,6 +244,7 @@ fn test_ts_fuzz_roundtrip_canonical_json() {
 }
 
 #[test]
+#[ignore = "Requires ts_rand_vectors.jsonl - run: node tooling/ts-fixture-exporter/export-random-vectors.js > tests/golden/ts_rand_vectors.jsonl"]
 fn test_ts_fuzz_roundtrip_hashes() {
     let vectors = load_ts_fuzz_vectors()
         .expect("Failed to load TypeScript fuzz vectors");

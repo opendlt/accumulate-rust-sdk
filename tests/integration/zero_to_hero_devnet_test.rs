@@ -1,4 +1,4 @@
-use accumulate_client::{Accumulate, AccOptions, AccumulateClient};
+use accumulate_client::{Accumulate, AccOptions, AccumulateClient, Ed25519Helper};
 use accumulate_client::protocol::{EnvelopeBuilder, helpers};
 use dotenvy::dotenv;
 use serde_json::json;
@@ -8,7 +8,8 @@ use tokio::time::{timeout, Duration, sleep};
 /// Comprehensive zero-to-hero integration test
 /// Tests the complete flow with generous timeouts for DevNet
 #[tokio::test]
-async fn test_zero_to_hero_flow() {
+#[ignore = "DevNet tests require running local DevNet - not required for SDK usage"]
+async fn test_zero_to_hero_flow() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
     println!("🚀 Starting Zero-to-Hero Integration Test");
@@ -20,11 +21,11 @@ async fn test_zero_to_hero_flow() {
         Ok(Err(e)) => {
             println!("❌ Failed to connect to DevNet: {}", e);
             println!("💡 Make sure DevNet is running: docker-compose up -d");
-            return; // Skip test if DevNet not available
+            return Ok(()); // Skip test if DevNet not available
         }
         Err(_) => {
             println!("⏰ DevNet connection timeout");
-            return; // Skip test if DevNet not responding
+            return Ok(()); // Skip test if DevNet not responding
         }
     };
 
@@ -35,17 +36,18 @@ async fn test_zero_to_hero_flow() {
         }
         Ok(Err(e)) => {
             println!("❌ DevNet status error: {}", e);
-            return;
+            return Ok(());
         }
         Err(_) => {
             println!("⏰ DevNet status timeout");
-            return;
+            return Ok(());
         }
     }
 
     // Step 2: Key generation and identity derivation
     println!("\n🔑 Step 2: Key Generation");
-    let user_keypair = AccumulateClient::generate_keypair();
+    let seed = [42u8; 32]; // Use a deterministic seed for testing
+    let user_keypair = Ed25519Helper::keypair_from_seed(&seed).expect("Failed to create keypair");
     let user_public_key = user_keypair.public.to_bytes();
     let lite_identity = derive_lite_identity_url(&user_public_key);
     let acme_account = format!("{}/ACME", lite_identity);
@@ -196,7 +198,7 @@ async fn test_zero_to_hero_flow() {
 
     println!("   ✅ Data transaction prepared");
     println!("   Data Account: {}", data_account_url);
-    println!("   Data Size: {} bytes", serde_json::to_string(&data_payload)?.len());
+    println!("   Data Size: {} bytes", serde_json::to_string(&data_payload).unwrap().len());
 
     // Step 8: Multi-account testing
     println!("\n🔄 Step 8: Multi-Account Testing");
@@ -229,14 +231,18 @@ async fn test_zero_to_hero_flow() {
     println!("   - Envelope creation and signing ✅");
     println!("   - Data structure preparation ✅");
     println!("   - Multi-account support ✅");
+
+    Ok(())
 }
 
 /// Test specific transaction types
 #[tokio::test]
+#[ignore = "DevNet tests require running local DevNet - not required for SDK usage"]
 async fn test_transaction_types() {
     println!("🔧 Testing Transaction Types");
 
-    let keypair = AccumulateClient::generate_keypair();
+    let seed = [123u8; 32]; // Use a different deterministic seed for testing
+    let keypair = Ed25519Helper::keypair_from_seed(&seed).expect("Failed to create keypair");
     let public_key = keypair.public.to_bytes();
     let lite_identity = derive_lite_identity_url(&public_key);
 

@@ -46,7 +46,7 @@ Phase 4 has been successfully implemented for the Rust Accumulate SDK with stric
 - **Signature Errors**: Cryptographic error type coverage
 - **Storage**: `tests/golden_vectors/api/*.json`
 
-### Stage 4.3 - API Smoke Testing (`tests/api_smoke_tests.rs`)
+### Stage 4.3 - API Smoke Testing (`tests/unit/runtime/api_smoke_tests.rs`)
 
 #### Core Method Coverage
 - **Status & Version**: Basic system information methods

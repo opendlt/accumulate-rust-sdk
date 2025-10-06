@@ -239,11 +239,13 @@ impl AccumulateClient {
     }
 
     /// Create keypair from seed
-    // BROKEN: API changed - commented out for Stage 1.2
-    // pub fn keypair_from_seed(seed: &[u8; 32]) -> Result<Keypair, JsonRpcError> {
-    //     Keypair::from_bytes(seed)
-    //         .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Invalid keypair seed: {}", e)))
-    // }
+    pub fn keypair_from_seed(seed: &[u8; 32]) -> Result<ed25519_dalek::Keypair, JsonRpcError> {
+        use ed25519_dalek::{SecretKey, PublicKey};
+        let secret_key = SecretKey::from_bytes(seed)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Invalid keypair seed: {}", e)))?;
+        let public_key = PublicKey::from(&secret_key);
+        Ok(ed25519_dalek::Keypair { secret: secret_key, public: public_key })
+    }
 
     // Utility Methods
 

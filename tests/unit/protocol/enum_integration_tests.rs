@@ -3,7 +3,7 @@ use serde_json;
 use std::collections::HashMap;
 
 // Include the generated enums directly
-include!("../src/generated/enums.rs");
+include!("../../../src/generated/enums.rs");
 
 // Mock structures that would use our enums in real scenarios
 #[derive(Serialize, Deserialize, Debug, PartialEq)]

@@ -136,6 +136,7 @@ mod integration_tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore = "DevNet tests require running local DevNet - not required for SDK usage"]
     async fn test_devnet_status() {
         // This test requires a running DevNet instance
         let v2_url = Url::parse("http://localhost:26660/v2").unwrap();

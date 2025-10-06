@@ -8,6 +8,7 @@ fn load_canonical_test_cases() -> serde_json::Value {
     let golden_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("canonical_json_tests.json");
 
     let content = fs::read_to_string(golden_path)
@@ -100,12 +101,13 @@ fn test_canonical_json_nested_objects() {
     let canonical = canonical_json(&complex_input);
 
     // Verify that keys are in alphabetical order at all levels
-    assert!(canonical.starts_with(r#"{"metadata":#));
-    assert!(canonical.contains(r#""transaction":{"body":#));
-    assert!(canonical.contains(r#""header":{"principal":#));
+    // Note: "metadata" comes before "transaction" alphabetically
+    assert!(canonical.starts_with("{\"metadata\":"));
+    assert!(canonical.contains("\"transaction\":{\"body\":"));
+    assert!(canonical.contains("\"header\":{\"principal\":"));
 
     // Verify that array elements maintain order but object keys are sorted
-    assert!(canonical.contains(r#"[{"amount":"1000","url":"acc://bob.acme/tokens"}]"#));
+    assert!(canonical.contains("[{\"amount\":\"1000\",\"url\":\"acc://bob.acme/tokens\"}]"));
 
     println!("Complex canonical JSON: {}", canonical);
 }
@@ -210,6 +212,7 @@ fn test_canonical_json_transaction_vectors() {
     let tx_vectors_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("tx_signing_vectors.json");
 
     let content = fs::read_to_string(tx_vectors_path)

@@ -1,4 +1,5 @@
-use accumulate_client::codec::{sha256_bytes, HashHelper};
+use accumulate_client::codec::sha256_bytes;
+use accumulate_client::crypto::ed25519::sha256;
 use serde_json::json;
 
 /// Test URL derivation patterns used in Accumulate protocol
@@ -137,8 +138,8 @@ fn test_url_hierarchy() {
 fn test_url_hash_consistency() {
     // Test that URL hashing is consistent for identity derivation
     let test_data = "test-seed-data";
-    let hash1 = HashHelper::sha256(test_data.as_bytes());
-    let hash2 = HashHelper::sha256(test_data.as_bytes());
+    let hash1 = sha256(test_data.as_bytes());
+    let hash2 = sha256(test_data.as_bytes());
 
     assert_eq!(hash1, hash2, "Hash should be deterministic");
 
@@ -156,7 +157,7 @@ fn test_url_hash_consistency() {
 fn test_lite_identity_derivation() {
     // Test lite identity creation from seed
     let seed_phrase = "test seed phrase for lite identity";
-    let seed_hash = HashHelper::sha256(seed_phrase.as_bytes());
+    let seed_hash = sha256(seed_phrase.as_bytes());
 
     // Create lite identity URL
     let lite_id_hex = hex::encode(&seed_hash[0..16]); // Use 16 bytes for lite ID
@@ -166,7 +167,7 @@ fn test_lite_identity_derivation() {
     assert!(validate_accumulate_url(&lite_url));
 
     // Test that same seed produces same identity
-    let seed_hash2 = HashHelper::sha256(seed_phrase.as_bytes());
+    let seed_hash2 = sha256(seed_phrase.as_bytes());
     let lite_id_hex2 = hex::encode(&seed_hash2[0..16]);
     let lite_url2 = format!("acc://{}.acme", lite_id_hex2);
 
@@ -213,12 +214,14 @@ fn normalize_accumulate_url(url: &str) -> String {
         normalized.pop();
     }
 
-    // Remove duplicate slashes (but preserve acc://)
-    let prefix = "acc://";
-    if normalized.starts_with(prefix) {
-        let path_part = &normalized[prefix.len()..];
-        let cleaned_path = path_part.replace("//", "/");
-        normalized = format!("{}{}", prefix, cleaned_path);
+    // Remove duplicate slashes but preserve the protocol part
+    let protocol_part = "acc://";
+    if normalized.len() > protocol_part.len() {
+        let after_protocol = &normalized[protocol_part.len()..];
+        if after_protocol.contains("//") {
+            let fixed_after_protocol = after_protocol.replace("//", "/");
+            normalized = format!("{}{}", protocol_part, fixed_after_protocol);
+        }
     }
 
     normalized

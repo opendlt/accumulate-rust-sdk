@@ -5,7 +5,7 @@ use std::fs;
 use std::path::PathBuf;
 
 // Include the generated enums directly
-include!("../src/generated/enums.rs");
+include!("../../../src/generated/enums.rs");
 
 fn load_manifest() -> serde_json::Value {
     let manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))

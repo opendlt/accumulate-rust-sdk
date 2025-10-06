@@ -116,8 +116,8 @@ impl AccumulateClient {
 
     /// Create a client configured for DevNet
     pub async fn devnet(opts: AccOptions) -> Result<Self> {
-        let v2 = Url::parse("https://testnet.accumulatenetwork.io/v2")?;
-        let v3 = Url::parse("https://testnet.accumulatenetwork.io/v3")?;
+        let v2 = Url::parse("http://localhost:26660/v2")?;
+        let v3 = Url::parse("http://localhost:26661/v3")?;
         Self::from_endpoints(v2, v3, opts).await
     }
 

@@ -257,10 +257,10 @@ fn phase_2_definition_of_done() {
     assert!(golden_base.join("transactions").exists(), "DOD FAILURE: Transaction golden vectors missing");
 
     // 4. Test infrastructure complete
-    assert!(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/api_surface_tests.rs").exists());
-    assert!(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/envelope_shape_tests.rs").exists());
-    assert!(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/rpc_smoke_tests.rs").exists());
-    assert!(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/parity_gates.rs").exists());
+    assert!(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/unit/runtime/api_surface_tests.rs").exists());
+    assert!(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/unit/protocol/envelope_shape_tests.rs").exists());
+    assert!(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/unit/runtime/rpc_smoke_tests.rs").exists());
+    assert!(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/specialized/parity_gates.rs").exists());
 
     println!("✓ DOD PASS: Phase 2 definition of done criteria met");
 }

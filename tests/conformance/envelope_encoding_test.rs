@@ -1,4 +1,5 @@
-use accumulate_client::codec::{canonical_json, Ed25519Helper};
+use accumulate_client::codec::canonical_json;
+use accumulate_client::Ed25519Helper;
 use accumulate_client::protocol::{EnvelopeBuilder, TransactionEnvelope, helpers};
 use serde_json::{json, Value};
 use std::fs;
@@ -9,6 +10,7 @@ fn load_envelope_fixed() -> Value {
     let envelope_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("envelope_fixed.golden.json");
 
     let content = fs::read_to_string(envelope_path)
@@ -22,6 +24,7 @@ fn load_transaction_only() -> Value {
     let tx_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("tx_only.golden.json");
 
     let content = fs::read_to_string(tx_path)
