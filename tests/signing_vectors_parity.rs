@@ -8,6 +8,7 @@ fn load_ed25519_vectors() -> serde_json::Result<Value> {
     let fixture_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("sig_ed25519.golden.json");
 
     let content = fs::read_to_string(fixture_path)

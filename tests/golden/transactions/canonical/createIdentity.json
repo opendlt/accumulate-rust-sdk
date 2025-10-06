@@ -1,0 +1,1 @@
+{"canonical_json":"{\"KeyBookUrl\":\"acc://alice.acme/book\",\"Url\":\"acc://alice.acme\",\"type\":\"createIdentity\"}","transaction_body":{"KeyBookUrl":"acc://alice.acme/book","Url":"acc://alice.acme","type":"createIdentity"}}

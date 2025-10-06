@@ -1,0 +1,36 @@
+{
+  "type": "delegated",
+  "Delegator": "acc://level1.acme/book/1",
+  "Signature": {
+    "type": "delegated",
+    "Delegator": "acc://level2.acme/book/1",
+    "Signature": {
+      "type": "delegated",
+      "Delegator": "acc://level3.acme/book/1",
+      "Signature": {
+        "type": "delegated",
+        "Delegator": "acc://level4.acme/book/1",
+        "Signature": {
+          "type": "delegated",
+          "Delegator": "acc://level5.acme/book/1",
+          "Signature": {
+            "type": "delegated",
+            "Delegator": "acc://level6.acme/book/1",
+            "Signature": {
+              "type": "ed25519",
+              "PublicKey": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+              "Signature": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+              "Signer": "acc://signer.acme/book/1",
+              "SignerVersion": 1,
+              "Timestamp": null,
+              "TransactionHash": null,
+              "Vote": null,
+              "Data": null,
+              "Memo": null
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ fn load_canonical_test_cases() -> serde_json::Value {
     let golden_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("canonical_json_tests.json");
 
     let content = fs::read_to_string(golden_path)
@@ -213,6 +214,7 @@ fn test_canonical_json_transaction_vectors() {
     let tx_vectors_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("tx_signing_vectors.json");
 
     let content = fs::read_to_string(tx_vectors_path)

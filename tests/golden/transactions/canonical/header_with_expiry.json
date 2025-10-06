@@ -1,0 +1,1 @@
+{"canonical_json":"{\"expire\":{\"atTime\":1234567890},\"initiator\":\"0303030303030303030303030303030303030303030303030303030303030303\",\"principal\":\"acc://expire.acme\"}","header":{"expire":{"atTime":1234567890},"initiator":"0303030303030303030303030303030303030303030303030303030303030303","principal":"acc://expire.acme"}}

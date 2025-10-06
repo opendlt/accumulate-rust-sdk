@@ -1,0 +1,18 @@
+{
+  "body": {
+    "Authorities": [
+      "acc://authority.acme"
+    ],
+    "Precision": 8,
+    "Properties": "acc://token-props.acme",
+    "SupplyLimit": "1000000",
+    "Symbol": "TEST",
+    "Url": "acc://token.acme",
+    "type": "createToken"
+  },
+  "header": {
+    "initiator": "deadbeef",
+    "principal": "acc://test.acme"
+  },
+  "signatures": []
+}

@@ -10,6 +10,7 @@ fn load_envelope_fixed() -> Value {
     let envelope_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("envelope_fixed.golden.json");
 
     let content = fs::read_to_string(envelope_path)
@@ -23,6 +24,7 @@ fn load_transaction_only() -> Value {
     let tx_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("tx_only.golden.json");
 
     let content = fs::read_to_string(tx_path)

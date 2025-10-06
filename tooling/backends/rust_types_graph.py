@@ -34,7 +34,7 @@ RUST_ROOT = Path(r"C:\Accumulate_Stuff\opendlt-rust-v2v3-sdk\unified")
 SRC_DIR = RUST_ROOT / "src"
 GEN_DIR = SRC_DIR / "generated"
 TESTS_DIR = RUST_ROOT / "tests"
-GOLDEN_TYPES = TESTS_DIR / "golden_vectors" / "types"
+GOLDEN_TYPES = TESTS_DIR / "golden" / "types"
 
 AUDIT_DIR = Path(r"C:\Accumulate_Stuff\rust_parity_audit")
 

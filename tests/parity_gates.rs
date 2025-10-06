@@ -252,7 +252,7 @@ fn phase_2_definition_of_done() {
     assert!(api_count >= 35, "DOD FAILURE: API count must be at least 35");
 
     // 3. Golden tests exist
-    let golden_base = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("golden_vectors");
+    let golden_base = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("golden");
     assert!(golden_base.join("api").exists(), "DOD FAILURE: API golden vectors missing");
     assert!(golden_base.join("transactions").exists(), "DOD FAILURE: Transaction golden vectors missing");
 

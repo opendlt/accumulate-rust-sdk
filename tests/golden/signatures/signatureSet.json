@@ -1,0 +1,8 @@
+{
+  "Authority": "acc://test.acme/authority",
+  "Signatures": [],
+  "Signer": "acc://test.acme/signer",
+  "TransactionHash": null,
+  "Vote": null,
+  "type": "signatureSet"
+}

@@ -20,7 +20,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_adi_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/adi.json");
+        let golden_path = Path::new("tests/golden/types/adi.json");
         assert!(golden_path.exists(), "Golden vector not found for ADI");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -52,7 +52,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_accoun\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/accountauth.json");
+        let golden_path = Path::new("tests/golden/types/accountauth.json");
         assert!(golden_path.exists(), "Golden vector not found for AccountAuth");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -84,7 +84,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_accoun\1_\\1_\2peratio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/accountauthoperationtype.json");
+        let golden_path = Path::new("tests/golden/types/accountauthoperationtype.json");
         assert!(golden_path.exists(), "Golden vector not found for AccountAuthOperationType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -116,7 +116,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_accoun\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/accounttype.json");
+        let golden_path = Path::new("tests/golden/types/accounttype.json");
         assert!(golden_path.exists(), "Golden vector not found for AccountType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -148,7 +148,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_accumulat\1_\\1_\2ntry_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/accumulatedataentry.json");
+        let golden_path = Path::new("tests/golden/types/accumulatedataentry.json");
         assert!(golden_path.exists(), "Golden vector not found for AccumulateDataEntry");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -180,7 +180,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_acm\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/acmefaucet.json");
+        let golden_path = Path::new("tests/golden/types/acmefaucet.json");
         assert!(golden_path.exists(), "Golden vector not found for AcmeFaucet");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -212,7 +212,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_acm\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/acmeoracle.json");
+        let golden_path = Path::new("tests/golden/types/acmeoracle.json");
         assert!(golden_path.exists(), "Golden vector not found for AcmeOracle");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -244,7 +244,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_activat\1_\\1_\2ersion_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/activateprotocolversion.json");
+        let golden_path = Path::new("tests/golden/types/activateprotocolversion.json");
         assert!(golden_path.exists(), "Golden vector not found for ActivateProtocolVersion");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -276,7 +276,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ad\1_\\1_\2uthorit\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/addaccountauthorityoperation.json");
+        let golden_path = Path::new("tests/golden/types/addaccountauthorityoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for AddAccountAuthorityOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -308,7 +308,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ad\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/addcredits.json");
+        let golden_path = Path::new("tests/golden/types/addcredits.json");
         assert!(golden_path.exists(), "Golden vector not found for AddCredits");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -340,7 +340,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ad\1_\\1_\2esult_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/addcreditsresult.json");
+        let golden_path = Path::new("tests/golden/types/addcreditsresult.json");
         assert!(golden_path.exists(), "Golden vector not found for AddCreditsResult");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -372,7 +372,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ad\1_\\1_\2peration_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/addkeyoperation.json");
+        let golden_path = Path::new("tests/golden/types/addkeyoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for AddKeyOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -404,7 +404,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_allowe\1_\\1_\2it_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/allowedtransactionbit.json");
+        let golden_path = Path::new("tests/golden/types/allowedtransactionbit.json");
         assert!(golden_path.exists(), "Golden vector not found for AllowedTransactionBit");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -436,7 +436,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ancho\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/anchorledger.json");
+        let golden_path = Path::new("tests/golden/types/anchorledger.json");
         assert!(golden_path.exists(), "Golden vector not found for AnchorLedger");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -468,7 +468,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ancho\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/anchormetadata.json");
+        let golden_path = Path::new("tests/golden/types/anchormetadata.json");
         assert!(golden_path.exists(), "Golden vector not found for AnchorMetadata");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -500,7 +500,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_annotate\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/annotatedreceipt.json");
+        let golden_path = Path::new("tests/golden/types/annotatedreceipt.json");
         assert!(golden_path.exists(), "Golden vector not found for AnnotatedReceipt");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -532,7 +532,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_authorit\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/authorityentry.json");
+        let golden_path = Path::new("tests/golden/types/authorityentry.json");
         assert!(golden_path.exists(), "Golden vector not found for AuthorityEntry");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -564,7 +564,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_authorit\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/authoritysignature.json");
+        let golden_path = Path::new("tests/golden/types/authoritysignature.json");
         assert!(golden_path.exists(), "Golden vector not found for AuthoritySignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -596,7 +596,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_bt\1_\\1_\2ignature_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/btclegacysignature.json");
+        let golden_path = Path::new("tests/golden/types/btclegacysignature.json");
         assert!(golden_path.exists(), "Golden vector not found for BTCLegacySignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -628,7 +628,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_bt\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/btcsignature.json");
+        let golden_path = Path::new("tests/golden/types/btcsignature.json");
         assert!(golden_path.exists(), "Golden vector not found for BTCSignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -660,7 +660,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_bloc\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/blockentry.json");
+        let golden_path = Path::new("tests/golden/types/blockentry.json");
         assert!(golden_path.exists(), "Golden vector not found for BlockEntry");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -692,7 +692,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_bloc\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/blockledger.json");
+        let golden_path = Path::new("tests/golden/types/blockledger.json");
         assert!(golden_path.exists(), "Golden vector not found for BlockLedger");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -724,7 +724,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_bloc\1_\\1_\2nchor_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/blockvalidatoranchor.json");
+        let golden_path = Path::new("tests/golden/types/blockvalidatoranchor.json");
         assert!(golden_path.exists(), "Golden vector not found for BlockValidatorAnchor");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -756,7 +756,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_boo\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/booktype.json");
+        let golden_path = Path::new("tests/golden/types/booktype.json");
         assert!(golden_path.exists(), "Golden vector not found for BookType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -788,7 +788,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_bur\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/burncredits.json");
+        let golden_path = Path::new("tests/golden/types/burncredits.json");
         assert!(golden_path.exists(), "Golden vector not found for BurnCredits");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -820,7 +820,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_bur\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/burntokens.json");
+        let golden_path = Path::new("tests/golden/types/burntokens.json");
         assert!(golden_path.exists(), "Golden vector not found for BurnTokens");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -852,7 +852,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_chai\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/chainmetadata.json");
+        let golden_path = Path::new("tests/golden/types/chainmetadata.json");
         assert!(golden_path.exists(), "Golden vector not found for ChainMetadata");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -884,7 +884,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_chai\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/chainparams.json");
+        let golden_path = Path::new("tests/golden/types/chainparams.json");
         assert!(golden_path.exists(), "Golden vector not found for ChainParams");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -916,7 +916,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_chai\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/chaintype.json");
+        let golden_path = Path::new("tests/golden/types/chaintype.json");
         assert!(golden_path.exists(), "Golden vector not found for ChainType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -948,7 +948,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_creat\1_\\1_\2ccount_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/createdataaccount.json");
+        let golden_path = Path::new("tests/golden/types/createdataaccount.json");
         assert!(golden_path.exists(), "Golden vector not found for CreateDataAccount");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -980,7 +980,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_creat\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/createidentity.json");
+        let golden_path = Path::new("tests/golden/types/createidentity.json");
         assert!(golden_path.exists(), "Golden vector not found for CreateIdentity");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1012,7 +1012,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_creat\1_\\1_\2ook_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/createkeybook.json");
+        let golden_path = Path::new("tests/golden/types/createkeybook.json");
         assert!(golden_path.exists(), "Golden vector not found for CreateKeyBook");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1044,7 +1044,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_creat\1_\\1_\2age_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/createkeypage.json");
+        let golden_path = Path::new("tests/golden/types/createkeypage.json");
         assert!(golden_path.exists(), "Golden vector not found for CreateKeyPage");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1076,7 +1076,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_creat\1_\\1_\2oke\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/createlitetokenaccount.json");
+        let golden_path = Path::new("tests/golden/types/createlitetokenaccount.json");
         assert!(golden_path.exists(), "Golden vector not found for CreateLiteTokenAccount");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1108,7 +1108,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_creat\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/createtoken.json");
+        let golden_path = Path::new("tests/golden/types/createtoken.json");
         assert!(golden_path.exists(), "Golden vector not found for CreateToken");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1140,7 +1140,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_creat\1_\\1_\2ccount_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/createtokenaccount.json");
+        let golden_path = Path::new("tests/golden/types/createtokenaccount.json");
         assert!(golden_path.exists(), "Golden vector not found for CreateTokenAccount");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1172,7 +1172,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_credi\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/creditrecipient.json");
+        let golden_path = Path::new("tests/golden/types/creditrecipient.json");
         assert!(golden_path.exists(), "Golden vector not found for CreditRecipient");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1204,7 +1204,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_dat\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/dataaccount.json");
+        let golden_path = Path::new("tests/golden/types/dataaccount.json");
         assert!(golden_path.exists(), "Golden vector not found for DataAccount");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1236,7 +1236,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_dat\1_\\1_\2ype_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/dataentrytype.json");
+        let golden_path = Path::new("tests/golden/types/dataentrytype.json");
         assert!(golden_path.exists(), "Golden vector not found for DataEntryType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1268,7 +1268,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_delegate\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/delegatedsignature.json");
+        let golden_path = Path::new("tests/golden/types/delegatedsignature.json");
         assert!(golden_path.exists(), "Golden vector not found for DelegatedSignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1300,7 +1300,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_director\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/directoryanchor.json");
+        let golden_path = Path::new("tests/golden/types/directoryanchor.json");
         assert!(golden_path.exists(), "Golden vector not found for DirectoryAnchor");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1332,7 +1332,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_disabl\1_\\1_\2ut\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/disableaccountauthoperation.json");
+        let golden_path = Path::new("tests/golden/types/disableaccountauthoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for DisableAccountAuthOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1364,7 +1364,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_doubl\1_\\1_\2at\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/doublehashdataentry.json");
+        let golden_path = Path::new("tests/golden/types/doublehashdataentry.json");
         assert!(golden_path.exists(), "Golden vector not found for DoubleHashDataEntry");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1396,7 +1396,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ed2551\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/ed25519signature.json");
+        let golden_path = Path::new("tests/golden/types/ed25519signature.json");
         assert!(golden_path.exists(), "Golden vector not found for ED25519Signature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1428,7 +1428,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_et\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/ethsignature.json");
+        let golden_path = Path::new("tests/golden/types/ethsignature.json");
         assert!(golden_path.exists(), "Golden vector not found for ETHSignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1460,7 +1460,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ecds\1_\225\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/ecdsasha256signature.json");
+        let golden_path = Path::new("tests/golden/types/ecdsasha256signature.json");
         assert!(golden_path.exists(), "Golden vector not found for EcdsaSha256Signature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1492,7 +1492,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_empt\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/emptyresult.json");
+        let golden_path = Path::new("tests/golden/types/emptyresult.json");
         assert!(golden_path.exists(), "Golden vector not found for EmptyResult");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1524,7 +1524,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_enabl\1_\\1_\2ut\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/enableaccountauthoperation.json");
+        let golden_path = Path::new("tests/golden/types/enableaccountauthoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for EnableAccountAuthOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1556,7 +1556,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_erro\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/errorcode.json");
+        let golden_path = Path::new("tests/golden/types/errorcode.json");
         assert!(golden_path.exists(), "Golden vector not found for ErrorCode");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1588,7 +1588,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_executo\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/executorversion.json");
+        let golden_path = Path::new("tests/golden/types/executorversion.json");
         assert!(golden_path.exists(), "Golden vector not found for ExecutorVersion");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1620,7 +1620,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_expir\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/expireoptions.json");
+        let golden_path = Path::new("tests/golden/types/expireoptions.json");
         assert!(golden_path.exists(), "Golden vector not found for ExpireOptions");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1652,7 +1652,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_facto\1_\\1_\2ntry_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/factomdataentry.json");
+        let golden_path = Path::new("tests/golden/types/factomdataentry.json");
         assert!(golden_path.exists(), "Golden vector not found for FactomDataEntry");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1684,7 +1684,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_facto\1_\\1_\2ntr\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/factomdataentrywrapper.json");
+        let golden_path = Path::new("tests/golden/types/factomdataentrywrapper.json");
         assert!(golden_path.exists(), "Golden vector not found for FactomDataEntryWrapper");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1716,7 +1716,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_fe\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/feeschedule.json");
+        let golden_path = Path::new("tests/golden/types/feeschedule.json");
         assert!(golden_path.exists(), "Golden vector not found for FeeSchedule");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1748,7 +1748,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_hol\1_\\1_\2ptions_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/holduntiloptions.json");
+        let golden_path = Path::new("tests/golden/types/holduntiloptions.json");
         assert!(golden_path.exists(), "Golden vector not found for HoldUntilOptions");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1780,7 +1780,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_inde\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/indexentry.json");
+        let golden_path = Path::new("tests/golden/types/indexentry.json");
         assert!(golden_path.exists(), "Golden vector not found for IndexEntry");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1812,7 +1812,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_interna\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/internalsignature.json");
+        let golden_path = Path::new("tests/golden/types/internalsignature.json");
         assert!(golden_path.exists(), "Golden vector not found for InternalSignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1844,7 +1844,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_issu\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/issuetokens.json");
+        let golden_path = Path::new("tests/golden/types/issuetokens.json");
         assert!(golden_path.exists(), "Golden vector not found for IssueTokens");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1876,7 +1876,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ke\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/keybook.json");
+        let golden_path = Path::new("tests/golden/types/keybook.json");
         assert!(golden_path.exists(), "Golden vector not found for KeyBook");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1908,7 +1908,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ke\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/keypage.json");
+        let golden_path = Path::new("tests/golden/types/keypage.json");
         assert!(golden_path.exists(), "Golden vector not found for KeyPage");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1940,7 +1940,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ke\1_\\1_\2peratio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/keypageoperationtype.json");
+        let golden_path = Path::new("tests/golden/types/keypageoperationtype.json");
         assert!(golden_path.exists(), "Golden vector not found for KeyPageOperationType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -1972,7 +1972,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ke\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/keyspec.json");
+        let golden_path = Path::new("tests/golden/types/keyspec.json");
         assert!(golden_path.exists(), "Golden vector not found for KeySpec");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2004,7 +2004,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_ke\1_\\1_\2arams_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/keyspecparams.json");
+        let golden_path = Path::new("tests/golden/types/keyspecparams.json");
         assert!(golden_path.exists(), "Golden vector not found for KeySpecParams");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2036,7 +2036,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_legac\1_\2d2551\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/legacyed25519signature.json");
+        let golden_path = Path::new("tests/golden/types/legacyed25519signature.json");
         assert!(golden_path.exists(), "Golden vector not found for LegacyED25519Signature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2068,7 +2068,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_lit\1_\\1_\2ccount_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/litedataaccount.json");
+        let golden_path = Path::new("tests/golden/types/litedataaccount.json");
         assert!(golden_path.exists(), "Golden vector not found for LiteDataAccount");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2100,7 +2100,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_lit\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/liteidentity.json");
+        let golden_path = Path::new("tests/golden/types/liteidentity.json");
         assert!(golden_path.exists(), "Golden vector not found for LiteIdentity");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2132,7 +2132,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_lit\1_\\1_\2ccount_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/litetokenaccount.json");
+        let golden_path = Path::new("tests/golden/types/litetokenaccount.json");
         assert!(golden_path.exists(), "Golden vector not found for LiteTokenAccount");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2164,7 +2164,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_loc\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/lockaccount.json");
+        let golden_path = Path::new("tests/golden/types/lockaccount.json");
         assert!(golden_path.exists(), "Golden vector not found for LockAccount");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2196,7 +2196,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_metric\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/metricsrequest.json");
+        let golden_path = Path::new("tests/golden/types/metricsrequest.json");
         assert!(golden_path.exists(), "Golden vector not found for MetricsRequest");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2228,7 +2228,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_metric\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/metricsresponse.json");
+        let golden_path = Path::new("tests/golden/types/metricsresponse.json");
         assert!(golden_path.exists(), "Golden vector not found for MetricsResponse");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2260,7 +2260,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_networ\1_\\1_\2pdate_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/networkaccountupdate.json");
+        let golden_path = Path::new("tests/golden/types/networkaccountupdate.json");
         assert!(golden_path.exists(), "Golden vector not found for NetworkAccountUpdate");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2292,7 +2292,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_networ\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/networkdefinition.json");
+        let golden_path = Path::new("tests/golden/types/networkdefinition.json");
         assert!(golden_path.exists(), "Golden vector not found for NetworkDefinition");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2324,7 +2324,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_networ\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/networkglobals.json");
+        let golden_path = Path::new("tests/golden/types/networkglobals.json");
         assert!(golden_path.exists(), "Golden vector not found for NetworkGlobals");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2356,7 +2356,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_networ\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/networklimits.json");
+        let golden_path = Path::new("tests/golden/types/networklimits.json");
         assert!(golden_path.exists(), "Golden vector not found for NetworkLimits");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2388,7 +2388,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_networ\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/networkmaintenance.json");
+        let golden_path = Path::new("tests/golden/types/networkmaintenance.json");
         assert!(golden_path.exists(), "Golden vector not found for NetworkMaintenance");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2420,7 +2420,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_networ\1_\\1_\2peratio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/networkmaintenanceoperationtype.json");
+        let golden_path = Path::new("tests/golden/types/networkmaintenanceoperationtype.json");
         assert!(golden_path.exists(), "Golden vector not found for NetworkMaintenanceOperationType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2452,7 +2452,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_object_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/object.json");
+        let golden_path = Path::new("tests/golden/types/object.json");
         assert!(golden_path.exists(), "Golden vector not found for Object");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2484,7 +2484,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_objec\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/objecttype.json");
+        let golden_path = Path::new("tests/golden/types/objecttype.json");
         assert!(golden_path.exists(), "Golden vector not found for ObjectType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2516,7 +2516,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_partitio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/partitionanchor.json");
+        let golden_path = Path::new("tests/golden/types/partitionanchor.json");
         assert!(golden_path.exists(), "Golden vector not found for PartitionAnchor");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2548,7 +2548,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_partitio\1_\\1_\2eceipt_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/partitionanchorreceipt.json");
+        let golden_path = Path::new("tests/golden/types/partitionanchorreceipt.json");
         assert!(golden_path.exists(), "Golden vector not found for PartitionAnchorReceipt");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2580,7 +2580,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_partitio\1_\\1_\2ersion_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/partitionexecutorversion.json");
+        let golden_path = Path::new("tests/golden/types/partitionexecutorversion.json");
         assert!(golden_path.exists(), "Golden vector not found for PartitionExecutorVersion");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2612,7 +2612,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_partitio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/partitioninfo.json");
+        let golden_path = Path::new("tests/golden/types/partitioninfo.json");
         assert!(golden_path.exists(), "Golden vector not found for PartitionInfo");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2644,7 +2644,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_partitio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/partitionsignature.json");
+        let golden_path = Path::new("tests/golden/types/partitionsignature.json");
         assert!(golden_path.exists(), "Golden vector not found for PartitionSignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2676,7 +2676,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_partitio\1_\\1_\2edger_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/partitionsyntheticledger.json");
+        let golden_path = Path::new("tests/golden/types/partitionsyntheticledger.json");
         assert!(golden_path.exists(), "Golden vector not found for PartitionSyntheticLedger");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2708,7 +2708,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_partitio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/partitiontype.json");
+        let golden_path = Path::new("tests/golden/types/partitiontype.json");
         assert!(golden_path.exists(), "Golden vector not found for PartitionType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2740,7 +2740,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_pendin\1_\\1_\2\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/pendingtransactiongcoperation.json");
+        let golden_path = Path::new("tests/golden/types/pendingtransactiongcoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for PendingTransactionGCOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2772,7 +2772,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_rcd\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/rcd1signature.json");
+        let golden_path = Path::new("tests/golden/types/rcd1signature.json");
         assert!(golden_path.exists(), "Golden vector not found for RCD1Signature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2804,7 +2804,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_rational_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/rational.json");
+        let golden_path = Path::new("tests/golden/types/rational.json");
         assert!(golden_path.exists(), "Golden vector not found for Rational");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2836,7 +2836,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_receip\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/receiptsignature.json");
+        let golden_path = Path::new("tests/golden/types/receiptsignature.json");
         assert!(golden_path.exists(), "Golden vector not found for ReceiptSignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2868,7 +2868,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_remot\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/remotesignature.json");
+        let golden_path = Path::new("tests/golden/types/remotesignature.json");
         assert!(golden_path.exists(), "Golden vector not found for RemoteSignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2900,7 +2900,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_remot\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/remotetransaction.json");
+        let golden_path = Path::new("tests/golden/types/remotetransaction.json");
         assert!(golden_path.exists(), "Golden vector not found for RemoteTransaction");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2932,7 +2932,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_remot\1_\\1_\2eason_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/remotetransactionreason.json");
+        let golden_path = Path::new("tests/golden/types/remotetransactionreason.json");
         assert!(golden_path.exists(), "Golden vector not found for RemoteTransactionReason");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2964,7 +2964,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_remov\1_\\1_\2uthorit\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/removeaccountauthorityoperation.json");
+        let golden_path = Path::new("tests/golden/types/removeaccountauthorityoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for RemoveAccountAuthorityOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -2996,7 +2996,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_remov\1_\\1_\2peration_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/removekeyoperation.json");
+        let golden_path = Path::new("tests/golden/types/removekeyoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for RemoveKeyOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3028,7 +3028,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_route_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/route.json");
+        let golden_path = Path::new("tests/golden/types/route.json");
         assert!(golden_path.exists(), "Golden vector not found for Route");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3060,7 +3060,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_rout\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/routeoverride.json");
+        let golden_path = Path::new("tests/golden/types/routeoverride.json");
         assert!(golden_path.exists(), "Golden vector not found for RouteOverride");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3092,7 +3092,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_routin\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/routingtable.json");
+        let golden_path = Path::new("tests/golden/types/routingtable.json");
         assert!(golden_path.exists(), "Golden vector not found for RoutingTable");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3124,7 +3124,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_rs\1_\225\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/rsasha256signature.json");
+        let golden_path = Path::new("tests/golden/types/rsasha256signature.json");
         assert!(golden_path.exists(), "Golden vector not found for RsaSha256Signature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3156,7 +3156,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_sen\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/sendtokens.json");
+        let golden_path = Path::new("tests/golden/types/sendtokens.json");
         assert!(golden_path.exists(), "Golden vector not found for SendTokens");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3188,7 +3188,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_se\1_\\1_\2hreshol\1_\\1_\2ag\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/setrejectthresholdkeypageoperation.json");
+        let golden_path = Path::new("tests/golden/types/setrejectthresholdkeypageoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for SetRejectThresholdKeyPageOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3220,7 +3220,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_se\1_\\1_\2hreshol\1_\\1_\2ag\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/setresponsethresholdkeypageoperation.json");
+        let golden_path = Path::new("tests/golden/types/setresponsethresholdkeypageoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for SetResponseThresholdKeyPageOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3252,7 +3252,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_se\1_\\1_\2e\1_\\1_\2peration_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/setthresholdkeypageoperation.json");
+        let golden_path = Path::new("tests/golden/types/setthresholdkeypageoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for SetThresholdKeyPageOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3284,7 +3284,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_signatur\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/signatureset.json");
+        let golden_path = Path::new("tests/golden/types/signatureset.json");
         assert!(golden_path.exists(), "Golden vector not found for SignatureSet");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3316,7 +3316,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_signatur\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/signaturetype.json");
+        let golden_path = Path::new("tests/golden/types/signaturetype.json");
         assert!(golden_path.exists(), "Golden vector not found for SignatureType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3348,7 +3348,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syntheti\1_\\1_\2okens_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/syntheticburntokens.json");
+        let golden_path = Path::new("tests/golden/types/syntheticburntokens.json");
         assert!(golden_path.exists(), "Golden vector not found for SyntheticBurnTokens");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3380,7 +3380,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syntheti\1_\\1_\2dentity_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/syntheticcreateidentity.json");
+        let golden_path = Path::new("tests/golden/types/syntheticcreateidentity.json");
         assert!(golden_path.exists(), "Golden vector not found for SyntheticCreateIdentity");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3412,7 +3412,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syntheti\1_\\1_\2redits_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/syntheticdepositcredits.json");
+        let golden_path = Path::new("tests/golden/types/syntheticdepositcredits.json");
         assert!(golden_path.exists(), "Golden vector not found for SyntheticDepositCredits");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3444,7 +3444,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syntheti\1_\\1_\2okens_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/syntheticdeposittokens.json");
+        let golden_path = Path::new("tests/golden/types/syntheticdeposittokens.json");
         assert!(golden_path.exists(), "Golden vector not found for SyntheticDepositTokens");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3476,7 +3476,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syntheti\1_\\1_\2ransaction_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/syntheticforwardtransaction.json");
+        let golden_path = Path::new("tests/golden/types/syntheticforwardtransaction.json");
         assert!(golden_path.exists(), "Golden vector not found for SyntheticForwardTransaction");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3508,7 +3508,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syntheti\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/syntheticledger.json");
+        let golden_path = Path::new("tests/golden/types/syntheticledger.json");
         assert!(golden_path.exists(), "Golden vector not found for SyntheticLedger");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3540,7 +3540,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syntheti\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/syntheticorigin.json");
+        let golden_path = Path::new("tests/golden/types/syntheticorigin.json");
         assert!(golden_path.exists(), "Golden vector not found for SyntheticOrigin");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3572,7 +3572,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syntheti\1_\\1_\2ata_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/syntheticwritedata.json");
+        let golden_path = Path::new("tests/golden/types/syntheticwritedata.json");
         assert!(golden_path.exists(), "Golden vector not found for SyntheticWriteData");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3604,7 +3604,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syste\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/systemgenesis.json");
+        let golden_path = Path::new("tests/golden/types/systemgenesis.json");
         assert!(golden_path.exists(), "Golden vector not found for SystemGenesis");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3636,7 +3636,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syste\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/systemledger.json");
+        let golden_path = Path::new("tests/golden/types/systemledger.json");
         assert!(golden_path.exists(), "Golden vector not found for SystemLedger");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3668,7 +3668,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_syste\1_\\1_\2ata_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/systemwritedata.json");
+        let golden_path = Path::new("tests/golden/types/systemwritedata.json");
         assert!(golden_path.exists(), "Golden vector not found for SystemWriteData");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3700,7 +3700,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_toke\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/tokenaccount.json");
+        let golden_path = Path::new("tests/golden/types/tokenaccount.json");
         assert!(golden_path.exists(), "Golden vector not found for TokenAccount");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3732,7 +3732,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_toke\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/tokenissuer.json");
+        let golden_path = Path::new("tests/golden/types/tokenissuer.json");
         assert!(golden_path.exists(), "Golden vector not found for TokenIssuer");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3764,7 +3764,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_toke\1_\\1_\2roof_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/tokenissuerproof.json");
+        let golden_path = Path::new("tests/golden/types/tokenissuerproof.json");
         assert!(golden_path.exists(), "Golden vector not found for TokenIssuerProof");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3796,7 +3796,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_toke\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/tokenrecipient.json");
+        let golden_path = Path::new("tests/golden/types/tokenrecipient.json");
         assert!(golden_path.exists(), "Golden vector not found for TokenRecipient");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3828,7 +3828,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_transaction_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/transaction.json");
+        let golden_path = Path::new("tests/golden/types/transaction.json");
         assert!(golden_path.exists(), "Golden vector not found for Transaction");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3860,7 +3860,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_transactio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/transactionheader.json");
+        let golden_path = Path::new("tests/golden/types/transactionheader.json");
         assert!(golden_path.exists(), "Golden vector not found for TransactionHeader");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3892,7 +3892,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_transactio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/transactionmax.json");
+        let golden_path = Path::new("tests/golden/types/transactionmax.json");
         assert!(golden_path.exists(), "Golden vector not found for TransactionMax");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3924,7 +3924,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_transactio\1_\\1_\2et_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/transactionresultset.json");
+        let golden_path = Path::new("tests/golden/types/transactionresultset.json");
         assert!(golden_path.exists(), "Golden vector not found for TransactionResultSet");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3956,7 +3956,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_transactio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/transactionstatus.json");
+        let golden_path = Path::new("tests/golden/types/transactionstatus.json");
         assert!(golden_path.exists(), "Golden vector not found for TransactionStatus");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -3988,7 +3988,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_transactio\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/transactiontype.json");
+        let golden_path = Path::new("tests/golden/types/transactiontype.json");
         assert!(golden_path.exists(), "Golden vector not found for TransactionType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4020,7 +4020,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_transfe\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/transfercredits.json");
+        let golden_path = Path::new("tests/golden/types/transfercredits.json");
         assert!(golden_path.exists(), "Golden vector not found for TransferCredits");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4052,7 +4052,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_t\1_\\1_\2et_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/txidset.json");
+        let golden_path = Path::new("tests/golden/types/txidset.json");
         assert!(golden_path.exists(), "Golden vector not found for TxIdSet");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4084,7 +4084,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_type\1_\\1_\2ignature_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/typeddatasignature.json");
+        let golden_path = Path::new("tests/golden/types/typeddatasignature.json");
         assert!(golden_path.exists(), "Golden vector not found for TypedDataSignature");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4116,7 +4116,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_unknow\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/unknownaccount.json");
+        let golden_path = Path::new("tests/golden/types/unknownaccount.json");
         assert!(golden_path.exists(), "Golden vector not found for UnknownAccount");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4148,7 +4148,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_unknow\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/unknownsigner.json");
+        let golden_path = Path::new("tests/golden/types/unknownsigner.json");
         assert!(golden_path.exists(), "Golden vector not found for UnknownSigner");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4180,7 +4180,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_updat\1_\\1_\2uth_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/updateaccountauth.json");
+        let golden_path = Path::new("tests/golden/types/updateaccountauth.json");
         assert!(golden_path.exists(), "Golden vector not found for UpdateAccountAuth");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4212,7 +4212,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_updat\1_\\1_\2e\1_\\1_\2peration_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/updateallowedkeypageoperation.json");
+        let golden_path = Path::new("tests/golden/types/updateallowedkeypageoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for UpdateAllowedKeyPageOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4244,7 +4244,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_updat\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/updatekey.json");
+        let golden_path = Path::new("tests/golden/types/updatekey.json");
         assert!(golden_path.exists(), "Golden vector not found for UpdateKey");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4276,7 +4276,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_updat\1_\\1_\2peration_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/updatekeyoperation.json");
+        let golden_path = Path::new("tests/golden/types/updatekeyoperation.json");
         assert!(golden_path.exists(), "Golden vector not found for UpdateKeyOperation");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4308,7 +4308,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_updat\1_\\1_\2age_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/updatekeypage.json");
+        let golden_path = Path::new("tests/golden/types/updatekeypage.json");
         assert!(golden_path.exists(), "Golden vector not found for UpdateKeyPage");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4340,7 +4340,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_validato\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/validatorinfo.json");
+        let golden_path = Path::new("tests/golden/types/validatorinfo.json");
         assert!(golden_path.exists(), "Golden vector not found for ValidatorInfo");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4372,7 +4372,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_validato\1_\\1_\2nfo_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/validatorpartitioninfo.json");
+        let golden_path = Path::new("tests/golden/types/validatorpartitioninfo.json");
         assert!(golden_path.exists(), "Golden vector not found for ValidatorPartitionInfo");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4404,7 +4404,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_vot\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/votetype.json");
+        let golden_path = Path::new("tests/golden/types/votetype.json");
         assert!(golden_path.exists(), "Golden vector not found for VoteType");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4436,7 +4436,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_writ\1_\2_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/writedata.json");
+        let golden_path = Path::new("tests/golden/types/writedata.json");
         assert!(golden_path.exists(), "Golden vector not found for WriteData");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4468,7 +4468,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_writ\1_\\1_\2esult_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/writedataresult.json");
+        let golden_path = Path::new("tests/golden/types/writedataresult.json");
         assert!(golden_path.exists(), "Golden vector not found for WriteDataResult");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4500,7 +4500,7 @@ mod protocol_conformance_tests {
 
     #[test]
     fn test_writ\1_\\1_\2o_json_roundtrip() {
-        let golden_path = Path::new("tests/golden_vectors/types/writedatato.json");
+        let golden_path = Path::new("tests/golden/types/writedatato.json");
         assert!(golden_path.exists(), "Golden vector not found for WriteDataTo");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -4535,7 +4535,7 @@ mod protocol_conformance_tests {
 /// Integration test for all protocol types
 #[test]
 fn test_all_protocol_types_coverage() {
-    let golden_dir = Path::new("tests/golden_vectors/types");
+    let golden_dir = Path::new("tests/golden/types");
     assert!(golden_dir.exists(), "Golden vectors directory not found");
 
     let expected_types = vec![

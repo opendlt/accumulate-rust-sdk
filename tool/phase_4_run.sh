@@ -100,6 +100,6 @@ echo "   - Parity gate validation (local audit)"
 
 echo ""
 echo "🎉 Phase 4 Complete: Local Validation & Goldens"
-echo "Local gates: $(find tests/golden_vectors -type f | wc -l) golden files generated"
+echo "Local gates: $(find tests/golden -type f | wc -l) golden files generated"
 echo "API coverage: 8+ core methods tested"
 echo "Enforcement: Local parity gate (14/16/33/35/111 compliance)"

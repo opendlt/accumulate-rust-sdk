@@ -101,7 +101,7 @@ if (Test-Path $TypesGeneratedFile) {
 
 if (Test-Path $TestsMetadataFile) {
     $testsData = Get-Content $TestsMetadataFile | ConvertFrom-Json
-    $goldenCount = $testsData.golden_vectors_created
+    $goldenCount = $testsData.golden_created
     $testsValidation = $testsData.validation_passed
 
     Write-Host "Test Generation Validation:" -ForegroundColor Cyan

@@ -129,8 +129,8 @@ fn validate_stage_3_3() {
     let conformance_test_path = Path::new("tests/conformance/test_protocol_types.rs");
     assert!(conformance_test_path.exists(), "Stage 3.3 output missing: test_protocol_types.rs");
 
-    let golden_vectors_dir = Path::new("tests/golden_vectors/types");
-    assert!(golden_vectors_dir.exists(), "Stage 3.3 output missing: golden_vectors/types directory");
+    let golden_dir = Path::new("tests/golden/types");
+    assert!(golden_dir.exists(), "Stage 3.3 output missing: golden/types directory");
 
     // Validate test metadata
     let metadata_content = fs::read_to_string(test_metadata_path)
@@ -139,15 +139,15 @@ fn validate_stage_3_3() {
         .expect("Failed to parse tests_metadata.json");
 
     let target_count = metadata_data["target_count"].as_u64().expect("Missing target_count");
-    let golden_vectors_created = metadata_data["golden_vectors_created"].as_u64().expect("Missing golden_vectors_created");
+    let golden_created = metadata_data["golden_vectors_created"].as_u64().expect("Missing golden_vectors_created");
     let validation_passed = metadata_data["validation_passed"].as_bool().expect("Missing validation_passed");
 
     assert_eq!(target_count, 141, "Expected 141 types to test");
-    assert_eq!(golden_vectors_created, 141, "Expected 141 golden vectors created");
+    assert_eq!(golden_created, 141, "Expected 141 golden vectors created");
     assert!(validation_passed, "Stage 3.3 validation should pass");
 
     // Count actual golden vector files
-    let golden_files: Vec<_> = fs::read_dir(golden_vectors_dir)
+    let golden_files: Vec<_> = fs::read_dir(golden_dir)
         .expect("Failed to read golden vectors directory")
         .filter_map(|entry| {
             let entry = entry.ok()?;
@@ -170,7 +170,7 @@ fn validate_stage_3_3() {
     assert!(test_content.contains("test_all_protocol_types_coverage"), "Test should have coverage validation");
     assert!(test_content.contains("141 protocol types"), "Test should reference 141 types");
 
-    println!("✅ Stage 3.3 validation passed: {} golden vectors and conformance tests created", golden_vectors_created);
+    println!("✅ Stage 3.3 validation passed: {} golden vectors and conformance tests created", golden_created);
 }
 
 /// Validate G5=PASS status - overall Phase 3 completion
@@ -246,16 +246,16 @@ fn test_phase3_protocol_types_basic_functionality() {
 
 /// Test that golden vectors are valid JSON and can be loaded
 #[test]
-fn test_phase3_golden_vectors_validity() {
+fn test_phase3_golden_validity() {
     println!("Testing Phase 3 Golden Vectors Validity");
 
-    let golden_vectors_dir = Path::new("tests/golden_vectors/types");
-    assert!(golden_vectors_dir.exists(), "Golden vectors directory should exist");
+    let golden_dir = Path::new("tests/golden/types");
+    assert!(golden_dir.exists(), "Golden vectors directory should exist");
 
     let mut valid_vectors = 0;
     let mut total_vectors = 0;
 
-    for entry in fs::read_dir(golden_vectors_dir).expect("Should read golden vectors directory") {
+    for entry in fs::read_dir(golden_dir).expect("Should read golden vectors directory") {
         let entry = entry.expect("Should read directory entry");
         let path = entry.path();
 

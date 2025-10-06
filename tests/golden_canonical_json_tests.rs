@@ -29,7 +29,7 @@ fn canonical_write_data_tx() {
     let canonical = canonical_json(&v);
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-      .join("tests/golden_vectors/transactions/canonical/writeData.json");
+      .join("tests/golden/transactions/canonical/writeData.json");
 
     let golden = json!({
         "transaction_body": v,
@@ -60,7 +60,7 @@ fn canonical_send_tokens_tx() {
     let canonical = canonical_json(&v);
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-      .join("tests/golden_vectors/transactions/canonical/sendTokens.json");
+      .join("tests/golden/transactions/canonical/sendTokens.json");
 
     let golden = json!({
         "transaction_body": v,
@@ -87,7 +87,7 @@ fn canonical_create_identity_tx() {
     let canonical = canonical_json(&v);
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-      .join("tests/golden_vectors/transactions/canonical/createIdentity.json");
+      .join("tests/golden/transactions/canonical/createIdentity.json");
 
     let golden = json!({
         "transaction_body": v,
@@ -113,7 +113,7 @@ fn canonical_add_credits_tx() {
     let canonical = canonical_json(&v);
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-      .join("tests/golden_vectors/transactions/canonical/addCredits.json");
+      .join("tests/golden/transactions/canonical/addCredits.json");
 
     let golden = json!({
         "transaction_body": v,
@@ -182,7 +182,7 @@ fn canonical_transaction_header() {
         let canonical = canonical_json(&v);
 
         let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-          .join("tests/golden_vectors/transactions/canonical")
+          .join("tests/golden/transactions/canonical")
           .join(format!("header_{}.json", name));
 
         let golden = json!({
@@ -248,7 +248,7 @@ fn canonical_signature_types() {
         let canonical = canonical_json(&v);
 
         let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-          .join("tests/golden_vectors/signatures")
+          .join("tests/golden/signatures")
           .join(format!("canonical_{}.json", name));
 
         let golden = json!({
@@ -297,7 +297,7 @@ fn canonical_complex_nested_objects() {
         let canonical = canonical_json(&test_value);
 
         let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-          .join("tests/golden_vectors/canonical")
+          .join("tests/golden/canonical")
           .join(format!("canonical_{}.json", name));
 
         let golden = json!({
@@ -335,7 +335,7 @@ fn canonical_deterministic_ordering() {
     assert_eq!(canonical1, expected_canonical);
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-      .join("tests/golden_vectors/canonical/canonical_deterministic.json");
+      .join("tests/golden/canonical/canonical_deterministic.json");
 
     let golden = json!({
         "input1": input1,

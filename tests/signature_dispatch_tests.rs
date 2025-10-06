@@ -307,14 +307,14 @@ fn test_signature_negative_cases() {
 }
 
 #[test]
-fn test_signature_golden_vectors() {
+fn test_signature_golden() {
     // This test writes and compares golden vectors for each signature type
     let manifest = load_manifest();
     let signatures = manifest["signatures"].as_array().unwrap();
 
     let golden_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
-        .join("golden_vectors")
+        .join("golden")
         .join("signatures");
 
     // Create directory if it doesn't exist

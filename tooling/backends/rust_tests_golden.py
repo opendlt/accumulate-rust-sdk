@@ -36,7 +36,7 @@ SRC_DIR = RUST_ROOT / "src"
 GEN_DIR = SRC_DIR / "generated"
 TESTS_DIR = RUST_ROOT / "tests"
 CONFORMANCE_DIR = TESTS_DIR / "conformance"
-GOLDEN_TYPES = TESTS_DIR / "golden_vectors" / "types"
+GOLDEN_TYPES = TESTS_DIR / "golden" / "types"
 
 AUDIT_DIR = Path(r"C:\Accumulate_Stuff\rust_parity_audit")
 
@@ -208,7 +208,7 @@ mod protocol_conformance_tests {{
             test_code += f"""
     #[test]
     fn test_{snake_name}_json_roundtrip() {{
-        let golden_path = Path::new("tests/golden_vectors/types/{type_name.lower()}.json");
+        let golden_path = Path::new("tests/golden/types/{type_name.lower()}.json");
         assert!(golden_path.exists(), "Golden vector not found for {type_name}");
 
         let golden_content = fs::read_to_string(golden_path)
@@ -245,7 +245,7 @@ mod protocol_conformance_tests {{
 /// Integration test for all protocol types
 #[test]
 fn test_all_protocol_types_coverage() {
-    let golden_dir = Path::new("tests/golden_vectors/types");
+    let golden_dir = Path::new("tests/golden/types");
     assert!(golden_dir.exists(), "Golden vectors directory not found");
 
     let expected_types = vec![

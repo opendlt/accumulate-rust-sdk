@@ -1,0 +1,1 @@
+{"canonical_json":"{\"Amount\":\"100000\",\"Oracle\":500000,\"Recipient\":\"acc://alice.acme\",\"type\":\"addCredits\"}","transaction_body":{"Amount":"100000","Oracle":500000,"Recipient":"acc://alice.acme","type":"addCredits"}}

@@ -104,7 +104,7 @@ struct EnvelopeVector {
 fn load_test_vectors() -> TestVectors {
     let fixtures_path = concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/tests/golden/typescript_sdk_vectors.json"
+        "/tests/golden/enums/typescript_sdk_vectors.json"
     );
     let fixtures_content =
         std::fs::read_to_string(fixtures_path).expect("Failed to read TypeScript SDK test vectors");

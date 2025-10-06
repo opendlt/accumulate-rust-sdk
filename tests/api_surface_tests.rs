@@ -15,7 +15,7 @@ fn api_manifest() -> json::Value {
 fn golden_api_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
-        .join("golden_vectors")
+        .join("golden")
         .join("api")
 }
 

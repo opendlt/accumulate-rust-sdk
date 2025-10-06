@@ -9,6 +9,7 @@ fn load_signing_vectors() -> Value {
     let vectors_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("tx_signing_vectors.json");
 
     let content = fs::read_to_string(vectors_path)
@@ -22,6 +23,7 @@ fn load_ed25519_vector() -> Value {
     let sig_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("golden")
+        .join("enums")
         .join("sig_ed25519.golden.json");
 
     let content = fs::read_to_string(sig_path)

@@ -6,7 +6,7 @@ use std::path::PathBuf;
 fn test_delegated_depth6_fail_golden_vector() {
     let golden_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
-        .join("golden_vectors")
+        .join("golden")
         .join("signatures")
         .join("delegated_depth6_fail.json");
 
@@ -35,7 +35,7 @@ fn test_delegated_depth6_fail_golden_vector() {
 fn test_signature_set_threshold_golden_vector() {
     let golden_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
-        .join("golden_vectors")
+        .join("golden")
         .join("signatures")
         .join("signature_set_threshold.json");
 
@@ -88,7 +88,7 @@ fn test_golden_vector_roundtrip() {
     for vector_file in &vectors {
         let golden_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("tests")
-            .join("golden_vectors")
+            .join("golden")
             .join("signatures")
             .join(vector_file);
 

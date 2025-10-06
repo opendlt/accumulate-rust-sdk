@@ -264,7 +264,7 @@ class Phase2Orchestrator:
         """Validate golden test vectors exist and are valid"""
         self.log("Validating golden test vectors")
 
-        golden_base = self.tests_dir / "golden_vectors"
+        golden_base = self.tests_dir / "golden"
 
         # Check API golden vectors
         api_golden = golden_base / "api"

@@ -1,0 +1,15 @@
+{
+  "body": {
+    "Entry": {
+      "data": "test data content"
+    },
+    "Scratch": false,
+    "WriteToState": true,
+    "type": "writeData"
+  },
+  "header": {
+    "initiator": "deadbeef",
+    "principal": "acc://test.acme"
+  },
+  "signatures": []
+}

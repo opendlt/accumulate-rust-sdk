@@ -72,7 +72,7 @@ fn delegated_depth_golden() {
     }
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/golden_vectors/signatures/delegated_depth.json");
+        .join("tests/golden/signatures/delegated_depth.json");
 
     let actual = json!({
         "test_results": results,
@@ -127,7 +127,7 @@ fn delegated_smart_constructor_golden() {
     assert!(invalid_result.is_err(), "Over-limit delegation should fail");
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/golden_vectors/signatures/delegated_smart_constructor.json");
+        .join("tests/golden/signatures/delegated_smart_constructor.json");
 
     let actual = json!({
         "valid_delegation_passes": valid_result.is_ok(),
@@ -217,7 +217,7 @@ fn signature_depth_edge_cases_golden() {
     }
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/golden_vectors/signatures/depth_edge_cases.json");
+        .join("tests/golden/signatures/depth_edge_cases.json");
 
     let actual = json!({
         "test_results": results,

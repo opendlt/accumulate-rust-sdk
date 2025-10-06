@@ -1,0 +1,50 @@
+{
+  "type": "signatureSet",
+  "Signer": "acc://threshold-signer.acme/book/1",
+  "SignerVersion": 1,
+  "Timestamp": null,
+  "TransactionHash": null,
+  "Vote": null,
+  "Data": null,
+  "Memo": null,
+  "Authority": "acc://authority.acme/book/1",
+  "threshold": 2,
+  "Signatures": [
+    {
+      "type": "ed25519",
+      "PublicKey": "1111111111111111111111111111111111111111111111111111111111111111",
+      "Signature": "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+      "Signer": "acc://signer1.acme/book/1",
+      "SignerVersion": 1,
+      "Timestamp": null,
+      "TransactionHash": null,
+      "Vote": null,
+      "Data": null,
+      "Memo": null
+    },
+    {
+      "type": "ed25519",
+      "PublicKey": "2222222222222222222222222222222222222222222222222222222222222222",
+      "Signature": "2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",
+      "Signer": "acc://signer2.acme/book/1",
+      "SignerVersion": 1,
+      "Timestamp": null,
+      "TransactionHash": null,
+      "Vote": null,
+      "Data": null,
+      "Memo": null
+    },
+    {
+      "type": "ed25519",
+      "PublicKey": "3333333333333333333333333333333333333333333333333333333333333333",
+      "Signature": "3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+      "Signer": "acc://signer3.acme/book/1",
+      "SignerVersion": 1,
+      "Timestamp": null,
+      "TransactionHash": null,
+      "Vote": null,
+      "Data": null,
+      "Memo": null
+    }
+  ]
+}

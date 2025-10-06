@@ -130,6 +130,6 @@ Write-Host "   - Parity gate validation (local audit)"
 
 Write-Host ""
 Write-Host "🎉 Phase 4 Complete: Local Validation & Goldens"
-Write-Host "Local gates: $((Get-ChildItem tests\golden_vectors -Recurse -File).Count) golden files generated"
+Write-Host "Local gates: $((Get-ChildItem tests\golden -Recurse -File).Count) golden files generated"
 Write-Host "API coverage: 8+ core methods tested"
 Write-Host "Enforcement: Local parity gate (14/16/33/35/111 compliance)"

@@ -4,7 +4,7 @@ use std::{fs, path::PathBuf};
 
 fn gpath(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-      .join("tests").join("golden_vectors").join("hash")
+      .join("tests").join("golden").join("hash")
       .join(format!("{name}.json"))
 }
 

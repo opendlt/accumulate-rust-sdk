@@ -67,7 +67,7 @@ async fn api_error_shape_parity() {
         };
 
         let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("tests/golden_vectors/api")
+            .join("tests/golden/api")
             .join(format!("error_{}.json", code));
 
         let golden = json!({
@@ -138,7 +138,7 @@ async fn api_error_serialization_golden() {
     }
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/golden_vectors/api/error_serialization.json");
+        .join("tests/golden/api/error_serialization.json");
 
     let golden = json!({
         "error_formats": results,
@@ -196,7 +196,7 @@ fn error_construction_golden() {
     }
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/golden_vectors/api/error_construction.json");
+        .join("tests/golden/api/error_construction.json");
 
     let golden = json!({
         "construction_tests": results,
@@ -236,7 +236,7 @@ fn signature_error_golden() {
     }
 
     let p = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/golden_vectors/api/signature_errors.json");
+        .join("tests/golden/api/signature_errors.json");
 
     let golden = json!({
         "signature_error_tests": results,

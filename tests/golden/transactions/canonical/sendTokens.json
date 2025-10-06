@@ -1,0 +1,1 @@
+{"canonical_json":"{\"To\":[{\"Amount\":\"1000\",\"Url\":\"acc://bob.acme/tokens\"}],\"type\":\"sendTokens\"}","transaction_body":{"To":[{"Amount":"1000","Url":"acc://bob.acme/tokens"}],"type":"sendTokens"}}

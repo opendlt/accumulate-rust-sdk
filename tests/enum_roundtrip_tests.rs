@@ -7,7 +7,7 @@ use std::path::PathBuf;
 fn goldens_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
-        .join("golden_vectors")
+        .join("golden")
         .join("enums")
 }
 
