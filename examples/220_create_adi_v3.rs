@@ -14,26 +14,26 @@ use std::env;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
-    println!("🏢 Create ADI using V3 API");
-    println!("==========================");
+    println!("Create ADI using V3 API");
+    println!("=======================");
 
     let client = Accumulate::devnet(AccOptions::default()).await?;
 
-    // Generate keypair for ADI
+    // Generate keypair for ADI (returns SigningKey in ed25519-dalek v2)
     let keypair = AccumulateClient::generate_keypair();
-    let public_key = keypair.public.to_bytes();
+    let public_key = keypair.verifying_key().to_bytes();
     let public_key_hex = hex::encode(public_key);
 
     // Create unique ADI URL
     let adi_url = format!("acc://demo-{}.acme", &public_key_hex[0..8]);
 
-    println!("🔑 ADI Information:");
+    println!("ADI Information:");
     println!("   Public Key: {}", public_key_hex);
     println!("   ADI URL: {}", adi_url);
     println!();
 
     // Create ADI transaction body
-    println!("📝 Creating ADI transaction...");
+    println!("Creating ADI transaction...");
     let adi_tx_body = json!({
         "type": "createIdentity",
         "url": adi_url,
@@ -48,24 +48,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     // Create signed envelope
-    println!("✍️  Creating signed envelope...");
+    println!("Creating signed envelope...");
     let envelope = client.create_envelope(&adi_tx_body, &keypair)?;
 
-    println!("   ✅ Envelope created successfully");
+    println!("   [OK] Envelope created successfully");
     println!("   Signatures: {}", envelope.signatures.len());
     if !envelope.signatures.is_empty() {
         println!("   Signature bytes length: {}", envelope.signatures[0].signature.len());
     }
 
     // Submit to V3 API
-    println!("🚀 Submitting to V3 API...");
+    println!("Submitting to V3 API...");
     match client.submit(&envelope).await {
         Ok(response) => {
-            println!("   ✅ Transaction submitted successfully!");
+            println!("   [OK] Transaction submitted successfully!");
             println!("   Transaction ID: {:?}", response);
         }
         Err(e) => {
-            println!("   ❌ Failed to submit transaction: {}", e);
+            println!("   [ERROR] Failed to submit transaction: {}", e);
             println!("   This is expected on DevNet if the ADI already exists or keys are invalid");
         }
     }

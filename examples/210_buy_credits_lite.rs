@@ -23,11 +23,11 @@ use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("💳 Accumulate Buy Credits Local DevNet Example");
-    println!("===============================================");
+    println!("Accumulate Buy Credits Local DevNet Example");
+    println!("============================================");
 
     // Step 1: Load environment configuration
-    println!("\n📋 Loading DevNet configuration...");
+    println!("\nLoading DevNet configuration...");
     dotenvy::dotenv().ok();
 
     let v2_url = std::env::var("ACC_RPC_URL_V2")
@@ -42,37 +42,37 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  Faucet: {}", faucet_account);
 
     // Step 2: Connect to DevNet
-    println!("\n🔗 Connecting to DevNet...");
+    println!("\nConnecting to DevNet...");
     let client = create_client(&v2_url, &v3_url).await?;
 
     // Test connectivity
     match test_devnet_status(&client).await {
-        Ok(_) => println!("  ✅ DevNet is accessible"),
+        Ok(_) => println!("  [OK] DevNet is accessible"),
         Err(e) => {
-            println!("  ❌ DevNet connectivity issue: {}", e);
-            println!("  💡 Make sure DevNet is running: cd devnet && docker compose up -d");
+            println!("  [ERROR] DevNet connectivity issue: {}", e);
+            println!("  Hint: Make sure DevNet is running: cd devnet && docker compose up -d");
             return Err(e.into());
         }
     }
 
     // Step 3: Generate test account
-    println!("\n🔑 Generating test account...");
+    println!("\nGenerating test account...");
     let test_account = generate_test_account().await?;
 
     // Step 4: Ensure account is funded
-    println!("\n💰 Ensuring account has ACME tokens...");
+    println!("\nEnsuring account has ACME tokens...");
     ensure_account_funded(&client, &test_account, &faucet_account).await?;
 
     // Step 5: Buy credits
-    println!("\n💳 Converting ACME tokens to credits...");
+    println!("\nConverting ACME tokens to credits...");
     buy_credits(&client, &test_account).await?;
 
     // Step 6: Verify credit balance
-    println!("\n🔍 Verifying credit balance...");
+    println!("\nVerifying credit balance...");
     verify_credits(&client, &test_account).await?;
 
-    println!("\n✅ Buy credits example completed successfully!");
-    println!("💡 Next: Run `cargo run --example 999_zero_to_hero`");
+    println!("\nSuccess: Buy credits example completed successfully!");
+    println!("Hint: Next, run `cargo run --example 999_zero_to_hero`");
 
     Ok(())
 }
@@ -146,7 +146,7 @@ async fn ensure_account_funded(
             println!("Account exists");
             if let Some(credits) = account.credits {
                 if credits > 0 {
-                    println!("  ✅ Account already has {} credits", credits);
+                    println!("  [OK] Account already has {} credits", credits);
                     return Ok(());
                 }
             }
@@ -160,18 +160,18 @@ async fn ensure_account_funded(
     print!("  Requesting faucet tokens... ");
     match client.faucet(&test_account.acme_account).await {
         Ok(response) => {
-            println!("✅ Success!");
+            println!("[OK] Success!");
             println!("    Transaction ID: {}", response.txid);
             if !response.amount.is_empty() {
                 println!("    Amount: {}", response.amount);
             }
 
             // Wait for transaction processing
-            println!("  ⏳ Waiting 3 seconds for processing...");
+            println!("  Waiting 3 seconds for processing...");
             tokio::time::sleep(Duration::from_secs(3)).await;
         }
         Err(e) => {
-            println!("❌ Failed: {}", e);
+            println!("[ERROR] Failed: {}", e);
             return Err(e.into());
         }
     }
@@ -190,7 +190,7 @@ async fn buy_credits(
     print!("  Checking ACME balance... ");
     match client.query_account(&test_account.acme_account).await {
         Ok(account) => {
-            println!("✅ Account found");
+            println!("[OK] Account found");
             if let Some(credits) = account.credits {
                 println!("    Current credits: {}", credits);
             } else {
@@ -198,15 +198,15 @@ async fn buy_credits(
             }
         }
         Err(e) => {
-            println!("❌ Failed to query account: {}", e);
+            println!("[ERROR] Failed to query account: {}", e);
             return Err(e.into());
         }
     }
 
     // In a full implementation, this would create and submit a credit purchase transaction
-    println!("  💡 Credit purchase transaction would be created here");
-    println!("  📝 This requires transaction signing and submission");
-    println!("  ⚠️  For now, demonstrating account structure and queries");
+    println!("  Tip: Credit purchase transaction would be created here");
+    println!("  Note: This requires transaction signing and submission");
+    println!("  Warning: For now, demonstrating account structure and queries");
 
     Ok(())
 }
@@ -219,7 +219,7 @@ async fn verify_credits(
     print!("  Checking credits account... ");
     match client.query_account(&test_account.credits_account).await {
         Ok(account) => {
-            println!("✅ Credits account exists!");
+            println!("[OK] Credits account exists!");
             println!("    URL: {}", account.url);
             println!("    Type: {}", account.account_type);
 
@@ -231,7 +231,7 @@ async fn verify_credits(
             println!("    Data: {}", serde_json::to_string_pretty(&account.data)?);
         }
         Err(e) => {
-            println!("⚠️ Credits account not found: {}", e);
+            println!("[WARN] Credits account not found: {}", e);
             println!("    This is expected if no credit purchase transaction was submitted");
         }
     }
@@ -240,10 +240,10 @@ async fn verify_credits(
     print!("  Checking lite identity... ");
     match client.query_account(&test_account.lite_identity).await {
         Ok(account) => {
-            println!("✅ Identity exists (type: {})", account.account_type);
+            println!("[OK] Identity exists (type: {})", account.account_type);
         }
         Err(_) => {
-            println!("❌ Identity not found");
+            println!("[ERROR] Identity not found");
         }
     }
 

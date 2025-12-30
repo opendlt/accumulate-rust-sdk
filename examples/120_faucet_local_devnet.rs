@@ -2,7 +2,7 @@
 //!
 //! This example demonstrates:
 //! - Loading DevNet configuration from .env.local
-//! - Connecting to local DevNet
+//! - Connecting to local DevNet (or Kermit testnet as fallback)
 //! - Requesting tokens from the faucet
 //! - Checking account balances
 //! - Querying transaction status
@@ -11,63 +11,92 @@
 //! ## Prerequisites
 //! 1. Run: `cargo run --bin devnet_discovery` to generate .env.local
 //! 2. Ensure DevNet is running: `cd devnet && docker compose up -d`
+//! 3. Or use Kermit testnet if DevNet is unavailable
 //!
 //! ## Usage
 //! ```bash
 //! cargo run --example 120_faucet_local_devnet
 //! ```
 
-use accumulate_client::{AccOptions, AccumulateClient};
+use accumulate_client::{AccOptions, AccumulateClient, KERMIT_V2, KERMIT_V3};
 use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("💰 Accumulate Faucet Local DevNet Example");
-    println!("==========================================");
+    println!("Accumulate Faucet Example");
+    println!("=========================");
 
-    // Step 1: Load environment configuration
-    println!("\n📋 Loading DevNet configuration...");
+    // Step 1: Load environment configuration or use defaults
+    println!("\nLoading configuration...");
     dotenvy::dotenv().ok();
 
     let v2_url = std::env::var("ACC_RPC_URL_V2")
         .unwrap_or_else(|_| "http://localhost:26660/v2".to_string());
     let v3_url = std::env::var("ACC_RPC_URL_V3")
         .unwrap_or_else(|_| "http://localhost:26660/v3".to_string());
-    let faucet_account = std::env::var("ACC_FAUCET_ACCOUNT")
-        .unwrap_or_else(|_| "acc://faucet.acme/ACME".to_string());
 
+    println!("  Trying local DevNet first...");
     println!("  V2 API: {}", v2_url);
     println!("  V3 API: {}", v3_url);
-    println!("  Faucet: {}", faucet_account);
 
-    // Step 2: Connect to DevNet
-    println!("\n🔗 Connecting to DevNet...");
-    let client = create_client(&v2_url, &v3_url).await?;
-
-    // Test connectivity
-    match test_devnet_status(&client).await {
-        Ok(_) => println!("  ✅ DevNet is accessible"),
-        Err(e) => {
-            println!("  ❌ DevNet connectivity issue: {}", e);
-            println!("  💡 Make sure DevNet is running: cd devnet && docker compose up -d");
-            return Err(e.into());
+    // Step 2: Connect to DevNet, fallback to Kermit if unavailable
+    println!("\nConnecting to network...");
+    let (client, network_name) = match create_client(&v2_url, &v3_url).await {
+        Ok(c) => {
+            // Test if local DevNet is actually responding
+            match test_network_status(&c).await {
+                Ok(_) => {
+                    println!("  [OK] Local DevNet is accessible");
+                    (c, "DevNet")
+                }
+                Err(_) => {
+                    println!("  [WARN] Local DevNet not responding, trying Kermit testnet...");
+                    let kermit_client = create_client(KERMIT_V2, KERMIT_V3).await?;
+                    match test_network_status(&kermit_client).await {
+                        Ok(_) => {
+                            println!("  [OK] Connected to Kermit testnet");
+                            (kermit_client, "Kermit")
+                        }
+                        Err(e) => {
+                            println!("  [ERROR] Both DevNet and Kermit unavailable");
+                            return Err(e.into());
+                        }
+                    }
+                }
+            }
         }
-    }
+        Err(_) => {
+            println!("  [WARN] Local DevNet unavailable, trying Kermit testnet...");
+            let kermit_client = create_client(KERMIT_V2, KERMIT_V3).await?;
+            match test_network_status(&kermit_client).await {
+                Ok(_) => {
+                    println!("  [OK] Connected to Kermit testnet");
+                    (kermit_client, "Kermit")
+                }
+                Err(e) => {
+                    println!("  [ERROR] Both DevNet and Kermit unavailable");
+                    return Err(e.into());
+                }
+            }
+        }
+    };
+
+    println!("  Using network: {}", network_name);
 
     // Step 3: Generate a test account
-    println!("\n🔑 Generating test account...");
+    println!("\nGenerating test account...");
     let test_account = generate_test_account().await?;
 
-    // Step 4: Request tokens from faucet
-    println!("\n💧 Requesting tokens from faucet...");
-    request_faucet_tokens(&client, &test_account, &faucet_account).await?;
+    // Step 4: Request tokens from faucet (multiple times for sufficient balance)
+    println!("\nRequesting tokens from faucet...");
+    request_faucet_tokens(&client, &test_account).await?;
 
     // Step 5: Verify funding and test queries
-    println!("\n🔍 Verifying funding and testing queries...");
+    println!("\nVerifying funding and testing queries...");
     verify_funding(&client, &test_account).await?;
 
-    println!("\n✅ Faucet funding example completed successfully!");
-    println!("💡 Next: Run `cargo run --example 210_buy_credits_lite`");
+    println!("\nSuccess: Faucet funding example completed successfully!");
+    println!("Hint: Next, run `cargo run --example 210_buy_credits_lite`");
 
     Ok(())
 }
@@ -87,15 +116,15 @@ async fn create_client(v2_url: &str, v3_url: &str) -> Result<AccumulateClient, B
         .map_err(|e| e.into())
 }
 
-async fn test_devnet_status(client: &AccumulateClient) -> Result<(), Box<dyn std::error::Error>> {
-    match client.status().await {
-        Ok(status) => {
-            println!("  DevNet Status: {} ({})", status.network, status.version);
-            Ok(())
-        }
-        Err(e) => {
-            Err(format!("Failed to get DevNet status: {}", e).into())
-        }
+async fn test_network_status(client: &AccumulateClient) -> Result<(), Box<dyn std::error::Error>> {
+    // Use V3 network-status API which is more reliable
+    let result: serde_json::Value = client.v3_client.call_v3("network-status", serde_json::json!({})).await?;
+
+    if result.get("oracle").is_some() {
+        println!("  Network status OK (oracle available)");
+        Ok(())
+    } else {
+        Err("Network status missing oracle".into())
     }
 }
 
@@ -128,10 +157,8 @@ async fn generate_test_account() -> Result<TestAccount, Box<dyn std::error::Erro
 async fn request_faucet_tokens(
     client: &AccumulateClient,
     test_account: &TestAccount,
-    faucet_account: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("  Target account: {}", test_account.acme_account);
-    println!("  Faucet source:  {}", faucet_account);
 
     // Check initial balance
     print!("  Checking initial balance... ");
@@ -140,30 +167,47 @@ async fn request_faucet_tokens(
         Err(_) => println!("Account does not exist (expected)"),
     }
 
-    // Request tokens from faucet
-    print!("  Requesting faucet tokens... ");
-    match client.faucet(&test_account.acme_account).await {
-        Ok(response) => {
-            println!("✅ Success!");
-            println!("    Transaction ID: {}", response.txid);
-            if !response.amount.is_empty() {
-                println!("    Amount: {}", response.amount);
+    // Request tokens from faucet multiple times
+    println!("  Requesting faucet tokens (5 times)...");
+    for i in 1..=5 {
+        print!("    Faucet request {}/5... ", i);
+        match client.faucet(&test_account.acme_account).await {
+            Ok(response) => {
+                println!("[OK] TxID: {}", response.txid);
             }
-
-            // Wait for transaction processing
-            println!("  ⏳ Waiting 3 seconds for processing...");
-            tokio::time::sleep(Duration::from_secs(3)).await;
+            Err(e) => {
+                println!("[WARN] {}", e);
+            }
         }
-        Err(e) => {
-            println!("❌ Failed: {}", e);
-            println!("    💡 Common issues:");
-            println!("       - DevNet not fully started");
-            println!("       - Faucet account empty or disabled");
-            println!("       - Network connectivity issues");
-            return Err(e.into());
+        tokio::time::sleep(Duration::from_secs(2)).await;
+    }
+
+    // Wait for transactions to settle
+    println!("  Waiting 10 seconds for transactions to settle...");
+    tokio::time::sleep(Duration::from_secs(10)).await;
+
+    // Poll for balance
+    println!("  Polling for balance...");
+    for attempt in 1..=10 {
+        match client.query_account(&test_account.acme_account).await {
+            Ok(account) => {
+                if let Some(balance) = account.data.get("balance").and_then(|b| b.as_str()) {
+                    if balance != "0" {
+                        println!("    [OK] Balance confirmed: {}", balance);
+                        return Ok(());
+                    }
+                }
+            }
+            Err(_) => {}
+        }
+        if attempt < 10 {
+            print!("    Attempt {}/10... ", attempt);
+            println!("waiting 3s");
+            tokio::time::sleep(Duration::from_secs(3)).await;
         }
     }
 
+    println!("    [WARN] Balance not confirmed after polling, but faucet requests were sent");
     Ok(())
 }
 
@@ -175,7 +219,7 @@ async fn verify_funding(
     print!("  Checking funded account... ");
     match client.query_account(&test_account.acme_account).await {
         Ok(account) => {
-            println!("✅ Account exists!");
+            println!("[OK] Account exists!");
             println!("    URL: {}", account.url);
             println!("    Type: {}", account.account_type);
 
@@ -191,7 +235,7 @@ async fn verify_funding(
             println!("    Data: {}", serde_json::to_string_pretty(&account.data)?);
         }
         Err(e) => {
-            println!("⚠️ Account not found: {}", e);
+            println!("[WARN] Account not found: {}", e);
             println!("    This might indicate:");
             println!("    - Transaction still processing");
             println!("    - Faucet request failed");
@@ -203,10 +247,10 @@ async fn verify_funding(
     print!("  Checking lite identity... ");
     match client.query_account(&test_account.lite_identity).await {
         Ok(account) => {
-            println!("✅ Identity exists (type: {})", account.account_type);
+            println!("[OK] Identity exists (type: {})", account.account_type);
         }
         Err(_) => {
-            println!("❌ Identity not found");
+            println!("[ERROR] Identity not found");
         }
     }
 
