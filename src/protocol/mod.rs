@@ -3,9 +3,10 @@
 //! This module provides transaction envelope building and serialization
 //! that matches the TypeScript SDK implementation exactly.
 
-use crate::codec::{canonical_json, sha256_bytes, HashHelper};
+#![allow(missing_docs)]
+
+use crate::codec::{canonical_json, sha256_bytes};
 use crate::crypto::ed25519_helper::{Ed25519Helper, Keypair};
-use ed25519_dalek::Signature;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -13,8 +14,9 @@ use std::time::{SystemTime, UNIX_EPOCH};
 pub mod envelope;
 pub mod transaction;
 
-pub use envelope::*;
-pub use transaction::*;
+// Re-export envelope and transaction modules (currently empty)
+// pub use envelope::*;
+// pub use transaction::*;
 
 /// Transaction envelope containing transaction and signatures
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -57,6 +59,7 @@ pub struct TransactionHeader {
 }
 
 /// Envelope builder for creating transaction envelopes
+#[derive(Debug, Clone, Copy)]
 pub struct EnvelopeBuilder;
 
 impl EnvelopeBuilder {
@@ -230,7 +233,7 @@ pub mod helpers {
     use serde_json::json;
 
     /// Create send tokens transaction body
-    pub fn create_send_tokens_body(to_url: &str, amount: &str, token_url: Option<&str>) -> Value {
+    pub fn create_send_tokens_body(to_url: &str, amount: &str, _token_url: Option<&str>) -> Value {
         json!({
             "type": "sendTokens",
             "to": [{
