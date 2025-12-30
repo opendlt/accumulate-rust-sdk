@@ -19,6 +19,7 @@ pub enum HashType {
 }
 
 /// Hash utilities that match TypeScript SDK exactly
+#[derive(Debug, Clone, Copy)]
 pub struct AccumulateHash;
 
 impl AccumulateHash {
@@ -191,6 +192,7 @@ impl BinaryEncodable for [u8; 32] {
 }
 
 /// URL hashing utilities that match TypeScript SDK
+#[derive(Debug, Clone, Copy)]
 pub struct UrlHash;
 
 impl UrlHash {
@@ -283,6 +285,7 @@ impl UrlHash {
 }
 
 /// Chain ID hashing utilities
+#[derive(Debug, Clone, Copy)]
 pub struct ChainHash;
 
 impl ChainHash {
@@ -316,6 +319,7 @@ impl ChainHash {
 }
 
 /// Merkle tree utilities for transaction hashing
+#[derive(Debug, Clone, Copy)]
 pub struct MerkleHash;
 
 impl MerkleHash {

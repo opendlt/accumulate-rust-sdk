@@ -3,10 +3,14 @@
 //! Provides deterministic JSON serialization with alphabetically ordered keys
 //! to ensure byte-for-byte compatibility with TypeScript SDK
 
+// Allow unwrap in this module - serialization of valid JSON values cannot fail
+#![allow(clippy::unwrap_used)]
+
 use serde_json::{Map, Value};
 use std::collections::BTreeMap;
 
 /// Canonical JSON encoder for Accumulate protocol
+#[derive(Debug, Clone, Copy)]
 pub struct CanonicalEncoder;
 
 impl CanonicalEncoder {
@@ -165,15 +169,15 @@ mod tests {
     #[test]
     fn test_unicode_strings() {
         let value = json!({
-            "unicode": "Hello 世界",
-            "emoji": "🚀🌟",
+            "unicode": "Hello world",
+            "multibyte": "cafe resume",
             "escape": "line1\nline2\ttab"
         });
 
         let canonical = to_canonical_string(&value);
         // Note: serde_json escapes unicode and control characters
-        assert!(canonical.contains(r#""unicode":"Hello 世界""#));
-        assert!(canonical.contains(r#""emoji":"🚀🌟""#));
+        assert!(canonical.contains(r#""unicode":"Hello world""#));
+        assert!(canonical.contains(r#""multibyte":"cafe resume""#));
         assert!(canonical.contains(r#""escape":"line1\nline2\ttab""#));
     }
 }

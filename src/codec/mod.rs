@@ -3,6 +3,8 @@
 //! This module provides both JSON and binary encoding to match the TypeScript SDK
 //! implementation for bit-for-bit and byte-for-byte parity.
 
+#![allow(missing_docs)]
+
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
@@ -12,14 +14,17 @@ pub mod crypto;
 pub mod hash_helper;
 pub mod hashes;
 pub mod reader;
+pub mod signing;
 pub mod transaction_codec;
 pub mod writer;
 
 pub use canonical::*;
-pub use crypto::*;
+// crypto module is kept for backwards compatibility but has no exports
+// pub use crypto::*;
 pub use hash_helper::*;
 pub use hashes::*;
 pub use reader::*;
+pub use signing::*;
 pub use transaction_codec::*;
 pub use writer::*;
 

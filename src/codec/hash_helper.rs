@@ -7,6 +7,7 @@ use crate::codec::{canonical_json, sha256_bytes};
 use serde_json::Value;
 
 /// High-level hash helper providing convenient hashing operations
+#[derive(Debug, Clone, Copy)]
 pub struct HashHelper;
 
 impl HashHelper {

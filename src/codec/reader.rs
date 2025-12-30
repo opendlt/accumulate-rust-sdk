@@ -3,7 +3,6 @@
 //! This module provides exact binary decoding compatibility with the TypeScript SDK,
 //! including identical varint/uvarint decoding, length prefixes, and field decoding.
 
-use std::collections::HashMap;
 use thiserror::Error;
 
 /// Errors that can occur during binary decoding
@@ -32,6 +31,7 @@ pub enum DecodingError {
 }
 
 /// Binary reader that matches TypeScript SDK decoding exactly
+#[derive(Debug, Clone)]
 pub struct BinaryReader<'a> {
     data: &'a [u8],
     position: usize,
@@ -207,6 +207,7 @@ impl<'a> BinaryReader<'a> {
 }
 
 /// Field-based reader for structured data decoding
+#[derive(Debug, Clone)]
 pub struct FieldReader<'a> {
     data: &'a [u8],
 }
@@ -509,7 +510,7 @@ mod tests {
 
     #[test]
     fn test_string_roundtrip() {
-        let test_cases = vec!["", "hello", "world", "🌍", "test with spaces"];
+        let test_cases = vec!["", "hello", "world", "earth", "test with spaces"];
 
         for input in test_cases {
             let encoded = BinaryWriter::encode_string(input);

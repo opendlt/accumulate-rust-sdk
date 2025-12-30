@@ -3,7 +3,9 @@
 //! This module provides exact binary encoding compatibility with the TypeScript SDK,
 //! including identical varint/uvarint encoding, length prefixes, and field encoding.
 
-use std::io::Write;
+// Allow unwrap in this module - write operations to Vec<u8> cannot fail
+#![allow(clippy::unwrap_used)]
+
 use thiserror::Error;
 
 /// Errors that can occur during binary encoding
@@ -29,6 +31,7 @@ pub enum EncodingError {
 }
 
 /// Binary writer that matches TypeScript SDK encoding exactly
+#[derive(Debug, Clone)]
 pub struct BinaryWriter {
     buffer: Vec<u8>,
 }
@@ -231,7 +234,7 @@ impl BinaryWriter {
     pub fn write_optional<T, F>(
         &mut self,
         value: Option<&T>,
-        field: u32,
+        _field: u32,
         writer_fn: F,
     ) -> Result<(), EncodingError>
     where
@@ -248,7 +251,7 @@ impl BinaryWriter {
     pub fn write_array<T, F>(
         &mut self,
         items: &[T],
-        field: u32,
+        _field: u32,
         writer_fn: F,
     ) -> Result<(), EncodingError>
     where
