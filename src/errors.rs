@@ -1,4 +1,6 @@
-// Error types for the Accumulate Rust SDK
+//! Error types for the Accumulate Rust SDK
+
+#![allow(missing_docs)]
 
 use thiserror::Error;
 
@@ -23,8 +25,42 @@ pub enum Error {
     #[error("RPC error: code={code}, message={message}")]
     Rpc { code: i32, message: String },
 
+    #[error("Validation error: {0}")]
+    Validation(#[from] ValidationError),
+
     #[error("General error: {0}")]
     General(String),
+}
+
+/// Validation-specific errors for transaction bodies and headers
+#[derive(Error, Debug, Clone)]
+pub enum ValidationError {
+    #[error("Invalid URL: {0}")]
+    InvalidUrl(String),
+
+    #[error("Required field missing: {0}")]
+    RequiredFieldMissing(String),
+
+    #[error("Invalid field value: {field} - {reason}")]
+    InvalidFieldValue { field: String, reason: String },
+
+    #[error("Amount must be positive: {0}")]
+    InvalidAmount(String),
+
+    #[error("Empty collection not allowed: {0}")]
+    EmptyCollection(String),
+
+    #[error("Invalid hash: expected {expected} bytes, got {actual}")]
+    InvalidHash { expected: usize, actual: usize },
+
+    #[error("Value out of range: {field} must be between {min} and {max}")]
+    OutOfRange { field: String, min: String, max: String },
+
+    #[error("Invalid token symbol: {0}")]
+    InvalidTokenSymbol(String),
+
+    #[error("Invalid precision: must be between 0 and 18, got {0}")]
+    InvalidPrecision(u64),
 }
 
 /// Signature-specific errors

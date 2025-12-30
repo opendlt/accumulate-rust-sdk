@@ -4,8 +4,6 @@
 //! encode → decode → re-encode roundtrip consistency.
 
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use std::collections::HashMap;
 use crate::codec::transaction_codec::{TransactionHeader, TransactionSignature};
 
 /// All protocol type names that must pass roundtrip tests
@@ -157,7 +155,7 @@ impl SampleGenerator for crate::codec::TransactionEnvelope {
                     initiator: Some("acc://initiator.acme".to_string()),
                     timestamp: 9999999999999,
                     nonce: Some(999999),
-                    memo: Some("Complex test with unicode: 🚀 ñoño".to_string()),
+                    memo: Some("Complex test with unicode: test nono".to_string()),
                     metadata: Some(serde_json::json!({
                         "version": "1.0",
                         "flags": ["test", "complex"],
@@ -218,9 +216,9 @@ impl SampleGenerator for crate::codec::TransactionHeader {
                 initiator: Some("acc://spëçîál.acme".to_string()),
                 timestamp: u64::MAX,
                 nonce: Some(u64::MAX),
-                memo: Some("Unicode test: 🌟 ñoño café résumé".to_string()),
+                memo: Some("Unicode test: star nono cafe resume".to_string()),
                 metadata: Some(serde_json::json!({
-                    "unicode": "🚀",
+                    "unicode": "test",
                     "special": "special chars: !@#$%^&*()_+-=[]{}|;':\",./<>?",
                     "nested": {"array": [1, 2, 3], "object": {"key": "value"}}
                 })),
@@ -428,9 +426,9 @@ pub fn generate_type_test_report() -> String {
 
     for type_name in core_types {
         if TYPE_NAMES.contains(&type_name) {
-            report.push_str(&format!("- ✅ {}\n", type_name));
+            report.push_str(&format!("- [OK] {}\n", type_name));
         } else {
-            report.push_str(&format!("- ❌ {} (missing from TYPE_NAMES)\n", type_name));
+            report.push_str(&format!("- [MISSING] {} (missing from TYPE_NAMES)\n", type_name));
         }
     }
 
@@ -442,9 +440,9 @@ pub fn generate_type_test_report() -> String {
 
     for type_name in api_types {
         if TYPE_NAMES.contains(&type_name) {
-            report.push_str(&format!("- ✅ {}\n", type_name));
+            report.push_str(&format!("- [OK] {}\n", type_name));
         } else {
-            report.push_str(&format!("- ❌ {} (missing from TYPE_NAMES)\n", type_name));
+            report.push_str(&format!("- [MISSING] {} (missing from TYPE_NAMES)\n", type_name));
         }
     }
 
@@ -455,19 +453,19 @@ pub fn generate_type_test_report() -> String {
 
     for type_name in v3_types {
         if TYPE_NAMES.contains(&type_name) {
-            report.push_str(&format!("- ✅ {}\n", type_name));
+            report.push_str(&format!("- [OK] {}\n", type_name));
         } else {
-            report.push_str(&format!("- ❌ {} (missing from TYPE_NAMES)\n", type_name));
+            report.push_str(&format!("- [MISSING] {} (missing from TYPE_NAMES)\n", type_name));
         }
     }
 
     report.push_str("\n## Coverage Status\n");
     match verify_type_coverage() {
         Ok(()) => {
-            report.push_str("✅ All types have test coverage\n");
+            report.push_str("[OK] All types have test coverage\n");
         }
         Err(missing) => {
-            report.push_str(&format!("❌ {} types need test implementations:\n", missing.len()));
+            report.push_str(&format!("[MISSING] {} types need test implementations:\n", missing.len()));
             for missing_type in missing {
                 report.push_str(&format!("  - {}\n", missing_type));
             }

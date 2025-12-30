@@ -1,3 +1,10 @@
+//! Canonical JSON encoding for Accumulate protocol
+//!
+//! Provides deterministic JSON serialization matching TypeScript SDK exactly.
+
+// Allow unwrap in this module - serialization of valid JSON values cannot fail
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use serde::Serialize;
 use serde_json::Value;
 use std::collections::BTreeMap;
