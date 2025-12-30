@@ -1,13 +1,26 @@
-use ed25519_dalek::{Keypair, PublicKey, SecretKey, Signature, Signer, Verifier};
+// Allow unwrap/expect in this module - cryptographic operations have controlled inputs
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
+use ed25519_dalek::{SigningKey, VerifyingKey, Signature, Signer, Verifier};
 use sha2::{Digest, Sha256};
+
 /// Ed25519 signer that exactly matches TypeScript SDK behavior
+/// Updated for ed25519-dalek v2.x API
 pub struct Ed25519Signer {
-    keypair: Keypair,
+    signing_key: SigningKey,
+}
+
+impl std::fmt::Debug for Ed25519Signer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Ed25519Signer")
+            .field("public_key", &hex::encode(self.signing_key.verifying_key().as_bytes()))
+            .finish_non_exhaustive()
+    }
 }
 
 impl Ed25519Signer {
-    pub fn new(keypair: Keypair) -> Self {
-        Self { keypair }
+    pub fn new(signing_key: SigningKey) -> Self {
+        Self { signing_key }
     }
 
     pub fn generate() -> Self {
@@ -28,50 +41,48 @@ impl Ed25519Signer {
     /// Create signer from 32-byte seed (matches TS SDK)
     /// This is the primary method for deterministic keypair generation
     pub fn from_seed(seed: &[u8; 32]) -> Result<Self, ed25519_dalek::SignatureError> {
-        // In ed25519-dalek v1.x, we need to create a SecretKey first, then derive the keypair
-        let secret_key = SecretKey::from_bytes(seed)?;
-        let public_key: PublicKey = (&secret_key).into();
-        let keypair = Keypair { secret: secret_key, public: public_key };
-        Ok(Self::new(keypair))
+        // In ed25519-dalek v2.x, SigningKey is created directly from seed bytes
+        let signing_key = SigningKey::from_bytes(seed);
+        Ok(Self::new(signing_key))
     }
 
     /// Sign message and return 64-byte signature array (matches TS SDK)
     /// Returns [u8; 64] for exact byte-for-byte compatibility
     pub fn sign(&self, message: &[u8]) -> [u8; 64] {
-        let signature = self.keypair.sign(message);
+        let signature = self.signing_key.sign(message);
         signature.to_bytes()
     }
 
     /// Sign a pre-hashed message and return 64-byte signature array
     pub fn sign_prehashed(&self, hash: &[u8; 32]) -> [u8; 64] {
-        let signature = self.keypair.sign(hash);
+        let signature = self.signing_key.sign(hash);
         signature.to_bytes()
     }
 
-    /// Get public key as reference
-    pub fn public_key(&self) -> &PublicKey {
-        &self.keypair.public
+    /// Get verifying (public) key as reference
+    pub fn verifying_key(&self) -> VerifyingKey {
+        self.signing_key.verifying_key()
     }
 
     /// Get public key as 32-byte array (matches TS SDK)
     pub fn public_key_bytes(&self) -> [u8; 32] {
-        self.keypair.public.to_bytes()
+        self.signing_key.verifying_key().to_bytes()
     }
 
-    /// Get private key as 32-byte array
+    /// Get private key (seed) as 32-byte array
     pub fn private_key_bytes(&self) -> [u8; 32] {
-        self.keypair.secret.to_bytes()
+        self.signing_key.to_bytes()
     }
 
     /// Create signer from 64-byte combined key (private + public)
     pub fn from_keypair_bytes(bytes: &[u8; 64]) -> Result<Self, ed25519_dalek::SignatureError> {
-        let keypair = Keypair::from_bytes(bytes)?;
-        Ok(Self::new(keypair))
+        let signing_key = SigningKey::from_keypair_bytes(bytes)?;
+        Ok(Self::new(signing_key))
     }
 
     /// Get full keypair as 64-byte array (private + public)
     pub fn keypair_bytes(&self) -> [u8; 64] {
-        self.keypair.to_bytes()
+        self.signing_key.to_keypair_bytes()
     }
 }
 
@@ -82,11 +93,10 @@ pub fn verify(
     message: &[u8],
     signature: &[u8; 64],
 ) -> bool {
-    match PublicKey::from_bytes(public_key) {
-        Ok(public_key) => {
+    match VerifyingKey::from_bytes(public_key) {
+        Ok(verifying_key) => {
             match Signature::from_bytes(signature) {
-                Ok(signature) => public_key.verify(message, &signature).is_ok(),
-                Err(_) => false,
+                sig => verifying_key.verify(message, &sig).is_ok(),
             }
         }
         Err(_) => false,
@@ -100,11 +110,10 @@ pub fn verify_prehashed(
     hash: &[u8; 32],
     signature: &[u8; 64],
 ) -> bool {
-    match PublicKey::from_bytes(public_key) {
-        Ok(public_key) => {
+    match VerifyingKey::from_bytes(public_key) {
+        Ok(verifying_key) => {
             match Signature::from_bytes(signature) {
-                Ok(signature) => public_key.verify(hash, &signature).is_ok(),
-                Err(_) => false,
+                sig => verifying_key.verify(hash, &sig).is_ok(),
             }
         }
         Err(_) => false,
@@ -117,9 +126,9 @@ pub fn verify_signature(
     message: &[u8],
     signature: &[u8; 64],
 ) -> Result<(), ed25519_dalek::SignatureError> {
-    let public_key = PublicKey::from_bytes(public_key)?;
-    let signature = Signature::from_bytes(signature)?;
-    public_key.verify(message, &signature)
+    let verifying_key = VerifyingKey::from_bytes(public_key)?;
+    let sig = Signature::from_bytes(signature);
+    verifying_key.verify(message, &sig)
 }
 
 /// Legacy verify function for backwards compatibility
@@ -128,9 +137,9 @@ pub fn verify_signature_prehashed(
     hash: &[u8; 32],
     signature: &[u8; 64],
 ) -> Result<(), ed25519_dalek::SignatureError> {
-    let public_key = PublicKey::from_bytes(public_key)?;
-    let signature = Signature::from_bytes(signature)?;
-    public_key.verify(hash, &signature)
+    let verifying_key = VerifyingKey::from_bytes(public_key)?;
+    let sig = Signature::from_bytes(signature);
+    verifying_key.verify(hash, &sig)
 }
 
 /// Hash message with SHA-256
