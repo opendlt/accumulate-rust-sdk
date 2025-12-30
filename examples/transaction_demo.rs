@@ -12,9 +12,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Accumulate::devnet(AccOptions::default()).await?;
     println!("Connected to DevNet");
 
-    // Generate a new keypair for demonstration
+    // Generate a new keypair for demonstration (returns SigningKey in ed25519-dalek v2)
     let keypair = AccumulateClient::generate_keypair();
-    let public_key_hex = hex::encode(keypair.public.to_bytes());
+    let public_key_hex = hex::encode(keypair.verifying_key().to_bytes());
     println!("Generated keypair with public key: {}", public_key_hex);
 
     // Create a simple token transfer transaction body
@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Demonstrate account creation transaction
     println!("\nDemonstrating account creation transaction:");
     let new_account_url = "acc://demo-new-account";
-    let account_tx = client.create_account(new_account_url, &keypair.public.to_bytes(), "identity");
+    let account_tx = client.create_account(new_account_url, &keypair.verifying_key().to_bytes(), "identity");
     println!(
         "✓ Account creation transaction body created for: {}",
         new_account_url

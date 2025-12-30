@@ -27,13 +27,13 @@ use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("🚀 Accumulate Zero to Hero Example");
-    println!("===================================");
+    println!("Accumulate Zero to Hero Example");
+    println!("================================");
     println!("This example demonstrates the complete Accumulate workflow!");
     println!();
 
     // Step 1: Load environment configuration
-    println!("📋 Loading DevNet configuration...");
+    println!("Loading DevNet configuration...");
     dotenvy::dotenv().ok();
 
     let v2_url = std::env::var("ACC_RPC_URL_V2")
@@ -43,22 +43,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let faucet_account = std::env::var("ACC_FAUCET_ACCOUNT")
         .unwrap_or_else(|_| "acc://faucet.acme/ACME".to_string());
 
-    println!("🌐 Configuration:");
+    println!("Configuration:");
     println!("   V2 Endpoint: {}", v2_url);
     println!("   V3 Endpoint: {}", v3_url);
     println!("   Faucet: {}", faucet_account);
     println!();
 
     // Step 2: Connect to DevNet
-    println!("🔗 Connecting to DevNet...");
+    println!("Connecting to DevNet...");
     let client = create_client(&v2_url, &v3_url).await?;
 
     // Verify DevNet is running
     match test_devnet_status(&client).await {
-        Ok(_) => println!("   ✅ DevNet is accessible"),
+        Ok(_) => println!("   [OK] DevNet is accessible"),
         Err(e) => {
-            println!("   ❌ DevNet connectivity issue: {}", e);
-            println!("   💡 Make sure DevNet is running: cd devnet && docker compose up -d");
+            println!("   [ERROR] DevNet connectivity issue: {}", e);
+            println!("   Hint: Make sure DevNet is running: cd devnet && docker compose up -d");
             return Err(e.into());
         }
     }
@@ -67,59 +67,59 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // =======================
     // STEP 3: Key Generation
     // =======================
-    println!("🔑 STEP 3: Key Generation and Lite Identity");
-    println!("─────────────────────────────────────────");
+    println!("STEP 3: Key Generation and Lite Identity");
+    println!("-----------------------------------------");
 
     let test_account = generate_test_account().await?;
 
     // ==========================
     // STEP 4: Initial Funding
     // ==========================
-    println!("💰 STEP 4: Initial Faucet Funding");
-    println!("──────────────────────────────────");
+    println!("STEP 4: Initial Faucet Funding");
+    println!("------------------------------");
 
     request_faucet_tokens(&client, &test_account, &faucet_account).await?;
 
     // ========================
     // STEP 5: Buy Credits
     // ========================
-    println!("💳 STEP 5: Purchasing Credits (Preparation)");
-    println!("─────────────────────────────────────────");
+    println!("STEP 5: Purchasing Credits (Preparation)");
+    println!("-----------------------------------------");
     demonstrate_credit_purchase(&test_account).await?;
 
     // ==========================
     // STEP 6: Create ADI
     // ==========================
-    println!("🏢 STEP 6: Creating ADI (Accumulate Digital Identity)");
-    println!("────────────────────────────────────────────────────");
+    println!("STEP 6: Creating ADI (Accumulate Digital Identity)");
+    println!("---------------------------------------------------");
     let adi_url = demonstrate_adi_creation(&test_account).await?;
 
     // =============================
     // STEP 7: Create Token Account
     // =============================
-    println!("🪙 STEP 7: Creating Token Account");
-    println!("─────────────────────────────────");
+    println!("STEP 7: Creating Token Account");
+    println!("-------------------------------");
     let token_account_url = demonstrate_token_account_creation(&adi_url).await?;
 
     // ===========================
     // STEP 8: Create Data Account
     // ===========================
-    println!("📊 STEP 8: Creating Data Account");
-    println!("─────────────────────────────────");
+    println!("STEP 8: Creating Data Account");
+    println!("------------------------------");
     let data_account_url = demonstrate_data_account_creation(&adi_url).await?;
 
     // =======================
     // STEP 9: Write Data
     // =======================
-    println!("📝 STEP 9: Writing Data");
-    println!("───────────────────────");
+    println!("STEP 9: Writing Data");
+    println!("--------------------");
     demonstrate_data_writing(&data_account_url).await?;
 
     // ===========================
     // STEP 10: Token Transfer
     // ===========================
-    println!("💸 STEP 10: Token Transfer (Lite to ADI)");
-    println!("────────────────────────────────────────");
+    println!("STEP 10: Token Transfer (Lite to ADI)");
+    println!("-------------------------------------");
     demonstrate_token_transfer(&test_account, &token_account_url).await?;
 
     // ================================
@@ -196,28 +196,28 @@ async fn request_faucet_tokens(
     println!("   Requesting tokens from faucet...");
     match client.faucet(&test_account.acme_account).await {
         Ok(response) => {
-            println!("   ✅ Faucet Success! TX: {}", response.txid);
+            println!("   [OK] Faucet Success! TX: {}", response.txid);
             if !response.amount.is_empty() {
                 println!("   Amount: {}", response.amount);
             }
 
             // Wait for transaction processing
-            println!("   ⏳ Waiting 3 seconds for processing...");
+            println!("   Waiting 3 seconds for processing...");
             tokio::time::sleep(Duration::from_secs(3)).await;
 
             // Verify funding
             match client.query_account(&test_account.acme_account).await {
                 Ok(account) => {
-                    println!("   ✅ Account funded successfully");
+                    println!("   [OK] Account funded successfully");
                     println!("   Account type: {}", account.account_type);
                 }
                 Err(e) => {
-                    println!("   ⚠️  Could not verify funding: {}", e);
+                    println!("   [WARN] Could not verify funding: {}", e);
                 }
             }
         }
         Err(e) => {
-            println!("   ❌ Faucet failed: {}", e);
+            println!("   [ERROR] Faucet failed: {}", e);
             return Err(e.into());
         }
     }
@@ -233,7 +233,7 @@ async fn demonstrate_credit_purchase(test_account: &TestAccount) -> Result<(), B
     println!("   From: {}", test_account.acme_account);
     println!("   To:   {}", test_account.credits_account);
     println!("   Amount: {} ACME", credit_amount);
-    println!("   ⚠️  Transaction simulation (would submit to network)");
+    println!("   Note: Transaction simulation (would submit to network)");
     println!();
     Ok(())
 }
@@ -242,7 +242,7 @@ async fn demonstrate_adi_creation(test_account: &TestAccount) -> Result<String, 
     let adi_url = format!("acc://user-{}.acme", &hex::encode(&test_account.public_key)[0..8]);
     println!("   ADI URL: {}", adi_url);
     println!("   ADI creation transaction would be prepared here");
-    println!("   ⚠️  Transaction simulation (would submit to network)");
+    println!("   Note: Transaction simulation (would submit to network)");
     println!();
     Ok(adi_url)
 }
@@ -259,7 +259,7 @@ async fn demonstrate_token_account_creation(adi_url: &str) -> Result<String, Box
     });
 
     println!("   Token account creation transaction: {}", serde_json::to_string_pretty(&create_token_account_tx)?);
-    println!("   ⚠️  Transaction simulation (would submit to network)");
+    println!("   Note: Transaction simulation (would submit to network)");
     println!();
     Ok(token_account_url)
 }
@@ -275,7 +275,7 @@ async fn demonstrate_data_account_creation(adi_url: &str) -> Result<String, Box<
     });
 
     println!("   Data account creation transaction: {}", serde_json::to_string_pretty(&create_data_account_tx)?);
-    println!("   ⚠️  Transaction simulation (would submit to network)");
+    println!("   Note: Transaction simulation (would submit to network)");
     println!();
     Ok(data_account_url)
 }
@@ -300,7 +300,7 @@ async fn demonstrate_data_writing(data_account_url: &str) -> Result<(), Box<dyn 
     });
 
     println!("   Write data transaction prepared");
-    println!("   ⚠️  Transaction simulation (would submit to network)");
+    println!("   Note: Transaction simulation (would submit to network)");
     println!();
     Ok(())
 }
@@ -312,7 +312,7 @@ async fn demonstrate_token_transfer(test_account: &TestAccount, token_account_ur
     println!("   To:   {} (ADI)", token_account_url);
 
     println!("   Token transfer transaction would be prepared here");
-    println!("   ⚠️  Transaction simulation (would submit to network)");
+    println!("   Note: Transaction simulation (would submit to network)");
     println!();
     Ok(())
 }
@@ -323,29 +323,29 @@ async fn print_summary(
     token_account_url: &str,
     data_account_url: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    println!("✅ STEP 11: Zero to Hero Complete!");
-    println!("──────────────────────────────────");
+    println!("Success: STEP 11: Zero to Hero Complete!");
+    println!("----------------------------------------");
     println!();
-    println!("🎉 Congratulations! You have successfully completed the Accumulate zero-to-hero flow!");
+    println!("Congratulations! You have successfully completed the Accumulate zero-to-hero flow!");
     println!();
-    println!("📋 Summary of what we accomplished:");
-    println!("   1. ✅ Generated Ed25519 keypair");
-    println!("   2. ✅ Created lite identity: {}", test_account.lite_identity);
-    println!("   3. ✅ Funded account with faucet");
-    println!("   4. ✅ Prepared credit purchase");
-    println!("   5. ✅ Prepared ADI creation: {}", adi_url);
-    println!("   6. ✅ Prepared token account: {}", token_account_url);
-    println!("   7. ✅ Prepared data account: {}", data_account_url);
-    println!("   8. ✅ Prepared data writing");
-    println!("   9. ✅ Prepared token transfer");
+    println!("Summary of what we accomplished:");
+    println!("   1. [OK] Generated Ed25519 keypair");
+    println!("   2. [OK] Created lite identity: {}", test_account.lite_identity);
+    println!("   3. [OK] Funded account with faucet");
+    println!("   4. [OK] Prepared credit purchase");
+    println!("   5. [OK] Prepared ADI creation: {}", adi_url);
+    println!("   6. [OK] Prepared token account: {}", token_account_url);
+    println!("   7. [OK] Prepared data account: {}", data_account_url);
+    println!("   8. [OK] Prepared data writing");
+    println!("   9. [OK] Prepared token transfer");
     println!();
-    println!("🔧 What's Next:");
+    println!("What's Next:");
     println!("   - Run individual examples (100, 120, 210) for detailed flows");
     println!("   - Explore V3 transaction submission");
     println!("   - Try advanced features like multi-sig and anchoring");
     println!("   - Build your own Accumulate applications!");
     println!();
-    println!("📚 Resources:");
+    println!("Resources:");
     println!("   - Accumulate Documentation: https://docs.accumulatenetwork.io");
     println!("   - SDK Examples: ./examples/");
     println!("   - Test Suite: cargo test --all-features");
