@@ -44,21 +44,21 @@ fn test_all_types_roundtrip() {
     test_manual_types(&mut tested_types, &mut failed_types, &mut total_samples);
 
     // Summary
-    println!("\n📊 ROUNDTRIP TEST SUMMARY");
+    println!("\nROUNDTRIP TEST SUMMARY");
     println!("========================");
     println!("Total samples tested: {}", total_samples);
     println!("Types tested: {}", tested_types.len());
     println!("Types in TYPE_NAMES: {}", TYPE_NAMES.len());
 
     if !failed_types.is_empty() {
-        println!("\n❌ FAILED TYPES:");
+        println!("\n[FAIL] FAILED TYPES:");
         for failed_type in &failed_types {
             println!("  - {}", failed_type);
         }
         panic!("Roundtrip tests failed for {} types", failed_types.len());
     }
 
-    println!("\n✅ All types passed roundtrip tests!");
+    println!("\n[OK] All types passed roundtrip tests!");
 
     // Verify that we tested types from our TYPE_NAMES list
     verify_type_coverage_implementation(&tested_types);
@@ -72,7 +72,7 @@ fn test_type_roundtrip<T>(
 ) where
     T: SampleGenerator + RoundtripTestable + std::fmt::Debug,
 {
-    println!("🔄 Testing {} roundtrips...", type_name);
+    println!("Testing {} roundtrips...", type_name);
 
     let samples = T::generate_samples();
     *total_samples += samples.len();
@@ -85,7 +85,7 @@ fn test_type_roundtrip<T>(
                 println!("  ✓ Sample {} passed JSON roundtrip", i);
             }
             Err(e) => {
-                println!("  ❌ Sample {} failed JSON roundtrip: {}", i, e);
+                println!("  [ERROR] Sample {} failed JSON roundtrip: {}", i, e);
                 sample_failures.push(format!("Sample {}: {}", i, e));
             }
         }
@@ -96,7 +96,7 @@ fn test_type_roundtrip<T>(
                 // Only print success for types that actually implement binary roundtrip
             }
             Err(e) if !e.is_empty() => {
-                println!("  ❌ Sample {} failed binary roundtrip: {}", i, e);
+                println!("  [ERROR] Sample {} failed binary roundtrip: {}", i, e);
                 sample_failures.push(format!("Sample {} binary: {}", i, e));
             }
             _ => {} // Ignore empty errors (default implementation)
@@ -104,10 +104,10 @@ fn test_type_roundtrip<T>(
     }
 
     if sample_failures.is_empty() {
-        println!("  ✅ {} passed all roundtrip tests ({} samples)", type_name, samples.len());
+        println!("  [OK] {} passed all roundtrip tests ({} samples)", type_name, samples.len());
         tested_types.push(type_name.to_string());
     } else {
-        println!("  ❌ {} failed roundtrip tests:", type_name);
+        println!("  [ERROR] {} failed roundtrip tests:", type_name);
         for failure in &sample_failures {
             println!("    {}", failure);
         }
@@ -204,16 +204,16 @@ fn test_single_sample<T>(
 ) where
     T: RoundtripTestable + std::fmt::Debug,
 {
-    println!("🔄 Testing {} roundtrip...", type_name);
+    println!("Testing {} roundtrip...", type_name);
     *total_samples += 1;
 
     match sample.test_json_roundtrip() {
         Ok(()) => {
-            println!("  ✅ {} passed JSON roundtrip test", type_name);
+            println!("  [OK] {} passed JSON roundtrip test", type_name);
             tested_types.push(type_name.to_string());
         }
         Err(e) => {
-            println!("  ❌ {} failed JSON roundtrip test: {}", type_name, e);
+            println!("  [ERROR] {} failed JSON roundtrip test: {}", type_name, e);
             failed_types.push(type_name.to_string());
         }
     }
@@ -226,7 +226,7 @@ fn verify_type_coverage_implementation(tested_types: &[String]) {
         .collect();
 
     if !missing_types.is_empty() {
-        println!("\n⚠️  WARNING: Some types from TYPE_NAMES are not tested:");
+        println!("\n[WARN] WARNING: Some types from TYPE_NAMES are not tested:");
         for missing_type in &missing_types {
             println!("  - {}", missing_type);
         }
@@ -240,7 +240,7 @@ fn verify_type_coverage_implementation(tested_types: &[String]) {
         .collect();
 
     if !extra_types.is_empty() {
-        println!("\n💡 INFO: Some tested types are not in TYPE_NAMES:");
+        println!("\nTip: Some tested types are not in TYPE_NAMES:");
         for extra_type in &extra_types {
             println!("  - {}", extra_type);
         }
@@ -250,7 +250,7 @@ fn verify_type_coverage_implementation(tested_types: &[String]) {
 
 #[test]
 fn test_transaction_codec_binary_roundtrip() {
-    println!("🔄 Testing TransactionCodec binary roundtrip...");
+    println!("Testing TransactionCodec binary roundtrip...");
 
     let envelope = TransactionEnvelope::generate_sample();
 
@@ -267,7 +267,7 @@ fn test_transaction_codec_binary_roundtrip() {
                     match TransactionCodec::encode_envelope(&decoded) {
                         Ok(re_encoded) => {
                             if encoded == re_encoded {
-                                println!("  ✅ Binary roundtrip successful - bytes match exactly");
+                                println!("  [OK] Binary roundtrip successful - bytes match exactly");
                             } else {
                                 panic!(
                                     "Binary roundtrip failed - re-encoded bytes differ\nOriginal: {} bytes\nRe-encoded: {} bytes",
@@ -294,7 +294,7 @@ fn test_transaction_codec_binary_roundtrip() {
 
 #[test]
 fn test_transaction_codec_header_roundtrip() {
-    println!("🔄 Testing TransactionHeader binary roundtrip...");
+    println!("Testing TransactionHeader binary roundtrip...");
 
     let headers = TransactionHeader::generate_samples();
 
@@ -334,12 +334,12 @@ fn test_transaction_codec_header_roundtrip() {
         }
     }
 
-    println!("  ✅ All header samples passed binary roundtrip");
+    println!("  [OK] All header samples passed binary roundtrip");
 }
 
 #[test]
 fn test_transaction_codec_signature_roundtrip() {
-    println!("🔄 Testing TransactionSignature binary roundtrip...");
+    println!("Testing TransactionSignature binary roundtrip...");
 
     let signatures = TransactionSignature::generate_samples();
 
@@ -379,12 +379,12 @@ fn test_transaction_codec_signature_roundtrip() {
         }
     }
 
-    println!("  ✅ All signature samples passed binary roundtrip");
+    println!("  [OK] All signature samples passed binary roundtrip");
 }
 
 #[test]
 fn test_type_matrix_completeness() {
-    println!("🔍 Verifying TYPE_NAMES completeness...");
+    println!("Verifying TYPE_NAMES completeness...");
 
     // Verify that TYPE_NAMES contains expected core types
     let required_types = [
@@ -407,16 +407,16 @@ fn test_type_matrix_completeness() {
         );
     }
 
-    println!("  ✅ All required types are present in TYPE_NAMES");
-    println!("  📊 TYPE_NAMES contains {} types total", TYPE_NAMES.len());
+    println!("  [OK] All required types are present in TYPE_NAMES");
+    println!("  TYPE_NAMES contains {} types total", TYPE_NAMES.len());
 
     // Verify type coverage implementation
     match verify_type_coverage() {
         Ok(()) => {
-            println!("  ✅ Type coverage verification passed");
+            println!("  [OK] Type coverage verification passed");
         }
         Err(missing) => {
-            println!("  ⚠️  Type coverage issues found:");
+            println!("  [WARN] Type coverage issues found:");
             for missing_type in missing {
                 println!("    - {}", missing_type);
             }

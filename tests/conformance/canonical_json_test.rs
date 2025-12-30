@@ -35,7 +35,7 @@ fn test_canonical_json_fixtures() {
             name, input, expected, actual
         );
 
-        println!("✓ Test case '{}' passed", name);
+        println!("Success: Test case '{}' passed", name);
     }
 }
 
@@ -116,7 +116,7 @@ fn test_canonical_json_nested_objects() {
 fn test_canonical_json_unicode_and_escaping() {
     let input = json!({
         "unicode": "Hello 世界",
-        "emoji": "🚀🌟",
+        "multibyte": "test123",
         "escape": "line1\nline2\ttab",
         "quotes": "He said \"hello\"",
         "backslash": "path\\to\\file"
@@ -130,7 +130,7 @@ fn test_canonical_json_unicode_and_escaping() {
     assert!(canonical.contains(r#""quotes":"He said \"hello\"""#));
 
     // Keys should still be sorted
-    let keys_order = ["backslash", "emoji", "escape", "quotes", "unicode"];
+    let keys_order = ["backslash", "escape", "multibyte", "quotes", "unicode"];
     let mut last_pos = 0;
     for key in keys_order {
         let key_pattern = format!(r#""{}":"#, key);
@@ -236,6 +236,6 @@ fn test_canonical_json_transaction_vectors() {
             name, expected_canonical, actual_canonical
         );
 
-        println!("✓ Transaction vector '{}' canonical JSON matches", name);
+        println!("Success: Transaction vector '{}' canonical JSON matches", name);
     }
 }

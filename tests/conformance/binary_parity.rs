@@ -1,6 +1,6 @@
 //! Binary parity tests for Accumulate Rust SDK
 //!
-//! ⚠️  WARNING: These tests use potentially buggy TypeScript test vectors.
+//! WARNING: These tests use potentially buggy TypeScript test vectors.
 //! See TYPESCRIPT_DEPENDENCIES_AUDIT.md for details.
 //! Use canonical tests in /conformance/ directory for reliable validation.
 //!
@@ -24,7 +24,7 @@ fn load_typescript_vectors() -> Result<Value, Box<dyn std::error::Error>> {
 
 /// Print first differing offset and hex row diff on binary mismatch
 fn print_binary_diff(rust_bytes: &[u8], expected_bytes: &[u8], test_name: &str) {
-    println!("❌ Binary parity FAILED for: {}", test_name);
+    println!("[FAIL] Binary parity FAILED for: {}", test_name);
 
     if rust_bytes.len() != expected_bytes.len() {
         println!("  Length mismatch: Rust={}, Expected={}", rust_bytes.len(), expected_bytes.len());
@@ -114,7 +114,7 @@ fn test_uvarint_binary_parity() {
         assert_eq!(re_encoded, rust_encoded, "Re-encoding not identical for input: {}", input);
     }
 
-    println!("✅ UVarint binary parity: {} tests passed", uvarint_tests.len());
+    println!("[OK] UVarint binary parity: {} tests passed", uvarint_tests.len());
 }
 
 /// Test varint (zigzag) encoding/decoding parity with TypeScript SDK
@@ -154,7 +154,7 @@ fn test_varint_binary_parity() {
         assert_eq!(re_encoded, rust_encoded, "Re-encoding not identical for input: {}", input);
     }
 
-    println!("✅ Varint binary parity: {} tests passed", varint_tests.len());
+    println!("[OK] Varint binary parity: {} tests passed", varint_tests.len());
 }
 
 /// Test string encoding/decoding parity with TypeScript SDK
@@ -194,7 +194,7 @@ fn test_string_binary_parity() {
         assert_eq!(re_encoded, rust_encoded, "Re-encoding not identical for input: '{}'", input);
     }
 
-    println!("✅ String binary parity: {} tests passed", string_tests.len());
+    println!("[OK] String binary parity: {} tests passed", string_tests.len());
 }
 
 /// Test bytes encoding/decoding parity with TypeScript SDK
@@ -238,7 +238,7 @@ fn test_bytes_binary_parity() {
         assert_eq!(re_encoded, rust_encoded, "Re-encoding not identical for input: {:?}", input_bytes);
     }
 
-    println!("✅ Bytes binary parity: {} tests passed", bytes_tests.len());
+    println!("[OK] Bytes binary parity: {} tests passed", bytes_tests.len());
 }
 
 /// Test boolean encoding/decoding parity with TypeScript SDK
@@ -278,7 +278,7 @@ fn test_boolean_binary_parity() {
         assert_eq!(re_encoded, rust_encoded, "Re-encoding not identical for input: {}", input);
     }
 
-    println!("✅ Boolean binary parity: {} tests passed", boolean_tests.len());
+    println!("[OK] Boolean binary parity: {} tests passed", boolean_tests.len());
 }
 
 /// Test hash computation parity with TypeScript SDK
@@ -308,7 +308,7 @@ fn test_hash_binary_parity() {
         assert_eq!(rust_hash_hex, expected_hash, "Byte-level hash mismatch for input: {}", input_value);
     }
 
-    println!("✅ Hash binary parity: {} tests passed", hash_tests.len());
+    println!("[OK] Hash binary parity: {} tests passed", hash_tests.len());
 }
 
 /// Test transaction envelope encoding/decoding parity with TypeScript SDK
@@ -357,7 +357,7 @@ fn test_transaction_envelope_binary_parity() {
             assert_eq!(re_encoded, rust_encoded, "Re-encoding not identical");
         }
 
-        println!("✅ Transaction envelope binary parity: {} tests passed", envelope_tests.len());
+        println!("[OK] Transaction envelope binary parity: {} tests passed", envelope_tests.len());
     }
 }
 
@@ -460,5 +460,5 @@ fn test_codec_integration() {
     let mut reader = BinaryReader::new(&bool_test);
     assert_eq!(reader.read_bool().unwrap(), true);
 
-    println!("✅ Codec integration tests passed");
+    println!("[OK] Codec integration tests passed");
 }
