@@ -12,7 +12,7 @@ async fn test_devnet_connectivity() {
     let client = match Accumulate::devnet(AccOptions::default()).await {
         Ok(client) => client,
         Err(_) => {
-            println!("⚠️  DevNet not available, skipping connectivity test");
+            println!("[WARN] DevNet not available, skipping connectivity test");
             return;
         }
     };
@@ -22,18 +22,18 @@ async fn test_devnet_connectivity() {
 
     match status_result {
         Ok(Ok(status)) => {
-            println!("✅ DevNet health check passed");
+            println!("[OK] DevNet health check passed");
             println!("   Network: {}", status.network);
             println!("   Version: {}", status.version);
             assert!(!status.network.is_empty());
             assert!(!status.version.is_empty());
         }
         Ok(Err(e)) => {
-            println!("❌ DevNet status error: {}", e);
+            println!("[ERROR] DevNet status error: {}", e);
             panic!("DevNet returned error: {}", e);
         }
         Err(_) => {
-            println!("⏰ DevNet status timeout");
+            println!("Timeout: DevNet status timeout");
             panic!("DevNet status call timed out");
         }
     }
@@ -47,36 +47,36 @@ async fn test_faucet_availability() {
     let client = match Accumulate::devnet(AccOptions::default()).await {
         Ok(client) => client,
         Err(_) => {
-            println!("⚠️  DevNet not available, skipping faucet test");
+            println!("[WARN] DevNet not available, skipping faucet test");
             return;
         }
     };
 
-    // Generate test account
+    // Generate test account (returns SigningKey in ed25519-dalek v2)
     let keypair = AccumulateClient::generate_keypair();
-    let public_key = keypair.public.to_bytes();
+    let public_key = keypair.verifying_key().to_bytes();
     let lite_identity = derive_lite_identity_url(&public_key);
     let acme_account = format!("{}/ACME", lite_identity);
 
-    println!("🧪 Testing faucet with account: {}", acme_account);
+    println!("Testing faucet with account: {}", acme_account);
 
     // Test faucet with generous timeout
     let faucet_result = timeout(Duration::from_secs(15), client.faucet(&acme_account)).await;
 
     match faucet_result {
         Ok(Ok(response)) => {
-            println!("✅ Faucet test passed");
+            println!("[OK] Faucet test passed");
             println!("   Transaction ID: {}", response.txid);
             println!("   Amount: {}", response.amount);
             assert!(!response.txid.is_empty());
             assert!(!response.amount.is_empty());
         }
         Ok(Err(e)) => {
-            println!("⚠️  Faucet error (might be expected): {}", e);
+            println!("[WARN] Faucet error (might be expected): {}", e);
             // Don't panic on faucet errors as they might be rate-limited or empty
         }
         Err(_) => {
-            println!("⏰ Faucet request timeout");
+            println!("Timeout: Faucet request timeout");
             // Don't panic on timeout as DevNet might be slow
         }
     }
@@ -87,7 +87,7 @@ async fn test_faucet_availability() {
 async fn test_environment_configuration() {
     dotenv().ok();
 
-    println!("🔍 Testing environment configuration");
+    println!("Testing environment configuration");
 
     let devnet_dir = env::var("ACC_DEVNET_DIR");
     let rpc_v2 = env::var("ACC_RPC_URL_V2");
@@ -103,10 +103,10 @@ async fn test_environment_configuration() {
     let client_result = Accumulate::devnet(AccOptions::default()).await;
     match client_result {
         Ok(_) => {
-            println!("✅ Client creation successful with current configuration");
+            println!("[OK] Client creation successful with current configuration");
         }
         Err(e) => {
-            println!("⚠️  Client creation failed: {}", e);
+            println!("[WARN] Client creation failed: {}", e);
             // Don't panic here as DevNet might not be running
         }
     }
@@ -115,12 +115,12 @@ async fn test_environment_configuration() {
 /// Test key generation and URL derivation
 #[tokio::test]
 async fn test_key_generation_and_urls() {
-    println!("🔑 Testing key generation and URL derivation");
+    println!("Testing key generation and URL derivation");
 
-    // Test multiple keypairs
+    // Test multiple keypairs (returns SigningKey in ed25519-dalek v2)
     for i in 1..=3 {
         let keypair = AccumulateClient::generate_keypair();
-        let public_key = keypair.public.to_bytes();
+        let public_key = keypair.verifying_key().to_bytes();
         let lite_identity = derive_lite_identity_url(&public_key);
 
         println!("   Keypair {}: {}", i, hex::encode(public_key));
@@ -139,13 +139,13 @@ async fn test_key_generation_and_urls() {
         assert!(AccumulateClient::validate_account_url(&credits_account));
     }
 
-    println!("✅ Key generation and URL derivation tests passed");
+    println!("[OK] Key generation and URL derivation tests passed");
 }
 
 /// Test deterministic key generation
 #[tokio::test]
 async fn test_deterministic_keys() {
-    println!("🌱 Testing deterministic key generation");
+    println!("Testing deterministic key generation");
 
     let seed_phrase = "test seed for deterministic generation";
 
@@ -153,8 +153,8 @@ async fn test_deterministic_keys() {
     let key1 = generate_deterministic_keypair(seed_phrase).unwrap();
     let key2 = generate_deterministic_keypair(seed_phrase).unwrap();
 
-    let pub1 = key1.public.to_bytes();
-    let pub2 = key2.public.to_bytes();
+    let pub1 = key1.verifying_key().to_bytes();
+    let pub2 = key2.verifying_key().to_bytes();
 
     assert_eq!(pub1, pub2, "Deterministic keys should be identical");
 
@@ -163,7 +163,7 @@ async fn test_deterministic_keys() {
 
     assert_eq!(identity1, identity2, "Derived identities should be identical");
 
-    println!("✅ Deterministic key generation test passed");
+    println!("[OK] Deterministic key generation test passed");
     println!("   Seed: {}", seed_phrase);
     println!("   Public Key: {}", hex::encode(pub1));
     println!("   Identity: {}", identity1);
@@ -184,7 +184,7 @@ fn derive_lite_identity_url(public_key: &[u8; 32]) -> String {
     format!("acc://{}.acme", lite_id_hex)
 }
 
-fn generate_deterministic_keypair(seed_phrase: &str) -> Result<ed25519_dalek::Keypair, Box<dyn std::error::Error>> {
+fn generate_deterministic_keypair(seed_phrase: &str) -> Result<ed25519_dalek::SigningKey, Box<dyn std::error::Error>> {
     use sha2::{Digest, Sha256};
 
     let mut hasher = Sha256::new();
