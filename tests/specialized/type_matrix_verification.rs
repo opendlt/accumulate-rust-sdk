@@ -5,7 +5,7 @@ use accumulate_client::codec::{TransactionEnvelope, TransactionHeader, Transacti
 
 #[test]
 fn test_type_names_constant() {
-    println!("🔍 Verifying TYPE_NAMES constant...");
+    println!("Verifying TYPE_NAMES constant...");
 
     // Verify TYPE_NAMES is not empty
     assert!(!TYPE_NAMES.is_empty(), "TYPE_NAMES should not be empty");
@@ -27,48 +27,48 @@ fn test_type_names_constant() {
         );
     }
 
-    println!("  ✅ TYPE_NAMES contains {} types", TYPE_NAMES.len());
-    println!("  ✅ All expected core types are present");
+    println!("  [OK] TYPE_NAMES contains {} types", TYPE_NAMES.len());
+    println!("  [OK] All expected core types are present");
 }
 
 #[test]
 fn test_sample_generators() {
-    println!("🔍 Testing SampleGenerator implementations...");
+    println!("Testing SampleGenerator implementations...");
 
     // Test TransactionEnvelope
     let envelope_samples = TransactionEnvelope::generate_samples();
     assert!(!envelope_samples.is_empty(), "TransactionEnvelope should generate samples");
-    println!("  ✅ TransactionEnvelope generates {} samples", envelope_samples.len());
+    println!("  [OK] TransactionEnvelope generates {} samples", envelope_samples.len());
 
     // Test TransactionHeader
     let header_samples = TransactionHeader::generate_samples();
     assert!(!header_samples.is_empty(), "TransactionHeader should generate samples");
-    println!("  ✅ TransactionHeader generates {} samples", header_samples.len());
+    println!("  [OK] TransactionHeader generates {} samples", header_samples.len());
 
     // Test TransactionSignature
     let signature_samples = TransactionSignature::generate_samples();
     assert!(!signature_samples.is_empty(), "TransactionSignature should generate samples");
-    println!("  ✅ TransactionSignature generates {} samples", signature_samples.len());
+    println!("  [OK] TransactionSignature generates {} samples", signature_samples.len());
 
     // Verify samples are different (at least some variation)
     if envelope_samples.len() > 1 {
         let different = envelope_samples.iter().any(|sample| sample != &envelope_samples[0]);
         assert!(different, "TransactionEnvelope samples should have some variation");
-        println!("  ✅ TransactionEnvelope samples have variation");
+        println!("  [OK] TransactionEnvelope samples have variation");
     }
 }
 
 #[test]
 fn test_type_coverage_verification() {
-    println!("🔍 Testing type coverage verification...");
+    println!("Testing type coverage verification...");
 
     // This test checks that our coverage verification works
     match verify_type_coverage() {
         Ok(()) => {
-            println!("  ✅ All types have test coverage");
+            println!("  [OK] All types have test coverage");
         }
         Err(missing_types) => {
-            println!("  ⚠️  {} types need test implementations:", missing_types.len());
+            println!("  [WARN] {} types need test implementations:", missing_types.len());
             for missing_type in &missing_types {
                 println!("    - {}", missing_type);
             }
@@ -82,7 +82,7 @@ fn test_type_coverage_verification() {
 
 #[test]
 fn test_type_report_generation() {
-    println!("🔍 Testing type report generation...");
+    println!("Testing type report generation...");
 
     let report = generate_type_test_report();
 
@@ -95,10 +95,10 @@ fn test_type_report_generation() {
     assert!(report.contains("API Response Types"), "Report should have API types section");
     assert!(report.contains("Coverage Status"), "Report should have coverage status");
 
-    println!("  ✅ Generated type report ({} characters)", report.len());
+    println!("  [OK] Generated type report ({} characters)", report.len());
 
     // Print the report for manual inspection during development
-    println!("\n📋 TYPE COVERAGE REPORT:");
+    println!("\nTYPE COVERAGE REPORT:");
     println!("{}", report);
 }
 
@@ -106,14 +106,14 @@ fn test_type_report_generation() {
 fn test_roundtrip_trait_basic() {
     use accumulate_client::types_matrix::RoundtripTestable;
 
-    println!("🔍 Testing RoundtripTestable trait...");
+    println!("Testing RoundtripTestable trait...");
 
     // Test with a simple transaction header
     let header = TransactionHeader::generate_sample();
 
     match header.test_json_roundtrip() {
         Ok(()) => {
-            println!("  ✅ TransactionHeader JSON roundtrip successful");
+            println!("  [OK] TransactionHeader JSON roundtrip successful");
         }
         Err(e) => {
             panic!("TransactionHeader JSON roundtrip failed: {}", e);
@@ -123,7 +123,7 @@ fn test_roundtrip_trait_basic() {
     // Test binary roundtrip (should be no-op for default implementation)
     match header.test_binary_roundtrip() {
         Ok(()) => {
-            println!("  ✅ TransactionHeader binary roundtrip check passed");
+            println!("  [OK] TransactionHeader binary roundtrip check passed");
         }
         Err(e) => {
             panic!("TransactionHeader binary roundtrip failed: {}", e);
@@ -133,7 +133,7 @@ fn test_roundtrip_trait_basic() {
 
 #[test]
 fn test_type_names_uniqueness() {
-    println!("🔍 Testing TYPE_NAMES uniqueness...");
+    println!("Testing TYPE_NAMES uniqueness...");
 
     let mut seen_types = std::collections::HashSet::new();
     let mut duplicates = Vec::new();
@@ -148,12 +148,12 @@ fn test_type_names_uniqueness() {
         panic!("TYPE_NAMES contains duplicate entries: {:?}", duplicates);
     }
 
-    println!("  ✅ All {} type names are unique", TYPE_NAMES.len());
+    println!("  [OK] All {} type names are unique", TYPE_NAMES.len());
 }
 
 #[test]
 fn test_comprehensive_type_matrix() {
-    println!("🔍 Running comprehensive type matrix validation...");
+    println!("Running comprehensive type matrix validation...");
 
     // Count types by category
     let mut core_types = 0;
@@ -180,7 +180,7 @@ fn test_comprehensive_type_matrix() {
         }
     }
 
-    println!("  📊 Type distribution:");
+    println!("  Type distribution:");
     println!("    Core transaction types: {}", core_types);
     println!("    API response types: {}", api_types);
     println!("    V3 protocol types: {}", v3_types);
@@ -192,5 +192,5 @@ fn test_comprehensive_type_matrix() {
     assert!(api_types >= 5, "Should have at least 5 API response types");
     assert!(v3_types >= 2, "Should have at least 2 V3 protocol types");
 
-    println!("  ✅ Type matrix has good coverage across categories");
+    println!("  [OK] Type matrix has good coverage across categories");
 }
