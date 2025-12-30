@@ -260,9 +260,12 @@ fn test_count_valid_sigs_with_different_types() {
         })),
     ];
 
-    // All should verify as false with current implementation
+    // Structural signatures (PartitionSignature) with valid structure return true
+    // Cryptographic signatures with invalid keys/signatures return false
+    // InternalSignature returns false with zero hashes
     let count = count_valid_sigs(&mixed_sigs, &msg());
-    assert_eq!(count, 0, "All signature types should verify as false with test data");
+    // Only PartitionSignature returns true (valid structure with non-empty networks)
+    assert_eq!(count, 1, "Only PartitionSignature should verify as true with test data");
 }
 
 #[test]

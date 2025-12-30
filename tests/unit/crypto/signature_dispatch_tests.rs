@@ -131,7 +131,12 @@ fn minimal_signature_json(wire: &str) -> serde_json::Value {
             "type": "receipt",
             "SourceNetwork": "acc://test.acme",
             "Proof": {
-                "data": hex::encode([0u8; 32])  // Placeholder merkle proof
+                "start": hex::encode([0u8; 32]),
+                "startIndex": 0,
+                "end": hex::encode([0u8; 32]),
+                "endIndex": 1,
+                "anchor": hex::encode([0u8; 32]),
+                "entries": []
             },
             "TransactionHash": null
         }),

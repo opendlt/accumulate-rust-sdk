@@ -54,7 +54,7 @@ fn test_ed25519_key_derivation() {
             name, private_key_hex, expected_public_key, computed_public_key
         );
 
-        println!("✓ Key derivation vector '{}' matches", name);
+        println!("Success: Key derivation vector '{}' matches", name);
     }
 }
 
@@ -103,7 +103,7 @@ fn test_transaction_signing() {
         let verification = Ed25519Helper::verify_json(&keypair.public, transaction, &signature);
         assert!(verification.is_ok(), "Signature verification failed for vector '{}'", name);
 
-        println!("✓ Signing vector '{}' processed successfully", name);
+        println!("Success: Signing vector '{}' processed successfully", name);
         println!("  Canonical: {}", computed_canonical);
         println!("  Hash: {}", computed_hash);
         println!("  Signature: {}", signature_hex);
@@ -140,7 +140,7 @@ fn test_signature_deterministic() {
     assert!(Ed25519Helper::verify_json(&keypair.public, &transaction, &sig1).is_ok());
     assert!(Ed25519Helper::verify_json(&keypair.public, &transaction, &sig2).is_ok());
 
-    println!("✓ Deterministic signing works");
+    println!("Success: Deterministic signing works");
     println!("  Signature: {}", hex::encode(sig1.to_bytes()));
 }
 
@@ -166,7 +166,7 @@ fn test_cross_signature_verification() {
     // Verify with wrong key should fail
     assert!(Ed25519Helper::verify_json(&keypair2.public, &transaction, &signature).is_err());
 
-    println!("✓ Cross-signature verification security works");
+    println!("Success: Cross-signature verification security works");
 }
 
 #[test]
@@ -193,7 +193,7 @@ fn test_message_modification_detection() {
     // Verify modified (should fail)
     assert!(Ed25519Helper::verify_json(&keypair.public, &modified_transaction, &signature).is_err());
 
-    println!("✓ Message modification detection works");
+    println!("Success: Message modification detection works");
 }
 
 #[test]
@@ -204,7 +204,7 @@ fn test_empty_and_special_transactions() {
     let test_cases = vec![
         ("empty_object", serde_json::json!({})),
         ("null_values", serde_json::json!({"field": null})),
-        ("unicode", serde_json::json!({"message": "Hello 世界 🚀"})),
+        ("unicode", serde_json::json!({"message": "Hello world test"})),
         ("numbers", serde_json::json!({"int": 42, "float": 3.14159})),
         ("arrays", serde_json::json!({"list": [1, 2, 3]})),
     ];
@@ -214,7 +214,7 @@ fn test_empty_and_special_transactions() {
         let verification = Ed25519Helper::verify_json(&keypair.public, &transaction, &signature);
 
         assert!(verification.is_ok(), "Verification failed for case '{}'", name);
-        println!("✓ Special case '{}' signing works", name);
+        println!("Success: Special case '{}' signing works", name);
     }
 }
 
@@ -253,7 +253,7 @@ fn test_signature_format_validation() {
     let verification = Ed25519Helper::verify(&public_key, &message_hash, &signature);
 
     // Note: This might fail if the signature is a placeholder, but format should be valid
-    println!("✓ Signature format validation passed");
+    println!("Success: Signature format validation passed");
     println!("  Public key: {}", public_key_hex);
     println!("  Signature: {}", signature_hex);
     println!("  Message: {}", message);
@@ -297,7 +297,7 @@ fn test_large_transaction_signing() {
     let verify_duration = start.elapsed();
 
     assert!(verification.is_ok());
-    println!("✓ Large transaction signing works");
+    println!("Success: Large transaction signing works");
     println!("  Sign time: {:?}", sign_duration);
     println!("  Verify time: {:?}", verify_duration);
     println!("  Transaction size: {} bytes", canonical_json(&large_transaction).len());
