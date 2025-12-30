@@ -14,7 +14,7 @@ fn manifest() -> json::Value {
 fn minimal_body_json(body_name: &str, fields: &[Value]) -> Value {
     let mut json_obj = json::json!({});
 
-    // Add required fields based on manifest
+    // Add required fields based on manifest with VALID values
     for field in fields {
         if field["required"].as_bool().unwrap_or(false) {
             let field_name = field["name"].as_str().unwrap();
@@ -23,13 +23,27 @@ fn minimal_body_json(body_name: &str, fields: &[Value]) -> Value {
             let value = match field_type {
                 "url" => json::json!("acc://test.acme"),
                 "hash" => json::json!("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"),
-                "string" => json::json!("test"),
-                "bytes" => json::json!("deadbeef"),
-                "uint" | "uvarint" => json::json!(123),
-                "bigint" => json::json!("123"),
-                "time" => json::json!(1640995200),
+                "string" => {
+                    // Handle Symbol specially to be alphanumeric
+                    match field_name {
+                        "Symbol" => json::json!("TEST"),
+                        _ => json::json!("test")
+                    }
+                },
+                "bytes" => json::json!("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"),
+                "uint" | "uvarint" => {
+                    // Handle fields with specific constraints
+                    match field_name {
+                        "Precision" => json::json!(8), // Must be 0-18
+                        "Oracle" => json::json!(500),   // Must be positive
+                        "Height" => json::json!(1),     // Must be positive
+                        _ => json::json!(100)
+                    }
+                },
+                "bigint" => json::json!("100"),
+                "time" => json::json!(1704067200), // 2024-01-01
                 "bool" => json::json!(false),
-                "rawJson" => json::json!({}),
+                "rawJson" => json::json!({"type": "test"}),
                 // Complex types - provide minimal valid structures as JSON
                 "TokenRecipient" => json::json!({
                     "Url": "acc://recipient.acme",
@@ -374,30 +388,52 @@ fn test_manifest_coverage() {
 
 #[test]
 fn test_body_validation_current_state() {
-    // Test current validation state (all validate() methods return Ok for now)
+    // Test that validation now properly rejects invalid data
 
-    // Test SendTokensBody with empty recipients (currently passes validation - TODO in generated code)
+    // Test SendTokensBody with empty recipients - should fail validation
     let invalid_send = SendTokensBody {
         hash: None,
         meta: None,
-        to: vec![], // Empty recipients - should eventually fail validation
+        to: vec![], // Empty recipients - should fail validation
     };
 
     let validation_result = invalid_send.validate();
-    assert!(validation_result.is_ok(), "Validation currently returns Ok() - TODO: implement proper validation");
+    assert!(validation_result.is_err(), "Validation should fail for empty recipients");
 
-    // Test CreateIdentityBody with empty URL (currently passes validation - TODO in generated code)
+    // Test CreateIdentityBody with empty URL - should fail validation
     let invalid_identity = CreateIdentityBody {
-        url: "".to_string(), // Empty URL - should eventually fail validation
+        url: "".to_string(), // Empty URL - should fail validation
         key_hash: None,
         key_book_url: None,
         authorities: None,
     };
 
     let validation_result = invalid_identity.validate();
-    assert!(validation_result.is_ok(), "Validation currently returns Ok() - TODO: implement proper validation");
+    assert!(validation_result.is_err(), "Validation should fail for empty URL");
 
-    println!("✓ Body validation current state test successful (validation is TODO in generated code)");
+    // Test CreateIdentityBody with invalid URL (missing acc:// prefix)
+    let invalid_identity2 = CreateIdentityBody {
+        url: "test.acme".to_string(), // Missing acc:// prefix
+        key_hash: None,
+        key_book_url: None,
+        authorities: None,
+    };
+
+    let validation_result = invalid_identity2.validate();
+    assert!(validation_result.is_err(), "Validation should fail for URL without acc:// prefix");
+
+    // Test CreateIdentityBody with VALID data
+    let valid_identity = CreateIdentityBody {
+        url: "acc://test.acme".to_string(),
+        key_hash: Some(vec![0u8; 32]), // Valid 32-byte hash
+        key_book_url: Some("acc://test.acme/book".to_string()),
+        authorities: None,
+    };
+
+    let validation_result = valid_identity.validate();
+    assert!(validation_result.is_ok(), "Validation should pass for valid CreateIdentityBody: {:?}", validation_result.err());
+
+    println!("✓ Body validation test successful - validation properly rejects invalid data");
 }
 
 #[test]

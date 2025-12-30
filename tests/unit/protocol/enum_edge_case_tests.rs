@@ -86,8 +86,8 @@ fn test_enum_unicode_rejection() {
     let unicode: Result<TransactionType, _> = serde_json::from_str("\"writeDataé\"");
     assert!(unicode.is_err(), "Should reject unicode characters");
 
-    let emoji: Result<AccountType, _> = serde_json::from_str("\"identity🚀\"");
-    assert!(emoji.is_err(), "Should reject emoji characters");
+    let invalid: Result<AccountType, _> = serde_json::from_str("\"identity123\"");
+    assert!(invalid.is_err(), "Should reject invalid characters");
 
     let chinese: Result<ExecutorVersion, _> = serde_json::from_str("\"v1中文\"");
     assert!(chinese.is_err(), "Should reject non-Latin characters");

@@ -30,7 +30,7 @@ fn test_enum_serialization_properties() {
     test_enum_serialization_property(ExecutorVersion::V2);
     test_enum_serialization_property(ExecutorVersion::V2Baikonur);
 
-    println!("✓ All enum serialization properties verified");
+    println!("Success: All enum serialization properties verified");
 }
 
 #[test]
@@ -378,7 +378,7 @@ fn test_enum_fuzzing_simulation() {
     let fuzz_inputs = vec![
         // Random strings
         "\"random_string_123\"",
-        "\"🚀🚀🚀\"",
+        "\"invalid123\"",
         "\"\\u0000\\u0001\\u0002\"",
 
         // Partial matches
@@ -451,5 +451,5 @@ where
     // Property: Should be ASCII only (no unicode)
     assert!(json1.is_ascii(), "Enum JSON should be ASCII only: {}", json1);
 
-    println!("✓ Enum serialization property verified for: {}", json1);
+    println!("Success: Enum serialization property verified for: {}", json1);
 }

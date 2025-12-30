@@ -19,7 +19,7 @@ fn minimal_body_json(body_info: &Value) -> Value {
         "type": wire
     });
 
-    // Add minimal required fields
+    // Add minimal required fields with VALID values for the new validation
     for field in fields {
         if field["required"].as_bool().unwrap_or(false) {
             let field_name = field["name"].as_str().unwrap();
@@ -27,16 +27,38 @@ fn minimal_body_json(body_info: &Value) -> Value {
             let repeatable = field["repeatable"].as_bool().unwrap_or(false);
 
             let value = if repeatable {
-                json::json!([])
+                // For repeatable fields that require at least one entry
+                match field_name {
+                    "Keys" => json::json!([{"publicKeyHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}]),
+                    "To" => json::json!([{"url": "acc://test.acme/tokens", "amount": "100"}]),
+                    "Operation" => json::json!([{"type": "add", "key": {"publicKeyHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}}]),
+                    "Operations" => json::json!([{"type": "enable"}]),
+                    _ => json::json!([])
+                }
             } else {
                 match field_type {
-                    "url" | "string" => json::json!(""),
-                    "uint" | "uvarint" => json::json!(0),
+                    "url" => json::json!("acc://test.acme/account"),
+                    "string" => {
+                        // Special handling for specific fields
+                        match field_name {
+                            "Symbol" => json::json!("TEST"),
+                            _ => json::json!("test")
+                        }
+                    },
+                    "uint" | "uvarint" => {
+                        // Special handling for fields that must be positive
+                        match field_name {
+                            "Oracle" => json::json!(100),
+                            "Height" => json::json!(1),
+                            "Precision" => json::json!(8),
+                            _ => json::json!(1)
+                        }
+                    },
                     "bool" | "boolean" => json::json!(false),
-                    "bytes" | "hash" | "txid" => json::json!("00"),
-                    "bigint" => json::json!("0"),
-                    "time" => json::json!(0),
-                    _ => json::json!({}), // Complex types
+                    "bytes" | "hash" | "txid" => json::json!("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"),
+                    "bigint" => json::json!("100"),
+                    "time" => json::json!(1704067200), // 2024-01-01 00:00:00 UTC
+                    _ => json::json!({"type": "test"}), // Complex types
                 }
             };
 
@@ -48,74 +70,74 @@ fn minimal_body_json(body_info: &Value) -> Value {
 }
 
 fn minimal_body_json_for_wire(wire_tag: &str) -> Value {
-    // Create minimal JSON for known wire tags
+    // Create minimal VALID JSON for known wire tags (passes validation)
     match wire_tag {
         "writeData" => json::json!({
             "type": "writeData",
-            "Entry": {}
+            "Entry": {"type": "test"}
         }),
         "createIdentity" => json::json!({
             "type": "createIdentity",
-            "Url": ""
+            "Url": "acc://test.acme"
         }),
         "sendTokens" => json::json!({
             "type": "sendTokens",
-            "To": []
+            "To": [{"url": "acc://recipient.acme/tokens", "amount": "100"}]
         }),
         "createToken" => json::json!({
             "type": "createToken",
-            "Url": "",
-            "Symbol": "",
-            "Precision": 0
+            "Url": "acc://test.acme/token",
+            "Symbol": "TEST",
+            "Precision": 8
         }),
         "issueTokens" => json::json!({
             "type": "issueTokens",
-            "Recipient": "",
-            "Amount": "0",
+            "Recipient": "acc://test.acme/tokens",
+            "Amount": "100",
             "To": []
         }),
         "acmeFaucet" => json::json!({
             "type": "acmeFaucet",
-            "Url": ""
+            "Url": "acc://test.acme/tokens"
         }),
         "activateProtocolVersion" => json::json!({
             "type": "activateProtocolVersion"
         }),
         "addCredits" => json::json!({
             "type": "addCredits",
-            "Recipient": "",
-            "Amount": "0",
-            "Oracle": 0
+            "Recipient": "acc://test.acme/page",
+            "Amount": "100",
+            "Oracle": 500
         }),
         "createDataAccount" => json::json!({
             "type": "createDataAccount",
-            "Url": ""
+            "Url": "acc://test.acme/data"
         }),
         "createKeyBook" => json::json!({
             "type": "createKeyBook",
-            "Url": "",
-            "PublicKeyHash": "00"
+            "Url": "acc://test.acme/book",
+            "PublicKeyHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         }),
         "createKeyPage" => json::json!({
             "type": "createKeyPage",
-            "Keys": []
+            "Keys": [{"publicKeyHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}]
         }),
         "createTokenAccount" => json::json!({
             "type": "createTokenAccount",
-            "Url": "",
-            "TokenUrl": ""
+            "Url": "acc://test.acme/tokens",
+            "TokenUrl": "acc://acme"
         }),
         "burnTokens" => json::json!({
             "type": "burnTokens",
-            "Amount": "0"
+            "Amount": "100"
         }),
         "updateKey" => json::json!({
             "type": "updateKey",
-            "NewKeyHash": ""
+            "NewKeyHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         }),
         "updateKeyPage" => json::json!({
             "type": "updateKeyPage",
-            "Operation": 0
+            "Operation": [{"type": "add"}]
         }),
         "blockValidatorAnchor" => json::json!({
             "type": "blockValidatorAnchor",
@@ -123,7 +145,7 @@ fn minimal_body_json_for_wire(wire_tag: &str) -> Value {
         }),
         "burnCredits" => json::json!({
             "type": "burnCredits",
-            "Amount": 0
+            "Amount": 100
         }),
         "directoryAnchor" => json::json!({
             "type": "directoryAnchor",
@@ -134,7 +156,37 @@ fn minimal_body_json_for_wire(wire_tag: &str) -> Value {
         }),
         "lockAccount" => json::json!({
             "type": "lockAccount",
-            "Height": 0
+            "Height": 1
+        }),
+        "transferCredits" => json::json!({
+            "type": "transferCredits",
+            "To": [{"url": "acc://recipient.acme/page", "amount": 100}]
+        }),
+        "updateAccountAuth" => json::json!({
+            "type": "updateAccountAuth",
+            "Operations": [{"type": "enable"}]
+        }),
+        "writeDataTo" => json::json!({
+            "type": "writeDataTo",
+            "Recipient": "acc://test.acme/data",
+            "Entry": {"type": "test"}
+        }),
+        "systemWriteData" => json::json!({
+            "type": "systemWriteData",
+            "Entry": {"type": "test"}
+        }),
+        "networkMaintenance" => json::json!({
+            "type": "networkMaintenance",
+            "Operations": []
+        }),
+        "createLiteTokenAccount" => json::json!({
+            "type": "createLiteTokenAccount"
+        }),
+        "systemGenesis" => json::json!({
+            "type": "systemGenesis"
+        }),
+        "remoteTransaction" => json::json!({
+            "type": "remoteTransaction"
         }),
         _ => json::json!({"type": wire_tag})
     }
@@ -220,22 +272,24 @@ fn test_specific_transaction_types() {
     // WriteData transaction
     let write_data = json::json!({
         "type": "writeData",
-        "Entry": {},
+        "Entry": {"type": "test"},
         "Scratch": false,
         "WriteToState": true
     });
 
     let parsed: TransactionBody = serde_json::from_value(write_data).unwrap();
-    assert!(parsed.validate().is_ok());
+    let result = parsed.validate();
+    assert!(result.is_ok(), "WriteData validation failed: {:?}", result.err());
 
-    // SendTokens transaction
+    // SendTokens transaction (must have at least one recipient)
     let send_tokens = json::json!({
         "type": "sendTokens",
-        "To": []
+        "To": [{"url": "acc://recipient.acme/tokens", "amount": "100"}]
     });
 
     let parsed: TransactionBody = serde_json::from_value(send_tokens).unwrap();
-    assert!(parsed.validate().is_ok());
+    let result = parsed.validate();
+    assert!(result.is_ok(), "SendTokens validation failed: {:?}", result.err());
 
     // CreateIdentity transaction
     let create_identity = json::json!({
@@ -244,7 +298,8 @@ fn test_specific_transaction_types() {
     });
 
     let parsed: TransactionBody = serde_json::from_value(create_identity).unwrap();
-    assert!(parsed.validate().is_ok());
+    let result = parsed.validate();
+    assert!(result.is_ok(), "CreateIdentity validation failed: {:?}", result.err());
 }
 
 #[test]
