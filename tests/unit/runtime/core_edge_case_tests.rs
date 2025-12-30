@@ -35,7 +35,7 @@ fn test_json_roundtrip_edge_cases() {
         initiator: vec![0x01, 0x02, 0x03, 0x04],
         memo: Some("Complete test".to_string()),
         metadata: Some(vec![0xaa, 0xbb, 0xcc, 0xdd]),
-        expire: Some(ExpireOptions { at_time: Some(9999999999) }),
+        expire: Some(ExpireOptions { at_time: Some(1893456000) }), // Jan 1, 2030 - reasonable
         hold_until: Some(HoldUntilOptions { minor_block: Some(12345) }),
         authorities: Some(vec!["acc://auth1.acme".to_string(), "acc://auth2.acme".to_string()]),
     };
@@ -234,12 +234,13 @@ fn test_validation_behavior() {
         initiator: vec![0xde, 0xad, 0xbe, 0xef],
         memo: Some("Valid transaction".to_string()),
         metadata: Some(vec![0x01, 0x02, 0x03]),
-        expire: Some(ExpireOptions { at_time: Some(9999999999) }),
+        expire: Some(ExpireOptions { at_time: Some(1893456000) }), // Jan 1, 2030
         hold_until: Some(HoldUntilOptions { minor_block: Some(12345) }),
         authorities: Some(vec!["acc://authority.acme".to_string()]),
     };
 
-    assert!(valid_header.validate().is_ok(), "Valid header should pass validation");
+    let result = valid_header.validate();
+    assert!(result.is_ok(), "Valid header should pass validation: {:?}", result.err());
 
     // Test minimal valid header
     let minimal_header = TransactionHeader {
@@ -255,7 +256,7 @@ fn test_validation_behavior() {
     assert!(minimal_header.validate().is_ok(), "Minimal header should pass validation");
 
     // Test that ExpireOptions and HoldUntilOptions validate
-    let expire_opts = ExpireOptions { at_time: Some(9999999999) };
+    let expire_opts = ExpireOptions { at_time: Some(1893456000) }; // Jan 1, 2030
     assert!(expire_opts.validate().is_ok(), "ExpireOptions should validate");
 
     let hold_opts = HoldUntilOptions { minor_block: Some(12345) };

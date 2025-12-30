@@ -116,8 +116,9 @@ fn test_canonical_json_primitives() {
 #[test]
 fn test_keypair_generation() {
     let keypair = AccumulateClient::generate_keypair();
-    assert_eq!(keypair.public.to_bytes().len(), 32);
-    assert_eq!(keypair.secret.to_bytes().len(), 32);
+    // In ed25519-dalek v2, use verifying_key() and to_bytes() instead of .public/.secret
+    assert_eq!(keypair.verifying_key().to_bytes().len(), 32);
+    assert_eq!(keypair.to_bytes().len(), 32);
 }
 
 #[test]
