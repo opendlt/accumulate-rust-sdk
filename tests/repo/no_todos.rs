@@ -202,7 +202,7 @@ fn test_no_todos_in_source_code() {
     println!("Scan complete. Files scanned: {}", total_files_scanned);
 
     if !all_violations.is_empty() {
-        println!("\n❌ QUALITY GATE FAILED: Found {} prohibited patterns in source code", all_violations.len());
+        println!("\n[FAIL] QUALITY GATE FAILED: Found {} prohibited patterns in source code", all_violations.len());
         println!("=====================================================================");
 
         // Group violations by file
@@ -217,7 +217,7 @@ fn test_no_todos_in_source_code() {
 
         // Print violations organized by file
         for (file_path, violations) in violations_by_file {
-            println!("\n📁 File: {}", file_path);
+            println!("\nFile: {}", file_path);
             for violation in violations {
                 println!("   Line {}: {} (pattern: '{}')",
                     violation.line_number,
@@ -228,7 +228,7 @@ fn test_no_todos_in_source_code() {
             }
         }
 
-        println!("\n💡 Fix these issues before proceeding:");
+        println!("\nTip: Fix these issues before proceeding:");
         println!("   - Replace TODO/FIXME with proper implementation");
         println!("   - Remove unimplemented!() and todo!() macros");
         println!("   - Implement proper error handling instead of panic!()");
@@ -236,7 +236,7 @@ fn test_no_todos_in_source_code() {
 
         panic!("Quality gate failed: {} prohibited patterns found", all_violations.len());
     } else {
-        println!("✅ QUALITY GATE PASSED: No prohibited patterns found in source code");
+        println!("[OK] QUALITY GATE PASSED: No prohibited patterns found in source code");
         println!("   Files scanned: {}", total_files_scanned);
         println!("   Directories: {}", SCAN_DIRECTORIES.join(", "));
     }
