@@ -26,7 +26,7 @@ async fn test_codec_integration_with_client() {
     // Client created successfully - this verifies compilation
     let _client = client;
 
-    println!("✅ Codec integration test compiled successfully");
+    println!("[OK] Codec integration test compiled successfully");
 }
 
 #[test]
@@ -49,7 +49,7 @@ fn test_standalone_codec_functions() {
     let hash_hex = hex::encode(hash);
     assert_eq!(hash_hex.len(), 64);
 
-    println!("✅ Standalone codec functions work correctly");
+    println!("[OK] Standalone codec functions work correctly");
 }
 
 #[test]
@@ -74,5 +74,5 @@ fn test_transaction_body_builders() {
     assert_eq!(create_identity_body["url"], "acc://alice.acme");
     assert_eq!(create_identity_body["keyBook"], "acc://alice.acme/book");
 
-    println!("✅ Transaction body builders work correctly");
+    println!("[OK] Transaction body builders work correctly");
 }

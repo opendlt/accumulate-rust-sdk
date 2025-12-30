@@ -1,6 +1,6 @@
 //! Binary parity tests using TypeScript SDK golden fixtures
 //!
-//! ⚠️  WARNING: These tests use potentially buggy TypeScript test vectors.
+//! WARNING: These tests use potentially buggy TypeScript test vectors.
 //! See TYPESCRIPT_DEPENDENCIES_AUDIT.md for details.
 //! Use canonical tests in /conformance/ directory for reliable validation.
 //!
