@@ -61,8 +61,8 @@ impl SignatureSetWithThreshold {
     }
 }
 
-/// Count signatures that verify `true`. If a signature cannot be verified due to missing algo,
-/// treat as `false` (Stage 1.2 may have TODOs; they should return Ok(false)).
+/// Count signatures that verify `true`. If a signature cannot be verified due to an error,
+/// treat as `false` (verification errors are counted as invalid).
 pub fn count_valid_sigs(sigs: &[Box<Signature>], message: &[u8]) -> usize {
     sigs.iter()
         .filter(|s| {

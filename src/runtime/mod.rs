@@ -1,3 +1,7 @@
+//! Runtime utilities for the Accumulate SDK
+
+#![allow(missing_docs)]
+
 pub mod signing;
 
 #[cfg(test)]

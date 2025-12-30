@@ -1,10 +1,13 @@
+// Allow unwrap in this module - HTTP client building with valid settings cannot fail
+#![allow(clippy::unwrap_used)]
+
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::json;
 use std::time::Duration;
 use crate::errors::Error;
 use async_trait::async_trait;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct HttpTransport {
     pub base_url: String,
     pub client: reqwest::Client,
