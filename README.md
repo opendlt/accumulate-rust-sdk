@@ -1,408 +1,261 @@
-# Accumulate Rust SDK (V2/V3 Unified)
+# OpenDLT Accumulate Rust SDK
 
-A DevNet-first Rust client library for the Accumulate blockchain, providing unified access to both V2 and V3 APIs.
+[![Rust](https://img.shields.io/badge/Rust-1.70+-orange.svg)](https://www.rust-lang.org)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Crates.io](https://img.shields.io/crates/v/accumulate-client.svg)](https://crates.io/crates/accumulate-client)
+
+Production-ready Rust SDK for the Accumulate blockchain protocol. Supports all signature types, V2/V3 API endpoints, and provides a high-level signing API with automatic version tracking.
 
 ## Features
 
-- **Unified API**: Single client supporting both V2 and V3 protocols
-- **DevNet-first**: Optimized for local development with DevNet instances
-- **Zero-to-hero**: Complete examples from basic connectivity to transaction submission
-- **Fully tested**: Unit tests and integration tests with mocking support
-- **Generated core**: Core client methods generated from OpenAPI specifications
-- **Type-safe**: Comprehensive Rust types with serde support
-- **Async/await**: Modern async Rust with tokio
+- **Multi-Signature Support**: Ed25519, RCD1, BTC, ETH, RSA-SHA256, ECDSA-SHA256
+- **Smart Signing**: Automatic signer version tracking with `SmartSigner`
+- **Complete Protocol**: All transaction types and account operations
+- **Async/Await**: Modern async Rust with tokio runtime
+- **Network Ready**: Mainnet, Testnet (Kermit), and local DevNet support
 
-## Quick Start
+## Installation
 
 Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-accumulate-client = "0.1.0"
+accumulate-client = "2.0"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
 
-### Basic Usage
+## Quick Start
 
 ```rust
-use accumulate_client::{AccOptions, AccumulateClient};
+use accumulate_client::{
+    AccumulateClient, AccOptions, derive_lite_identity_url,
+    KERMIT_V2, KERMIT_V3,
+};
 use url::Url;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Connect to DevNet
-    let v2_url = Url::parse("http://localhost:26660/v2")?;
-    let v3_url = Url::parse("http://localhost:26660/v3")?;
-    let client = AccumulateClient::from_endpoints(v2_url, v3_url, AccOptions::default()).await?;
+    // Connect to Kermit testnet
+    let v2_url = Url::parse(KERMIT_V2)?;
+    let v3_url = Url::parse(KERMIT_V3)?;
+    let client = AccumulateClient::new_with_options(v2_url, v3_url, AccOptions::default()).await?;
 
-    // Get network status
-    let status = client.status().await?;
-    println!("Network: {}", status.network);
+    // Generate key pair and derive lite account URLs
+    let keypair = AccumulateClient::generate_keypair();
+    let public_key = keypair.verifying_key().to_bytes();
+    let lite_identity = derive_lite_identity_url(&public_key);
+    let lite_token_account = format!("{}/ACME", lite_identity);
+
+    println!("Lite Identity: {}", lite_identity);
+    println!("Lite Token Account: {}", lite_token_account);
 
     Ok(())
 }
 ```
 
-### Network Configuration
+## Smart Signing API
+
+The `SmartSigner` class handles version tracking automatically:
 
 ```rust
-use accumulate_client::{AccOptions, AccumulateClient};
+use accumulate_client::{
+    AccumulateClient, AccOptions, SmartSigner, TxBody,
+    derive_lite_identity_url, KERMIT_V2, KERMIT_V3,
+};
 use url::Url;
 
-// DevNet (default: localhost:26660)
-let v2_url = Url::parse("http://localhost:26660/v2")?;
-let v3_url = Url::parse("http://localhost:26660/v3")?;
-let client = AccumulateClient::from_endpoints(v2_url, v3_url, options).await?;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let v2_url = Url::parse(KERMIT_V2)?;
+    let v3_url = Url::parse(KERMIT_V3)?;
+    let client = AccumulateClient::new_with_options(v2_url, v3_url, AccOptions::default()).await?;
 
-// Custom network
-let v2_url = Url::parse("http://my-node:8080/v2")?;
-let v3_url = Url::parse("http://my-node:8080/v3")?;
-let client = AccumulateClient::from_endpoints(v2_url, v3_url, options).await?;
+    let keypair = AccumulateClient::generate_keypair();
+    let public_key = keypair.verifying_key().to_bytes();
+    let lite_identity = derive_lite_identity_url(&public_key);
+    let lite_token_account = format!("{}/ACME", lite_identity);
+
+    // Create SmartSigner - automatically queries and tracks signer version
+    let mut signer = SmartSigner::new(&client, keypair, &lite_identity);
+
+    // Sign, submit, and wait for delivery in one call
+    let result = signer.sign_submit_and_wait(
+        &lite_token_account,
+        &TxBody::send_tokens_single("acc://recipient.acme/tokens", "100000000"),
+        Some("Payment"),
+        30, // timeout seconds
+    ).await;
+
+    if result.success {
+        println!("Transaction delivered: {:?}", result.txid);
+    }
+
+    Ok(())
+}
 ```
 
-### Transaction Creation and Signing
+## QuickStart API
+
+For the simplest possible experience, use `QuickStart`:
 
 ```rust
-use accumulate_client::AccumulateClient;
+use accumulate_client::QuickStart;
 
-// Generate keypair
-let keypair = AccumulateClient::generate_keypair();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Connect to Kermit testnet (one line!)
+    let acc = QuickStart::kermit().await?;
 
-// Create transaction body
-let tx_body = client.create_token_transfer(
-    "acc://alice",
-    "acc://bob",
-    100, // amount
-    None // use default ACME token
-);
+    // Create a wallet (one line!)
+    let wallet = acc.create_wallet();
+    println!("Lite Token Account: {}", wallet.lite_token_account);
 
-// Create signed envelope for V3 API
-let envelope = client.create_envelope(&tx_body, &keypair)?;
+    // Fund from faucet (one line!)
+    acc.fund_wallet(&wallet, 5).await?;
 
-// Submit to network
-let result = client.submit(&envelope).await?;
-println!("Transaction hash: {}", result.hash);
+    // Create ADI with automatic credit purchase (one line!)
+    let adi = acc.setup_adi(&wallet, "my-adi").await?;
+    println!("ADI Created: {}", adi.url);
+
+    acc.close();
+    Ok(())
+}
+```
+
+## Supported Signature Types
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| Ed25519 | Default signature type | Recommended for all new accounts |
+| LegacyED25519 | Legacy Ed25519 format | Backward compatibility |
+| RCD1 | Factom RCD1 signature | Factom ecosystem compatibility |
+| BTC | Bitcoin secp256k1 | Bitcoin ecosystem integration |
+| ETH | Ethereum secp256k1 + keccak256 | Ethereum ecosystem integration |
+| RSA-SHA256 | RSA with SHA-256 | Enterprise/legacy systems |
+| ECDSA-SHA256 | ECDSA P-256 curve | Standard ECDSA operations |
+
+## Transaction Builders
+
+Build transactions using the `TxBody` struct:
+
+```rust
+use accumulate_client::TxBody;
+
+// Send tokens
+TxBody::send_tokens_single("acc://recipient.acme/tokens", "100000000");
+
+// Add credits
+TxBody::add_credits("acc://my-identity.acme", "1000000", oracle_price);
+
+// Create ADI
+TxBody::create_identity("acc://my-adi.acme", "acc://my-adi.acme/book", &key_hash_hex);
+
+// Create token account
+TxBody::create_token_account("acc://my-adi.acme/tokens", "acc://ACME");
+
+// Create custom token
+TxBody::create_token("acc://my-adi.acme/mytoken", "MTK", 8, None);
+
+// Write data
+TxBody::write_data(&["entry1_hex", "entry2_hex"]);
+
+// Key management
+TxBody::update_key_page_add_key(&key_hash_bytes);
+TxBody::update_key_page_set_threshold(2);
+```
+
+## Network Endpoints
+
+```rust
+use accumulate_client::{AccumulateClient, AccOptions, KERMIT_V2, KERMIT_V3};
+use url::Url;
+
+// Kermit Testnet (recommended for development)
+let client = AccumulateClient::new_with_options(
+    Url::parse(KERMIT_V2)?,
+    Url::parse(KERMIT_V3)?,
+    AccOptions::default(),
+).await?;
+
+// Local DevNet
+let client = AccumulateClient::new_with_options(
+    Url::parse("http://localhost:26660/v2")?,
+    Url::parse("http://localhost:26661/v3")?,
+    AccOptions::default(),
+).await?;
+
+// Custom endpoint
+let client = AccumulateClient::new_with_options(
+    Url::parse("https://your-node.com/v2")?,
+    Url::parse("https://your-node.com/v3")?,
+    AccOptions::default(),
+).await?;
 ```
 
 ## Examples
 
-The SDK includes comprehensive examples for DevNet integration:
+See [`examples/`](examples/) for complete working examples:
 
-### DevNet Setup and Discovery
+| Example | Description |
+|---------|-------------|
+| `example_01_lite_identities` | Lite identity and token account operations |
+| `example_02_adi_creation` | ADI creation with key books |
+| `example_03_token_accounts` | Token account management |
+| `example_04_data_accounts` | Data account operations |
+| `example_05_adi_to_adi_transfer` | ADI-to-ADI token transfers |
+| `example_06_custom_tokens` | Custom token creation and issuance |
+| `example_07_query_operations` | Query accounts, transactions, and network status |
+| `example_08_query_transactions` | Transaction querying patterns |
+| `example_09_key_management` | Key page operations (add/remove keys) |
+| `example_10_threshold_updates` | Multi-sig threshold management |
+| `example_11_quickstart_demo` | Ultra-simple QuickStart API demo |
+| `example_12_multi_signature_workflow` | Complete multi-sig workflow |
 
+Run any example:
 ```bash
-# 1. Start with DevNet discovery
-cargo run --bin devnet_discovery
-
-# This creates .env.local with discovered endpoints
+cargo run --example example_01_lite_identities
+cargo run --example example_11_quickstart_demo
 ```
 
-### Step-by-Step Examples
-
-```bash
-# 2. Learn key generation and URL patterns
-cargo run --example 100_keygen_lite_urls
-
-# 3. Fund accounts with faucet
-cargo run --example 120_faucet_local_devnet
-
-# 4. Buy credits for transactions
-cargo run --example 210_buy_credits_lite
-
-# 5. Complete zero-to-hero workflow
-cargo run --example 999_zero_to_hero
-```
-
-### Environment Configuration
-
-The examples use `.env.local` created by DevNet discovery:
-
-```bash
-# Generated by devnet_discovery
-ACC_DEVNET_DIR=/path/to/Devnet
-ACC_RPC_URL_V2=http://localhost:26660/v2
-ACC_RPC_URL_V3=http://localhost:26660/v3
-ACC_FAUCET_ACCOUNT=acc://faucet.acme/ACME
-```
-
-### Development Environment Variables
-
-For code generation and tooling, set these environment variables:
-
-```bash
-# Required: Path to the Accumulate Go repository
-# Clone from: https://gitlab.com/accumulatenetwork/accumulate
-export ACCUMULATE_REPO="/path/to/accumulate"
-
-# Optional: Path to the DevNet repository
-# Clone from: https://gitlab.com/accumulatenetwork/core/Devnet
-export DEVNET_REPO="/path/to/Devnet"
-
-# Optional: Path to this Rust SDK (defaults to current directory)
-export RUST_SDK_ROOT="/path/to/opendlt-rust-v2v3-sdk/unified"
-
-# Optional: TypeScript SDK path (for fixture export)
-export TS_SDK_ROOT="/path/to/accumulate-javascript-client"
-
-# Optional: Audit directory (for parity testing)
-export AUDIT_DIR="/path/to/rust_parity_audit"
-```
-
-These are used by the Python codegen scripts in `tooling/backends/` to generate Rust code from the canonical Go protocol definitions.
-
-## API Reference
-
-### Client Creation
-
-- `AccumulateClient::from_endpoints(v2_url, v3_url, options)` - Connect to custom V2/V3 endpoints
-
-### V2 API Methods
-
-- `client.status()` - Get node status
-- `client.query_tx(hash)` - Query transaction by hash
-- `client.query_account(url)` - Query account by URL
-- `client.faucet(account)` - Request test tokens (DevNet/TestNet)
-- `client.submit_v2(tx)` - Submit V2 transaction
-
-### V3 API Methods
-
-- `client.submit(envelope)` - Submit single transaction
-- `client.submit_multi(envelopes)` - Submit multiple transactions
-- `client.query(url)` - Query using V3 API
-- `client.query_block(height)` - Query block by height
-
-### Transaction Helpers
-
-- `client.create_envelope(tx, keypair)` - Create signed transaction envelope
-- `client.create_token_transfer(from, to, amount, token)` - Create token transfer
-- `client.create_account(url, pubkey, type)` - Create account creation transaction
-- `AccumulateClient::generate_keypair()` - Generate new keypair
-- `AccumulateClient::keypair_from_seed(seed)` - Create keypair from seed
-
-### Utilities
-
-- `client.get_urls()` - Get V2/V3 API URLs
-- `client.validate_account_url(url)` - Validate account URL format
-- `canonical_json(value)` - Create deterministic JSON for hashing
-
-## Configuration
-
-### AccOptions
-
-```rust
-use std::time::Duration;
-
-let mut headers = std::collections::HashMap::new();
-headers.insert("Authorization".to_string(), "Bearer token".to_string());
-
-let options = AccOptions {
-    timeout: Duration::from_secs(60),
-    headers,
-};
-```
-
-### Features
-
-- `default = ["rustls-tls"]` - Use rustls for TLS
-- `rustls-tls` - Enable rustls TLS backend
-
-## Testing
-
-```bash
-# Unit tests
-cargo test
-
-# Conformance tests (TS parity)
-cargo test conformance --all-features
-
-# All tests including demos
-cargo test --all-features
-
-# Test with tracing output
-RUST_LOG=debug cargo test
-```
-
-## Parity Gate
-
-The Rust SDK maintains byte-for-byte compatibility with the TypeScript SDK through comprehensive parity testing. The parity gate verifies:
-
-- **Canonical JSON**: Identical deterministic serialization
-- **Cryptographic parity**: Ed25519 signatures match exactly
-- **Transaction hashes**: SHA-256 hashes identical between SDKs
-- **Binary encoding**: Protocol buffers roundtrip correctly
-- **Fuzzing**: 1000+ random TypeScript-generated test vectors
-
-### Running the Parity Gate
-
-```bash
-# Run complete parity validation pipeline
-scripts\run_parity_gate.ps1
-
-# Custom fuzz count and coverage threshold
-scripts\run_parity_gate.ps1 -FuzzCount 2000 -CoverageThreshold 80
-```
-
-### Expected Output
+## Project Structure
 
 ```
-🚀 ACCUMULATE RUST SDK PARITY GATE
-===================================
-
-📁 Entering unified directory...
-🔧 Generating TypeScript fixtures...
-  → Generating standard fixtures...
-  → Generating random test vectors (n=1000)...
-  ✅ Generated 1000 random test vectors
-🎨 Formatting Rust code...
-  ✅ Code formatting complete
-🔍 Running Clippy linter...
-  ✅ Linting passed with no warnings
-🛡️  Running quality gates...
-  → Checking for TODOs and stubs...
-  ✅ No prohibited patterns found
-🧪 Running core functionality tests...
-  → Testing canonical JSON implementation...
-  → Testing cryptographic functions...
-  → Testing codec functionality...
-  ✅ Core functionality tests passed
-🔄 Running parity and roundtrip tests...
-  → Testing TypeScript fuzzing roundtrip...
-  → Testing type matrix roundtrips...
-  → Verifying type matrix coverage...
-  ✅ All parity and roundtrip tests passed
-🎯 Running complete test suite...
-  ✅ All tests passed
-📊 Analyzing code coverage...
-  ✅ Coverage threshold of 70% achieved
-
-📋 PARITY GATE SUMMARY
-======================
-📦 Golden fixtures: 15 files
-🎲 Fuzz vectors: 1000 envelopes
-🎯 Test coverage: 70% threshold
-🔄 Type matrix: 27 protocol types
-
-🟢 Parity locked: binary, canonical JSON, hashes, signatures, fuzz roundtrip = OK
-
-✅ All parity gates passed successfully!
-   The Rust SDK maintains byte-for-byte compatibility with TypeScript SDK
+src/
+├── lib.rs              # Public API facade
+├── client.rs           # AccumulateClient implementation
+├── helpers.rs          # SmartSigner, TxBody, QuickStart, utilities
+├── json_rpc_client.rs  # V2/V3 JSON-RPC client
+├── codec/              # Binary encoding (TLV format)
+├── crypto/             # Ed25519 and signature implementations
+├── generated/          # Protocol types from YAML definitions
+└── protocol/           # Transaction and envelope builders
+examples/               # Complete working examples
+tests/
+├── unit/               # Unit tests
+├── integration/        # Network integration tests
+└── conformance/        # Cross-implementation compatibility
 ```
-
-### Components
-
-The parity gate executes:
-
-1. **TypeScript Fixture Generation**: Creates deterministic test vectors
-2. **Code Quality**: Formatting, linting, and prohibition scanning
-3. **Core Tests**: Canonical JSON, cryptography, and codec validation
-4. **Roundtrip Verification**: Type matrix and fuzzing roundtrips
-5. **Coverage Analysis**: Ensures adequate test coverage (configurable threshold)
-
-## Production Tooling
-
-The SDK includes comprehensive production-ready tooling:
-
-### Code Quality
-
-```bash
-# Format code
-make fmt
-
-# Run lints
-make lint
-
-# Full development checks
-make dev
-```
-
-### Coverage Analysis
-
-```bash
-# Generate coverage report
-make coverage
-
-# Run coverage gates (70% overall, 85% critical)
-scripts/coverage_gate.sh
-
-# Coverage with HTML report
-cargo llvm-cov --all-features --html
-```
-
-### Package Validation
-
-```bash
-# Check package readiness
-scripts/package_check.sh
-
-# Test documentation builds
-cargo doc --all-features --no-deps -D warnings
-
-# Dry-run publish
-cargo publish --dry-run
-```
-
-### CI Integration
-
-The project includes GitHub Actions workflows for:
-- **CI**: Format, lint, test, coverage across Windows/Linux
-- **Release**: Automated publishing to crates.io on version tags
-- **Security**: Dependency auditing and vulnerability scanning
 
 ## Development
 
-### Running DevNet
-
-Start the local DevNet instance:
-
+### Running Tests
 ```bash
-cd /path/to/devnet-accumulate-instance
-./start-devnet.sh
+cargo test                           # All tests
+cargo test --lib                     # Library tests only
+cargo test --test integration_tests  # Integration tests (requires network)
 ```
 
-DevNet URLs:
-- V2 API: http://localhost:26660/v2
-- V3 API: http://localhost:26661/v3
-
-### Regenerating Code
-
-The core client, types, and JSON-RPC client are generated from templates:
-
+### Code Quality
 ```bash
-# Regenerate from OpenAPI spec
-cd /path/to/accumulate
-./tools/cmd/gen-sdk/gen-sdk.exe ./pkg/api/v3/openapi.yml \
-  --lang rust \
-  --template-dir "/path/to/opendlt-rust-v2v3-sdk/tooling/templates" \
-  --out "/path/to/opendlt-rust-v2v3-sdk/unified/src" \
-  --unified --api-version both
-
-# Format generated code
-cargo fmt
+cargo fmt                            # Format code
+cargo clippy                         # Run linter
+cargo doc --no-deps --open           # Generate and view docs
 ```
 
-**Important**: The generated files are read-only. To modify behavior, update the templates in `tooling/templates/` and regenerate.
-
-### Templates
-
-Templates are located in `tooling/templates/`:
-
-- `client.rs.tmpl` - Main client implementation
-- `json_rpc_client.rs.tmpl` - JSON-RPC client with V2/V3 support
-- `types.rs.tmpl` - Serde-compatible type definitions
-
-## Architecture
-
-```
-unified/
-├── Cargo.toml              # Dependencies and metadata
-├── src/
-│   ├── lib.rs             # Public facade (handwritten)
-│   ├── client.rs          # Generated client implementation
-│   ├── json_rpc_client.rs # Generated JSON-RPC client
-│   └── types.rs           # Generated type definitions
-├── examples/              # Zero-to-hero examples
-├── tests/                 # Unit and integration tests
-└── tooling/templates/     # Code generation templates
+### Building Examples
+```bash
+cargo build --examples               # Build all examples
+cargo run --example example_11_quickstart_demo
 ```
 
 ## Error Handling
@@ -412,25 +265,23 @@ All API methods return `Result<T, JsonRpcError>`:
 ```rust
 use accumulate_client::JsonRpcError;
 
-match client.status().await {
-    Ok(status) => println!("Success: {:?}", status),
+match client.v3_client.call_v3::<Value>("query", params).await {
+    Ok(result) => println!("Success: {:?}", result),
     Err(JsonRpcError::Http(e)) => eprintln!("HTTP error: {}", e),
-    Err(JsonRpcError::Rpc { code, message }) => eprintln!("RPC error {}: {}", code, message),
+    Err(JsonRpcError::Rpc { code, message }) => {
+        eprintln!("RPC error {}: {}", code, message)
+    },
     Err(e) => eprintln!("Other error: {}", e),
 }
 ```
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
-## Contributing
+## Links
 
-1. Fork the repository
-2. Create your feature branch
-3. Make changes to templates (not generated files)
-4. Run `cargo fmt` and `cargo clippy`
-5. Add tests for new functionality
-6. Submit a pull request
-
-Generated code should not be edited directly - modify templates and regenerate instead.
+- [Accumulate Protocol](https://accumulatenetwork.io/)
+- [API Documentation](https://docs.accumulatenetwork.io/)
+- [Kermit Testnet Explorer](https://kermit.explorer.accumulatenetwork.io/)
+- [Crates.io Package](https://crates.io/crates/accumulate-client)
