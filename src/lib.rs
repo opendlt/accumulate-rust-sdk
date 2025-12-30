@@ -17,8 +17,13 @@ pub use crate::canonjson::{dumps_canonical, canonicalize};
 pub use crate::crypto::ed25519::{Ed25519Signer, verify, verify_prehashed, verify_signature, sha256};
 pub use crate::crypto::ed25519_helper::Ed25519Helper;
 pub use crate::codec::hash_helper::HashHelper;
-pub use crate::protocol::{EnvelopeBuilder, helpers};
-pub use crate::generated::enums::*;
+pub use crate::protocol::{EnvelopeBuilder, helpers as protocol_helpers};
+pub use crate::generated::enums::{
+    AccountAuthOperationType, AccountType, AllowedTransactionBit, BookType,
+    DataEntryType, ExecutorVersion, KeyPageOperationType, NetworkMaintenanceOperationType,
+    ObjectType, PartitionType, SignatureType, TransactionMax, TransactionType,
+    VoteType, VoteTally,
+};
 pub use crate::generated::signatures::*;
 pub use crate::generated::header::*;
 pub use crate::generated::transactions::*;
@@ -42,17 +47,63 @@ pub use crate::runtime::rpc::*;
 #[cfg(test)]
 pub use crate::runtime::signing_test_shims;
 
+/// Canonical JSON encoding utilities
 pub mod canonjson;
+/// Main Accumulate client implementation
 pub mod client;
+/// Binary encoding/decoding utilities
 pub mod codec;
+/// Cryptographic utilities (Ed25519, hashing)
 pub mod crypto;
+/// Error types and handling
 pub mod errors;
+/// Auto-generated protocol types
 pub mod generated;
+/// Helper utilities (SmartSigner, TxBody, KeyManager, QuickStart)
+pub mod helpers;
+/// JSON-RPC client implementation
 pub mod json_rpc_client;
+/// Protocol envelope and transaction building
 pub mod protocol;
+/// Runtime utilities (RPC, signing)
 pub mod runtime;
+/// V3 API type definitions
 pub mod types;
+/// Type matrix for testing
 pub mod types_matrix;
+
+// Re-export helper utilities for convenience
+pub use crate::helpers::{
+    // Constants
+    KERMIT_V2, KERMIT_V3, DEVNET_V2, DEVNET_V3,
+    // Transaction builders
+    TxBody, TxResult,
+    // Smart signing
+    SmartSigner, KeyManager, KeyPageState, KeyEntry,
+    // QuickStart API
+    QuickStart, Wallet, AdiInfo, KeyPageInfo,
+    // Polling utilities
+    poll_for_balance, poll_for_credits, wait_for_tx,
+    // URL derivation
+    derive_lite_identity_url, derive_lite_token_account_url, sha256_hash,
+};
+
+// Re-export V3 API types for convenience
+pub use crate::types::{
+    // V3 Service Types
+    V3NodeInfo, ServiceAddress, NodeInfoOptions,
+    V3ConsensusStatus, LastBlock, ConsensusPeerInfo, ConsensusStatusOptions,
+    V3NetworkStatus, AcmeOracle, PartitionExecutorVersion, NetworkStatusOptions,
+    V3Metrics, MetricsOptions,
+    V3Submission, SubmitOptions, ValidateOptions,
+    V3FaucetOptions, V3SnapshotInfo, ListSnapshotsOptions,
+    FindServiceOptions, FindServiceResult, SubscribeOptions,
+    // V3 Query Types
+    RangeOptions, ReceiptOptions, DefaultQuery,
+    ChainQuery, DataQuery, DirectoryQuery, PendingQuery, BlockQuery,
+    AnchorSearchQuery, PublicKeySearchQuery, PublicKeyHashSearchQuery,
+    DelegateSearchQuery, MessageHashSearchQuery, V3Query,
+};
 
 use anyhow::Result;
 use std::time::Duration;
