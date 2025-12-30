@@ -1,6 +1,6 @@
 [package]
 name         = "accumulate-client"
-version      = "0.1.0"
+version      = "2.0.0"
 edition      = "2021"
 license      = "MIT"
 readme       = "README.md"
@@ -30,24 +30,20 @@ reqwest = { version = "0.12", default-features = false, features = ["json","rust
 tokio = { version = "1", features = ["rt-multi-thread","macros"], optional = true }
 thiserror = "1"
 anyhow = "1"
-ed25519-dalek = { version = "1", features = ["rand"] }
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
 num-bigint = "0.4"
 sha2 = "0.10"
 hex = { version = "0.4", features = ["serde"] }
-base64 = "0.22"
 url = "2"
-once_cell = "1"
 dotenvy = "0.15"
-rand = "0.8"
-k256 = { version = "0.13", features = ["ecdsa"] }
+k256 = { version = "0.13", features = ["ecdsa", "ecdsa-core"] }
 rsa = { version = "0.9", features = ["sha2"] }
+sha3 = "0.10"
 async-trait = "0.1"
 
 [dev-dependencies]
-insta = { version = "1", default-features = false, features = ["json","redactions"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rand = "0.8"
 hex = "0.4"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 tracing-subscriber = "0.3"
@@ -69,17 +65,19 @@ panic = "deny"
 print_stdout = "deny"
 print_stderr = "deny"
 
-# Pedantic lints for code quality
-pedantic = "warn"
-nursery = "warn"
+# Pedantic lints for code quality (lower priority so individual lints override)
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
 
 # Performance lints
-perf = "warn"
+perf = { level = "warn", priority = -1 }
 
 # Cargo lints
-cargo = "warn"
+cargo = { level = "warn", priority = -1 }
 
 # Allow some pedantic lints that are too strict for our use case
 module_name_repetitions = "allow"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
+unreadable_literal = "allow"
+needless_continue = "allow"
