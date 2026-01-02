@@ -47,6 +47,9 @@ docker-compose.override.yml
 artifacts/
 releases/
 
+# Python test cache (should never be committed)
+.pytest_cache/
+
 # Cache
 .cache/
 .cargo-cache/
