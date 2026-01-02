@@ -31,27 +31,27 @@ function Write-Header {
 
 function Write-Success {
     param($Message)
-    Write-Host "${Green}✅ $Message${Reset}"
+    Write-Host "${Green} $Message${Reset}"
 }
 
 function Write-Warning {
     param($Message)
-    Write-Host "${Yellow}⚠️  $Message${Reset}"
+    Write-Host "${Yellow}  $Message${Reset}"
 }
 
 function Write-Error {
     param($Message)
-    Write-Host "${Red}❌ $Message${Reset}"
+    Write-Host "${Red} $Message${Reset}"
 }
 
 function Write-Info {
     param($Message)
-    Write-Host "${Blue}ℹ️  $Message${Reset}"
+    Write-Host "${Blue}ℹ  $Message${Reset}"
 }
 
 function Write-Progress {
     param($Message)
-    Write-Host "${Magenta}🔄 $Message${Reset}"
+    Write-Host "${Magenta} $Message${Reset}"
 }
 
 # Initialize counters
@@ -272,18 +272,18 @@ Test-Command "Release build succeeds" "cargo build --release"
 Write-Header "Package Check Summary"
 
 Write-Host ""
-Write-Host "${Blue}📊 Results:${Reset}"
+Write-Host "${Blue} Results:${Reset}"
 Write-Host "   Total checks: $TotalChecks"
 Write-Host "   Passed: $PassedChecks"
 Write-Host "   Failed: $FailedChecks"
 
 if ($FailedChecks -eq 0) {
     Write-Host ""
-    Write-Success "🎉 All package sanity checks passed!"
+    Write-Success " All package sanity checks passed!"
     Write-Host ""
     Write-Info "Package is ready for publishing to crates.io"
     Write-Host ""
-    Write-Host "${Blue}📋 Next steps:${Reset}"
+    Write-Host "${Blue} Next steps:${Reset}"
     Write-Host "   1. Update version in Cargo.toml if needed"
     Write-Host "   2. Update CHANGELOG.md with release notes"
     Write-Host "   3. Create a git tag: git tag v`$(grep '^version' Cargo.toml | cut -d'`"' -f2)"
@@ -292,7 +292,7 @@ if ($FailedChecks -eq 0) {
     exit 0
 } else {
     Write-Host ""
-    Write-Error "💥 $FailedChecks package check(s) failed!"
+    Write-Error " $FailedChecks package check(s) failed!"
     Write-Host ""
     Write-Info "Please fix the issues above before publishing"
     Write-Host ""

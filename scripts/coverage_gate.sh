@@ -27,23 +27,23 @@ write_header() {
 }
 
 write_success() {
-    echo -e "${GREEN}✅ $1${RESET}"
+    echo -e "${GREEN} $1${RESET}"
 }
 
 write_warning() {
-    echo -e "${YELLOW}⚠️  $1${RESET}"
+    echo -e "${YELLOW}  $1${RESET}"
 }
 
 write_error() {
-    echo -e "${RED}❌ $1${RESET}"
+    echo -e "${RED} $1${RESET}"
 }
 
 write_info() {
-    echo -e "${BLUE}ℹ️  $1${RESET}"
+    echo -e "${BLUE}ℹ  $1${RESET}"
 }
 
 write_progress() {
-    echo -e "${MAGENTA}🔄 $1${RESET}"
+    echo -e "${MAGENTA} $1${RESET}"
 }
 
 # Parse command line arguments
@@ -189,7 +189,7 @@ CRITICAL_COVERAGE=$(awk "BEGIN { if ($CRITICAL_TOTAL > 0) print ($CRITICAL_HIT /
 write_header "Coverage Summary"
 
 echo ""
-echo -e "${BLUE}📊 Overall Coverage:${RESET}"
+echo -e "${BLUE} Overall Coverage:${RESET}"
 echo "   Lines Total: $OVERALL_TOTAL"
 echo "   Lines Hit:   $OVERALL_HIT"
 if (( $(echo "$OVERALL_COVERAGE >= $OVERALL_THRESHOLD" | bc -l) )); then
@@ -199,7 +199,7 @@ else
 fi
 
 echo ""
-echo -e "${BLUE}🔒 Critical Code Coverage:${RESET}"
+echo -e "${BLUE} Critical Code Coverage:${RESET}"
 echo "   Lines Total: $CRITICAL_TOTAL"
 echo "   Lines Hit:   $CRITICAL_HIT"
 if (( $(echo "$CRITICAL_COVERAGE >= $CRITICAL_THRESHOLD" | bc -l) )); then
@@ -211,14 +211,14 @@ fi
 # Show critical files
 if [ ${#CRITICAL_FILES[@]} -gt 0 ]; then
     echo ""
-    echo -e "${BLUE}📋 Critical Files:${RESET}"
+    echo -e "${BLUE} Critical Files:${RESET}"
     for file_data in "${CRITICAL_FILES[@]}"; do
         file=$(echo "$file_data" | cut -d: -f1)
         coverage=$(echo "$file_data" | cut -d: -f2)
         if (( $(echo "$coverage >= $CRITICAL_THRESHOLD" | bc -l) )); then
-            status="${GREEN}✅${RESET}"
+            status="${GREEN} ${RESET}"
         else
-            status="${RED}❌${RESET}"
+            status="${RED} ${RESET}"
         fi
         printf "   %s %5.1f%% %s\n" "$status" "$coverage" "$file"
     done
@@ -226,14 +226,14 @@ fi
 
 # Show low coverage files (< 50%)
 echo ""
-echo -e "${YELLOW}⚠️  Low Coverage Files (< 50%):${RESET}"
+echo -e "${YELLOW}  Low Coverage Files (< 50%):${RESET}"
 LOW_COUNT=0
 while IFS=: read -r file found hit coverage; do
     if [ "$file" = "OVERALL" ]; then
         continue
     fi
     if (( $(echo "$coverage < 50 && $found > 5" | bc -l) )) && [ $LOW_COUNT -lt 10 ]; then
-        printf "   ${RED}❌${RESET} %5.1f%% %s\n" "$coverage" "$file"
+        printf "   ${RED} ${RESET} %5.1f%% %s\n" "$coverage" "$file"
         LOW_COUNT=$((LOW_COUNT + 1))
     fi
 done < "$TEMP_DIR/coverage_data"
@@ -260,13 +260,13 @@ fi
 # Final result
 if [ "$OVERALL_PASSED" = "1" ] && [ "$CRITICAL_PASSED" = "1" ]; then
     echo ""
-    write_success "🎉 All coverage gates passed!"
+    write_success " All coverage gates passed!"
     write_info "HTML report: target/llvm-cov/html/index.html"
     write_info "LCOV report: target/lcov.info"
     exit 0
 else
     echo ""
-    write_error "💥 Coverage gates failed!"
+    write_error " Coverage gates failed!"
     write_info "Improve test coverage for the files listed above"
     write_info "HTML report: target/llvm-cov/html/index.html"
     write_info "LCOV report: target/lcov.info"

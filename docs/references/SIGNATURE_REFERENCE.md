@@ -37,15 +37,15 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| PublicKey | []byte | ✅ | Ed25519 public key |
-| Signature | []byte | ✅ | Ed25519 signature bytes |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| SignerVersion | uint64 | ✅ | Version of the signer |
-| Timestamp | uint64 | ❌ | Timestamp of signing |
-| Vote | VoteType | ❌ | Vote type |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
-| Memo | string | ❌ | Optional memo |
-| Data | []byte | ❌ | Additional signature data |
+| PublicKey | []byte | Yes | Ed25519 public key |
+| Signature | []byte | Yes | Ed25519 signature bytes |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| SignerVersion | uint64 | Yes | Version of the signer |
+| Timestamp | uint64 | No | Timestamp of signing |
+| Vote | VoteType | No | Vote type |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
+| Memo | string | No | Optional memo |
+| Data | []byte | No | Additional signature data |
 
 ### ETHSignature
 **File**: `protocol/types_gen.go:361`
@@ -53,15 +53,15 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| PublicKey | []byte | ✅ | Ethereum public key |
-| Signature | []byte | ✅ | Ethereum signature bytes |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| SignerVersion | uint64 | ✅ | Version of the signer |
-| Timestamp | uint64 | ❌ | Timestamp of signing |
-| Vote | VoteType | ❌ | Vote type |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
-| Memo | string | ❌ | Optional memo |
-| Data | []byte | ❌ | Additional signature data |
+| PublicKey | []byte | Yes | Ethereum public key |
+| Signature | []byte | Yes | Ethereum signature bytes |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| SignerVersion | uint64 | Yes | Version of the signer |
+| Timestamp | uint64 | No | Timestamp of signing |
+| Vote | VoteType | No | Vote type |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
+| Memo | string | No | Optional memo |
+| Data | []byte | No | Additional signature data |
 
 ### BTCSignature
 **File**: `protocol/types_gen.go:170`
@@ -69,15 +69,15 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| PublicKey | []byte | ✅ | Bitcoin public key |
-| Signature | []byte | ✅ | Bitcoin signature bytes |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| SignerVersion | uint64 | ✅ | Version of the signer |
-| Timestamp | uint64 | ❌ | Timestamp of signing |
-| Vote | VoteType | ❌ | Vote type |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
-| Memo | string | ❌ | Optional memo |
-| Data | []byte | ❌ | Additional signature data |
+| PublicKey | []byte | Yes | Bitcoin public key |
+| Signature | []byte | Yes | Bitcoin signature bytes |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| SignerVersion | uint64 | Yes | Version of the signer |
+| Timestamp | uint64 | No | Timestamp of signing |
+| Vote | VoteType | No | Vote type |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
+| Memo | string | No | Optional memo |
+| Data | []byte | No | Additional signature data |
 
 ### BTCLegacySignature
 **File**: `protocol/types_gen.go:156`
@@ -85,15 +85,15 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| PublicKey | []byte | ✅ | Bitcoin legacy public key |
-| Signature | []byte | ✅ | Bitcoin legacy signature bytes |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| SignerVersion | uint64 | ✅ | Version of the signer |
-| Timestamp | uint64 | ❌ | Timestamp of signing |
-| Vote | VoteType | ❌ | Vote type |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
-| Memo | string | ❌ | Optional memo |
-| Data | []byte | ❌ | Additional signature data |
+| PublicKey | []byte | Yes | Bitcoin legacy public key |
+| Signature | []byte | Yes | Bitcoin legacy signature bytes |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| SignerVersion | uint64 | Yes | Version of the signer |
+| Timestamp | uint64 | No | Timestamp of signing |
+| Vote | VoteType | No | Vote type |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
+| Memo | string | No | Optional memo |
+| Data | []byte | No | Additional signature data |
 
 ### EcdsaSha256Signature
 **File**: `protocol/types_gen.go:375`
@@ -101,15 +101,15 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| PublicKey | []byte | ✅ | ECDSA public key |
-| Signature | []byte | ✅ | ECDSA signature bytes |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| SignerVersion | uint64 | ✅ | Version of the signer |
-| Timestamp | uint64 | ❌ | Timestamp of signing |
-| Vote | VoteType | ❌ | Vote type |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
-| Memo | string | ❌ | Optional memo |
-| Data | []byte | ❌ | Additional signature data |
+| PublicKey | []byte | Yes | ECDSA public key |
+| Signature | []byte | Yes | ECDSA signature bytes |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| SignerVersion | uint64 | Yes | Version of the signer |
+| Timestamp | uint64 | No | Timestamp of signing |
+| Vote | VoteType | No | Vote type |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
+| Memo | string | No | Optional memo |
+| Data | []byte | No | Additional signature data |
 
 ### RsaSha256Signature
 **File**: `protocol/types_gen.go:786`
@@ -117,15 +117,15 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| PublicKey | []byte | ✅ | RSA public key |
-| Signature | []byte | ✅ | RSA signature bytes |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| SignerVersion | uint64 | ✅ | Version of the signer |
-| Timestamp | uint64 | ❌ | Timestamp of signing |
-| Vote | VoteType | ❌ | Vote type |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
-| Memo | string | ❌ | Optional memo |
-| Data | []byte | ❌ | Additional signature data |
+| PublicKey | []byte | Yes | RSA public key |
+| Signature | []byte | Yes | RSA signature bytes |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| SignerVersion | uint64 | Yes | Version of the signer |
+| Timestamp | uint64 | No | Timestamp of signing |
+| Vote | VoteType | No | Vote type |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
+| Memo | string | No | Optional memo |
+| Data | []byte | No | Additional signature data |
 
 ### TypedDataSignature
 **File**: `protocol/types_gen.go:1041`
@@ -133,16 +133,16 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| PublicKey | []byte | ✅ | Public key for typed data |
-| Signature | []byte | ✅ | Typed data signature bytes |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| SignerVersion | uint64 | ✅ | Version of the signer |
-| Timestamp | uint64 | ❌ | Timestamp of signing |
-| Vote | VoteType | ❌ | Vote type |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
-| Memo | string | ❌ | Optional memo |
-| Data | []byte | ❌ | Additional signature data |
-| ChainID | *big.Int | ✅ | Chain ID for typed data |
+| PublicKey | []byte | Yes | Public key for typed data |
+| Signature | []byte | Yes | Typed data signature bytes |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| SignerVersion | uint64 | Yes | Version of the signer |
+| Timestamp | uint64 | No | Timestamp of signing |
+| Vote | VoteType | No | Vote type |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
+| Memo | string | No | Optional memo |
+| Data | []byte | No | Additional signature data |
+| ChainID | *big.Int | Yes | Chain ID for typed data |
 
 **Special Note**: TypedDataSignature is the exception to the "omit null fields" rule. Some EIP-712 implementations may require explicit null handling for chain ID or other fields.
 
@@ -152,15 +152,15 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| PublicKey | []byte | ✅ | RCD1 public key |
-| Signature | []byte | ✅ | RCD1 signature bytes |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| SignerVersion | uint64 | ✅ | Version of the signer |
-| Timestamp | uint64 | ❌ | Timestamp of signing |
-| Vote | VoteType | ❌ | Vote type |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
-| Memo | string | ❌ | Optional memo |
-| Data | []byte | ❌ | Additional signature data |
+| PublicKey | []byte | Yes | RCD1 public key |
+| Signature | []byte | Yes | RCD1 signature bytes |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| SignerVersion | uint64 | Yes | Version of the signer |
+| Timestamp | uint64 | No | Timestamp of signing |
+| Vote | VoteType | No | Vote type |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
+| Memo | string | No | Optional memo |
+| Data | []byte | No | Additional signature data |
 
 ### LegacyED25519Signature
 **File**: `protocol/types_gen.go:511`
@@ -168,13 +168,13 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| Timestamp | uint64 | ✅ | Legacy timestamp field (required) |
-| PublicKey | []byte | ✅ | Ed25519 public key |
-| Signature | []byte | ✅ | Ed25519 signature bytes |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| SignerVersion | uint64 | ✅ | Version of the signer |
-| Vote | VoteType | ❌ | Vote type |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
+| Timestamp | uint64 | Yes | Legacy timestamp field (required) |
+| PublicKey | []byte | Yes | Ed25519 public key |
+| Signature | []byte | Yes | Ed25519 signature bytes |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| SignerVersion | uint64 | Yes | Version of the signer |
+| Vote | VoteType | No | Vote type |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
 
 **Note**: In LegacyED25519Signature, timestamp is required (unlike other signatures).
 
@@ -186,13 +186,13 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| Origin | *url.URL | ✅ | The signer that produced this signature |
-| Authority | *url.URL | ✅ | The authority that produced this signature |
-| Vote | VoteType | ❌ | The authority's vote |
-| TxID | *url.TxID | ✅ | The ID of the transaction this was produced for |
-| Cause | *url.TxID | ✅ | The ID of the signature that produced this |
-| Delegator | []*url.URL | ✅ | Delegation chain |
-| Memo | string | ❌ | Optional memo field |
+| Origin | *url.URL | Yes | The signer that produced this signature |
+| Authority | *url.URL | Yes | The authority that produced this signature |
+| Vote | VoteType | No | The authority's vote |
+| TxID | *url.TxID | Yes | The ID of the transaction this was produced for |
+| Cause | *url.TxID | Yes | The ID of the signature that produced this |
+| Delegator | []*url.URL | Yes | Delegation chain |
+| Memo | string | No | Optional memo field |
 
 ### InternalSignature
 **File**: `protocol/types_gen.go:453`
@@ -200,8 +200,8 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| Cause | [32]byte | ✅ | Hash of the transaction that produced the signed transaction |
-| TransactionHash | [32]byte | ✅ | Hash of the signed transaction |
+| Cause | [32]byte | Yes | Hash of the transaction that produced the signed transaction |
+| TransactionHash | [32]byte | Yes | Hash of the signed transaction |
 
 ### PartitionSignature
 **File**: `protocol/types_gen.go:670`
@@ -209,10 +209,10 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| SourceNetwork | *url.URL | ✅ | Source network of transaction |
-| DestinationNetwork | *url.URL | ✅ | Destination network of transaction |
-| SequenceNumber | uint64 | ✅ | Sequence number of transaction |
-| TransactionHash | [32]byte | ❌ | Hash of transaction |
+| SourceNetwork | *url.URL | Yes | Source network of transaction |
+| DestinationNetwork | *url.URL | Yes | Destination network of transaction |
+| SequenceNumber | uint64 | Yes | Sequence number of transaction |
+| TransactionHash | [32]byte | No | Hash of transaction |
 
 ### ReceiptSignature
 **File**: `protocol/types_gen.go:725`
@@ -220,9 +220,9 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| SourceNetwork | *url.URL | ✅ | Network that produced the transaction |
-| Proof | merkle.Receipt | ✅ | Merkle proof receipt |
-| TransactionHash | [32]byte | ❌ | Hash of transaction |
+| SourceNetwork | *url.URL | Yes | Network that produced the transaction |
+| Proof | merkle.Receipt | Yes | Merkle proof receipt |
+| TransactionHash | [32]byte | No | Hash of transaction |
 
 ## Wrapper Signatures
 
@@ -232,8 +232,8 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| Signature | Signature | ✅ | The wrapped signature |
-| Delegator | *url.URL | ✅ | The authority that delegated its authority to the signer |
+| Signature | Signature | Yes | The wrapped signature |
+| Delegator | *url.URL | Yes | The authority that delegated its authority to the signer |
 
 **Usage**: Delegation chains up to 5 levels deep.
 
@@ -243,9 +243,9 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| Destination | *url.URL | ✅ | Destination partition for forwarding |
-| Signature | Signature | ✅ | The wrapped signature |
-| Cause | [][32]byte | ✅ | Hash chain of causes |
+| Destination | *url.URL | Yes | Destination partition for forwarding |
+| Signature | Signature | Yes | The wrapped signature |
+| Cause | [][32]byte | Yes | Hash chain of causes |
 
 ## Aggregate Signatures
 
@@ -255,11 +255,11 @@ Cryptographic signatures (extends UserSignature):
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| Vote | VoteType | ❌ | Vote type for the set |
-| Signer | *url.URL | ✅ | URL of the signing entity |
-| TransactionHash | [32]byte | ❌ | Hash of signed transaction |
-| Signatures | []Signature | ✅ | Set of signatures |
-| Authority | *url.URL | ✅ | Authority for the signature set |
+| Vote | VoteType | No | Vote type for the set |
+| Signer | *url.URL | Yes | URL of the signing entity |
+| TransactionHash | [32]byte | No | Hash of signed transaction |
+| Signatures | []Signature | Yes | Set of signatures |
+| Authority | *url.URL | Yes | Authority for the signature set |
 
 ## Usage Patterns
 

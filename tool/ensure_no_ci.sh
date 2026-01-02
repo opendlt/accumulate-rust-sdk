@@ -9,9 +9,9 @@ echo "=== Ensuring No CI/Actions (Phase 4 Policy) ==="
 
 if [ -d "$gha" ]; then
     rm -rf "$gha"
-    echo "✅ Removed .github (GitHub Actions) directory."
+    echo "Removed .github (GitHub Actions) directory."
 else
-    echo "✅ No .github directory found."
+    echo "No .github directory found."
 fi
 
 # Check for other CI directories and files
@@ -28,10 +28,10 @@ for ci_path in "${ci_paths[@]}"; do
     if [ -e "$full_path" ]; then
         if [ -d "$full_path" ]; then
             rm -rf "$full_path"
-            echo "✅ Removed CI directory: $ci_path"
+            echo "Removed CI directory: $ci_path"
         else
             rm -f "$full_path"
-            echo "✅ Removed CI file: $ci_path"
+            echo "Removed CI file: $ci_path"
         fi
     fi
 done
@@ -48,10 +48,10 @@ Jenkinsfile"
 
 if [ -f "$gi" ]; then
     echo "$block" >> "$gi"
-    echo "✅ Added CI blocking rules to .gitignore"
+    echo "Added CI blocking rules to .gitignore"
 else
     echo "$block" > "$gi"
-    echo "✅ Created .gitignore with CI blocking rules"
+    echo "Created .gitignore with CI blocking rules"
 fi
 
-echo "✅ CI/Actions disabled & ignored."
+echo "CI/Actions disabled & ignored."

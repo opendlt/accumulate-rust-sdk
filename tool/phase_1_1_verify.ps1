@@ -41,20 +41,20 @@ Write-Host "`n5) Verifying G1=PASS (14/14 enums)..." -ForegroundColor Yellow
 $parity_report = "C:\Accumulate_Stuff\rust_parity_audit\reports\RUST_vs_Go_Parity_Report.md"
 if (Test-Path $parity_report) {
     $content = Get-Content $parity_report -Raw
-    if ($content -match "Enums.*14.*14.*✅|Enums.*14.*14.*PASS") {
-        Write-Host "✅ SUCCESS: G1=PASS (14/14 enums achieved)" -ForegroundColor Green
+    if ($content -match "Enums.*14.*14.*|Enums.*14.*14.*PASS") {
+        Write-Host "SUCCESS: G1=PASS (14/14 enums achieved)" -ForegroundColor Green
     } else {
-        Write-Host "❌ FAILED: G1 gate not achieved" -ForegroundColor Red
+        Write-Host "FAILED: G1 gate not achieved" -ForegroundColor Red
         Write-Host "Parity report excerpt:" -ForegroundColor Yellow
         Get-Content $parity_report | Select-Object -First 20
         exit 1
     }
 } else {
-    Write-Host "❌ FAILED: Parity report not found" -ForegroundColor Red
+    Write-Host "FAILED: Parity report not found" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "`n🎉 Phase 1.1 Verification Complete!" -ForegroundColor Green
+Write-Host "`n Phase 1.1 Verification Complete!" -ForegroundColor Green
 Write-Host "✓ 14 enums generated with exact wire compatibility" -ForegroundColor White
 Write-Host "✓ All JSON roundtrip tests pass" -ForegroundColor White
 Write-Host "✓ Golden vectors captured and enforced" -ForegroundColor White

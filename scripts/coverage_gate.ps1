@@ -34,27 +34,27 @@ function Write-Header {
 
 function Write-Success {
     param($Message)
-    Write-Host "${Green}✅ $Message${Reset}"
+    Write-Host "${Green} $Message${Reset}"
 }
 
 function Write-Warning {
     param($Message)
-    Write-Host "${Yellow}⚠️  $Message${Reset}"
+    Write-Host "${Yellow}  $Message${Reset}"
 }
 
 function Write-Error {
     param($Message)
-    Write-Host "${Red}❌ $Message${Reset}"
+    Write-Host "${Red} $Message${Reset}"
 }
 
 function Write-Info {
     param($Message)
-    Write-Host "${Blue}ℹ️  $Message${Reset}"
+    Write-Host "${Blue}ℹ  $Message${Reset}"
 }
 
 function Write-Progress {
     param($Message)
-    Write-Host "${Magenta}🔄 $Message${Reset}"
+    Write-Host "${Magenta} $Message${Reset}"
 }
 
 Write-Header "Accumulate Rust SDK Coverage Gate"
@@ -167,7 +167,7 @@ $criticalCoverage = if ($criticalLinesFound -gt 0) { ($criticalLinesHit / $criti
 Write-Header "Coverage Summary"
 
 Write-Host ""
-Write-Host "${Blue}📊 Overall Coverage:${Reset}"
+Write-Host "${Blue} Overall Coverage:${Reset}"
 Write-Host "   Lines Total: $totalLinesFound"
 Write-Host "   Lines Hit:   $totalLinesHit"
 if ($overallCoverage -ge $OverallThreshold) {
@@ -177,7 +177,7 @@ if ($overallCoverage -ge $OverallThreshold) {
 }
 
 Write-Host ""
-Write-Host "${Blue}🔒 Critical Code Coverage:${Reset}"
+Write-Host "${Blue} Critical Code Coverage:${Reset}"
 Write-Host "   Lines Total: $criticalLinesFound"
 Write-Host "   Lines Hit:   $criticalLinesHit"
 if ($criticalCoverage -ge $CriticalThreshold) {
@@ -189,10 +189,10 @@ if ($criticalCoverage -ge $CriticalThreshold) {
 # Show critical files
 if ($criticalFiles.Count -gt 0) {
     Write-Host ""
-    Write-Host "${Blue}📋 Critical Files:${Reset}"
+    Write-Host "${Blue} Critical Files:${Reset}"
     foreach ($file in $criticalFiles | Sort-Object) {
         $coverage = $sourceFiles[$file].Coverage
-        $status = if ($coverage -ge $CriticalThreshold) { "${Green}✅${Reset}" } else { "${Red}❌${Reset}" }
+        $status = if ($coverage -ge $CriticalThreshold) { "${Green} ${Reset}" } else { "${Red} ${Reset}" }
         Write-Host "   $status $($coverage.ToString("F1").PadLeft(5))% $file"
     }
 }
@@ -201,10 +201,10 @@ if ($criticalFiles.Count -gt 0) {
 $lowCoverageFiles = $sourceFiles.GetEnumerator() | Where-Object { $_.Value.Coverage -lt 50 -and $_.Value.LinesFound -gt 5 } | Sort-Object { $_.Value.Coverage }
 if ($lowCoverageFiles.Count -gt 0) {
     Write-Host ""
-    Write-Host "${Yellow}⚠️  Low Coverage Files (< 50%):${Reset}"
+    Write-Host "${Yellow}  Low Coverage Files (< 50%):${Reset}"
     foreach ($file in $lowCoverageFiles | Select-Object -First 10) {
         $coverage = $file.Value.Coverage
-        Write-Host "   ${Red}❌${Reset} $($coverage.ToString("F1").PadLeft(5))% $($file.Key)"
+        Write-Host "   ${Red} ${Reset} $($coverage.ToString("F1").PadLeft(5))% $($file.Key)"
     }
     if ($lowCoverageFiles.Count -gt 10) {
         Write-Host "   ... and $($lowCoverageFiles.Count - 10) more files"
@@ -233,13 +233,13 @@ if ($criticalPassed) {
 # Final result
 if ($overallPassed -and $criticalPassed) {
     Write-Host ""
-    Write-Success "🎉 All coverage gates passed!"
+    Write-Success " All coverage gates passed!"
     Write-Info "HTML report: target/llvm-cov/html/index.html"
     Write-Info "LCOV report: target/lcov.info"
     exit 0
 } else {
     Write-Host ""
-    Write-Error "💥 Coverage gates failed!"
+    Write-Error " Coverage gates failed!"
     Write-Info "Improve test coverage for the files listed above"
     Write-Info "HTML report: target/llvm-cov/html/index.html"
     Write-Info "LCOV report: target/lcov.info"

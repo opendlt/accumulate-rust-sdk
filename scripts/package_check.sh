@@ -21,23 +21,23 @@ write_header() {
 }
 
 write_success() {
-    echo -e "${GREEN}✅ $1${RESET}"
+    echo -e "${GREEN} $1${RESET}"
 }
 
 write_warning() {
-    echo -e "${YELLOW}⚠️  $1${RESET}"
+    echo -e "${YELLOW}  $1${RESET}"
 }
 
 write_error() {
-    echo -e "${RED}❌ $1${RESET}"
+    echo -e "${RED} $1${RESET}"
 }
 
 write_info() {
-    echo -e "${BLUE}ℹ️  $1${RESET}"
+    echo -e "${BLUE}ℹ  $1${RESET}"
 }
 
 write_progress() {
-    echo -e "${MAGENTA}🔄 $1${RESET}"
+    echo -e "${MAGENTA} $1${RESET}"
 }
 
 # Initialize counters
