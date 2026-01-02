@@ -1,0 +1,19 @@
+# Default: normalize text files to LF in repo
+* text=auto eol=lf
+
+# Keep scripts sane
+*.sh  text eol=lf
+*.ps1 text eol=crlf
+
+# Golden fixtures: never touch line endings (byte-stable)
+tests/golden/**/*.json   -text
+tests/golden/**/*.jsonl  -text
+tests/golden/**/*.txt    -text
+tests/golden/**/*.bin    -text
+tests/golden/**/*.dat    -text
+
+# Rust in golden tests should remain normal text
+tests/golden/**/*.rs text eol=lf
+
+# JSON generally should be LF (outside of golden fixtures)
+*.json text eol=lf
