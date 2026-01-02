@@ -1,17 +1,27 @@
 [package]
-name         = "accumulate-client"
-version      = "2.0.0"
-edition      = "2021"
-license      = "MIT"
-readme       = "README.md"
-authors      = ["OpenDLT <dev@opendlt.dev>"]
-description  = "Accumulate Rust SDK (V2/V3 unified) with DevNet-first flows"
-repository   = "https://github.com/opendlt/opendlt-rust-v2v3-sdk"
-homepage     = "https://github.com/opendlt/opendlt-rust-v2v3-sdk"
-documentation= "https://docs.rs/accumulate-client"
-keywords     = ["accumulate","blockchain","sdk","json-rpc","crypto"]
-categories   = ["api-bindings","cryptography","network-programming"]
-publish      = true
+name = "accumulate-sdk"
+version = "2.0.0"
+edition = "2021"
+rust-version = "1.70"
+license = "MIT"
+readme = "README.md"
+authors = ["OpenDLT Developers"]
+description = "Accumulate Rust SDK (V2/V3 unified) with DevNet-first flows"
+repository = "https://github.com/opendlt/opendlt-rust-v2v3-sdk"
+homepage = "https://github.com/opendlt/opendlt-rust-v2v3-sdk"
+documentation = "https://docs.rs/accumulate-sdk"
+keywords = ["accumulate","blockchain","sdk","json-rpc","crypto"]
+categories = ["api-bindings","cryptography","network-programming"]
+publish = true
+
+include = [
+  "src/**",
+  "Cargo.toml",
+  "README.md",
+  "LICENSE",
+  "CHANGELOG.md",
+  "examples/**",
+]
 
 [lib]
 name = "accumulate_client"
@@ -19,15 +29,22 @@ path = "src/lib.rs"
 
 [features]
 default = ["async-client"]
-async-client = ["reqwest/json","reqwest/rustls-tls","tokio","tokio/macros"]
-blocking-client = ["reqwest/blocking","reqwest/json","reqwest/rustls-tls"]
-typescript-compat-tests = []  # Optional TypeScript compatibility tests (known to have buggy test vectors)
+
+# Async client (Tokio + reqwest async)
+async-client = ["dep:reqwest", "reqwest/json", "reqwest/rustls-tls", "dep:tokio"]
+
+# Blocking client (reqwest blocking)
+blocking-client = ["dep:reqwest", "reqwest/blocking", "reqwest/json", "reqwest/rustls-tls"]
+
+typescript-compat-tests = []
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-reqwest = { version = "0.12", default-features = false, features = ["json","rustls-tls"] }
-tokio = { version = "1", features = ["rt-multi-thread","macros"], optional = true }
+
+reqwest = { version = "0.12", default-features = false, optional = true }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"], optional = true }
+
 thiserror = "1"
 anyhow = "1"
 ed25519-dalek = { version = "2.1", features = ["rand_core"] }
@@ -55,7 +72,6 @@ missing_docs = "warn"
 missing_debug_implementations = "warn"
 
 [lints.clippy]
-# Restriction lints for production code
 dbg_macro = "deny"
 todo = "deny"
 unimplemented = "deny"
@@ -65,17 +81,11 @@ panic = "deny"
 print_stdout = "deny"
 print_stderr = "deny"
 
-# Pedantic lints for code quality (lower priority so individual lints override)
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
-
-# Performance lints
 perf = { level = "warn", priority = -1 }
-
-# Cargo lints
 cargo = { level = "warn", priority = -1 }
 
-# Allow some pedantic lints that are too strict for our use case
 module_name_repetitions = "allow"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
