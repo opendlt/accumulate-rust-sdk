@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - N/A
 
+## [2.0.2] - 2026-02-07
+
+### Fixed
+- Verified all v3 examples against Kermit public testnet
+- Removed duplicate custom tokens example (broken V2 faucet)
+
 ## [2.0.0] - 2024-12-30
 
 ### Added
