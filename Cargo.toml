@@ -57,6 +57,7 @@ k256 = { version = "0.13", features = ["ecdsa", "ecdsa-core"] }
 rsa = { version = "0.9", features = ["sha2"] }
 sha3 = "0.10"
 async-trait = "0.1"
+chrono = "0.4"
 
 [dev-dependencies]
 serde = { version = "1", features = ["derive"] }
@@ -91,3 +92,97 @@ missing_errors_doc = "allow"
 missing_panics_doc = "allow"
 unreadable_literal = "allow"
 needless_continue = "allow"
+
+# ── V3 examples ──────────────────────────────────────────────
+[[example]]
+name = "example_01_lite_identities"
+path = "examples/v3/example_01_lite_identities.rs"
+
+[[example]]
+name = "example_02_adi_creation"
+path = "examples/v3/example_02_adi_creation.rs"
+
+[[example]]
+name = "example_03_token_accounts"
+path = "examples/v3/example_03_token_accounts.rs"
+
+[[example]]
+name = "example_04_data_accounts"
+path = "examples/v3/example_04_data_accounts.rs"
+
+[[example]]
+name = "example_05_adi_to_adi_transfer"
+path = "examples/v3/example_05_adi_to_adi_transfer.rs"
+
+[[example]]
+name = "example_06_custom_tokens"
+path = "examples/v3/example_06_custom_tokens.rs"
+
+[[example]]
+name = "example_07_query_operations"
+path = "examples/v3/example_07_query_operations.rs"
+
+[[example]]
+name = "example_08_query_transactions"
+path = "examples/v3/example_08_query_transactions.rs"
+
+[[example]]
+name = "example_09_key_management"
+path = "examples/v3/example_09_key_management.rs"
+
+[[example]]
+name = "example_10_threshold_updates"
+path = "examples/v3/example_10_threshold_updates.rs"
+
+[[example]]
+name = "example_11_quickstart_demo"
+path = "examples/v3/example_11_quickstart_demo.rs"
+
+[[example]]
+name = "example_12_multi_signature_workflow"
+path = "examples/v3/example_12_multi_signature_workflow.rs"
+
+[[example]]
+name = "example_13_adi_to_adi_transfer_with_header_options"
+path = "examples/v3/example_13_adi_to_adi_transfer_with_header_options.rs"
+
+[[example]]
+name = "faucet_demo"
+path = "examples/v3/faucet_demo.rs"
+
+# ── Misc examples ────────────────────────────────────────────
+[[example]]
+name = "100_keygen_lite_urls"
+path = "examples/misc/100_keygen_lite_urls.rs"
+
+[[example]]
+name = "120_faucet_local_devnet"
+path = "examples/misc/120_faucet_local_devnet.rs"
+
+[[example]]
+name = "210_buy_credits_lite"
+path = "examples/misc/210_buy_credits_lite.rs"
+
+[[example]]
+name = "220_create_adi_v3"
+path = "examples/misc/220_create_adi_v3.rs"
+
+[[example]]
+name = "270_write_data"
+path = "examples/misc/270_write_data.rs"
+
+[[example]]
+name = "280_send_tokens_lta_to_adi"
+path = "examples/misc/280_send_tokens_lta_to_adi.rs"
+
+[[example]]
+name = "999_zero_to_hero"
+path = "examples/misc/999_zero_to_hero.rs"
+
+[[example]]
+name = "basic_usage"
+path = "examples/misc/basic_usage.rs"
+
+[[example]]
+name = "transaction_demo"
+path = "examples/misc/transaction_demo.rs"

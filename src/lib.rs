@@ -79,7 +79,7 @@ pub use crate::helpers::{
     // Transaction builders
     TxBody, TxResult,
     // Smart signing
-    SmartSigner, KeyManager, KeyPageState, KeyEntry,
+    SmartSigner, HeaderOptions, KeyManager, KeyPageState, KeyEntry,
     // QuickStart API
     QuickStart, Wallet, AdiInfo, KeyPageInfo,
     // Polling utilities

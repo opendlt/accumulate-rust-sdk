@@ -194,7 +194,7 @@ let client = AccumulateClient::new_with_options(
 
 ## Examples
 
-See [`examples/`](examples/) for complete working examples:
+See [`examples/v3/`](examples/v3/) for the core V3 API examples:
 
 | Example | Description |
 |---------|-------------|
@@ -210,6 +210,9 @@ See [`examples/`](examples/) for complete working examples:
 | `example_10_threshold_updates` | Multi-sig threshold management |
 | `example_11_quickstart_demo` | Ultra-simple QuickStart API demo |
 | `example_12_multi_signature_workflow` | Complete multi-sig workflow |
+| `example_13_adi_to_adi_transfer_with_header_options` | ADI transfers with header options (memo, metadata, expire, etc.) |
+
+Additional examples are available in [`examples/misc/`](examples/misc/).
 
 Run any example:
 ```bash
@@ -229,7 +232,9 @@ src/
 ├── crypto/             # Ed25519 and signature implementations
 ├── generated/          # Protocol types from YAML definitions
 └── protocol/           # Transaction and envelope builders
-examples/               # Complete working examples
+examples/
+├── v3/                 # Core V3 API examples
+├── misc/               # Additional / legacy examples
 tests/
 ├── unit/               # Unit tests
 ├── integration/        # Network integration tests

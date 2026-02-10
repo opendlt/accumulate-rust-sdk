@@ -306,6 +306,32 @@ pub struct KeyEntry {
 }
 
 // =============================================================================
+// HEADER OPTIONS
+// =============================================================================
+
+/// Optional transaction header fields for advanced transaction control.
+///
+/// These fields are included in the transaction envelope submitted to the V3 API.
+/// - `memo`: Human-readable memo text
+/// - `metadata`: Binary metadata bytes (hex-encoded in the envelope)
+/// - `expire`: Transaction expiration time
+/// - `hold_until`: Scheduled execution at a specific minor block
+/// - `authorities`: Additional signing authorities
+#[derive(Debug, Clone, Default)]
+pub struct HeaderOptions {
+    /// Human-readable memo text
+    pub memo: Option<String>,
+    /// Binary metadata bytes
+    pub metadata: Option<Vec<u8>>,
+    /// Transaction expiration options
+    pub expire: Option<crate::generated::header::ExpireOptions>,
+    /// Hold-until (delayed execution) options
+    pub hold_until: Option<crate::generated::header::HoldUntilOptions>,
+    /// Additional signing authorities (list of authority URLs)
+    pub authorities: Option<Vec<String>>,
+}
+
+// =============================================================================
 // SMART SIGNER
 // =============================================================================
 
@@ -595,6 +621,243 @@ impl<'a> SmartSigner<'a> {
     #[allow(dead_code)]
     fn public_key_hash(&self) -> [u8; 32] {
         sha256_hash(&self.keypair.verifying_key().to_bytes())
+    }
+
+    /// Sign a transaction with full header options and return the envelope.
+    ///
+    /// Like [`sign`], but accepts a [`HeaderOptions`] struct for specifying
+    /// memo, metadata, expire, hold_until, and authorities.
+    pub fn sign_with_options(
+        &self,
+        principal: &str,
+        body: &Value,
+        options: &HeaderOptions,
+    ) -> Result<Value, JsonRpcError> {
+        use crate::codec::signing::{
+            compute_ed25519_signature_metadata_hash,
+            compute_transaction_hash,
+            compute_write_data_body_hash,
+            create_signing_preimage,
+            marshal_transaction_header_full,
+            HeaderBinaryOptions,
+            sha256_bytes,
+        };
+
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Time error: {}", e)))?
+            .as_micros() as u64;
+
+        let public_key = self.keypair.verifying_key().to_bytes();
+
+        // Step 1: Compute signature metadata hash
+        let sig_metadata_hash = compute_ed25519_signature_metadata_hash(
+            &public_key,
+            &self.signer_url,
+            self.cached_version,
+            timestamp,
+        );
+        let initiator_hex = hex::encode(&sig_metadata_hash);
+
+        // Step 2: Marshal header with initiator, memo, metadata, and extended options
+        let memo_ref = options.memo.as_deref();
+        let metadata_ref = options.metadata.as_deref();
+
+        // Build extended binary options for fields 5-7
+        let has_extended = options.expire.is_some()
+            || options.hold_until.is_some()
+            || options.authorities.is_some();
+
+        let extended = if has_extended {
+            Some(HeaderBinaryOptions {
+                expire_at_time: options.expire.as_ref().and_then(|e| e.at_time.map(|t| t as i64)),
+                hold_until_minor_block: options.hold_until.as_ref().and_then(|h| h.minor_block),
+                authorities: options.authorities.clone(),
+            })
+        } else {
+            None
+        };
+
+        let header_bytes = marshal_transaction_header_full(
+            principal,
+            &sig_metadata_hash,
+            memo_ref,
+            metadata_ref,
+            extended.as_ref(),
+        );
+
+        // Step 3 & 4: Compute transaction hash
+        let tx_type = body.get("type").and_then(|t| t.as_str()).unwrap_or("");
+        let tx_hash = if tx_type == "writeData" || tx_type == "writeDataTo" {
+            let header_hash = sha256_bytes(&header_bytes);
+            let mut entries_hex = Vec::new();
+            if let Some(entry) = body.get("entry") {
+                if let Some(data) = entry.get("data") {
+                    if let Some(arr) = data.as_array() {
+                        for item in arr {
+                            if let Some(s) = item.as_str() {
+                                entries_hex.push(s.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+            let scratch = body.get("scratch").and_then(|s| s.as_bool()).unwrap_or(false);
+            let write_to_state = body.get("writeToState").and_then(|w| w.as_bool()).unwrap_or(false);
+            let body_hash = compute_write_data_body_hash(&entries_hex, scratch, write_to_state);
+            let mut combined = Vec::with_capacity(64);
+            combined.extend_from_slice(&header_hash);
+            combined.extend_from_slice(&body_hash);
+            sha256_bytes(&combined)
+        } else {
+            let body_bytes = marshal_body_to_binary(body)?;
+            compute_transaction_hash(&header_bytes, &body_bytes)
+        };
+
+        // Step 5: Create signing preimage and sign
+        let preimage = create_signing_preimage(&sig_metadata_hash, &tx_hash);
+        let signature = self.keypair.sign(&preimage);
+
+        // Build transaction JSON (for submission)
+        let mut tx = json!({
+            "header": {
+                "principal": principal,
+                "initiator": &initiator_hex
+            },
+            "body": body
+        });
+
+        // Add optional header fields
+        if let Some(ref m) = options.memo {
+            tx["header"]["memo"] = json!(m);
+        }
+        if let Some(ref md) = options.metadata {
+            tx["header"]["metadata"] = json!(hex::encode(md));
+        }
+        if let Some(ref expire) = options.expire {
+            if let Some(at_time) = expire.at_time {
+                // V3 API expects atTime as an RFC 3339 / ISO 8601 timestamp string
+                let dt = chrono::DateTime::from_timestamp(at_time as i64, 0)
+                    .unwrap_or_else(|| chrono::DateTime::from_timestamp(0, 0).unwrap());
+                tx["header"]["expire"] = json!({ "atTime": dt.to_rfc3339() });
+            }
+        }
+        if let Some(ref hold) = options.hold_until {
+            if let Some(minor_block) = hold.minor_block {
+                tx["header"]["holdUntil"] = json!({ "minorBlock": minor_block });
+            }
+        }
+        if let Some(ref auths) = options.authorities {
+            tx["header"]["authorities"] = json!(auths);
+        }
+
+        // Build envelope
+        let envelope = json!({
+            "transaction": [tx],
+            "signatures": [{
+                "type": "ed25519",
+                "publicKey": hex::encode(&public_key),
+                "signature": hex::encode(signature.to_bytes()),
+                "signer": &self.signer_url,
+                "signerVersion": self.cached_version,
+                "timestamp": timestamp,
+                "transactionHash": hex::encode(&tx_hash)
+            }]
+        });
+
+        Ok(envelope)
+    }
+
+    /// Sign, submit, and wait for transaction confirmation with full header options.
+    ///
+    /// Like [`sign_submit_and_wait`], but accepts a [`HeaderOptions`] struct.
+    pub async fn sign_submit_and_wait_with_options(
+        &mut self,
+        principal: &str,
+        body: &Value,
+        options: &HeaderOptions,
+        max_attempts: u32,
+    ) -> TxResult {
+        // Refresh version before signing
+        if let Err(e) = self.refresh_version().await {
+            return TxResult::err(format!("Failed to refresh version: {}", e));
+        }
+
+        // Sign the transaction with options
+        let envelope = match self.sign_with_options(principal, body, options) {
+            Ok(env) => env,
+            Err(e) => return TxResult::err(format!("Failed to sign: {}", e)),
+        };
+
+        // Submit
+        let submit_result: Result<Value, _> = self.client.v3_client.call_v3("submit", json!({
+            "envelope": envelope
+        })).await;
+
+        let response = match submit_result {
+            Ok(resp) => resp,
+            Err(e) => return TxResult::err(format!("Submit failed: {}", e)),
+        };
+
+        // Extract transaction ID
+        let txid = extract_txid(&response);
+        if txid.is_none() {
+            return TxResult::err("No transaction ID in response".to_string());
+        }
+        let txid = txid.unwrap();
+
+        // Wait for confirmation
+        let tx_hash = if txid.starts_with("acc://") && txid.contains('@') {
+            txid.split('@').next().unwrap_or(&txid).replace("acc://", "")
+        } else {
+            txid.clone()
+        };
+        let query_scope = format!("acc://{}@unknown", tx_hash);
+
+        for _attempt in 0..max_attempts {
+            tokio::time::sleep(Duration::from_secs(2)).await;
+
+            let query_result: Result<Value, _> = self.client.v3_client.call_v3("query", json!({
+                "scope": &query_scope,
+                "query": {"queryType": "default"}
+            })).await;
+
+            if let Ok(result) = query_result {
+                if let Some(status_value) = result.get("status") {
+                    if let Some(status_str) = status_value.as_str() {
+                        if status_str == "delivered" {
+                            return TxResult::ok(txid, response);
+                        }
+                        continue;
+                    }
+                    if status_value.is_object() {
+                        let delivered = status_value.get("delivered")
+                            .and_then(|d| d.as_bool())
+                            .unwrap_or(false);
+                        if delivered {
+                            let failed = status_value.get("failed")
+                                .and_then(|f| f.as_bool())
+                                .unwrap_or(false);
+                            if failed {
+                                let error_msg = status_value.get("error")
+                                    .and_then(|e| {
+                                        if let Some(msg) = e.get("message").and_then(|m| m.as_str()) {
+                                            Some(msg.to_string())
+                                        } else {
+                                            e.as_str().map(String::from)
+                                        }
+                                    })
+                                    .unwrap_or_else(|| "Unknown error".to_string());
+                                return TxResult::err(error_msg);
+                            }
+                            return TxResult::ok(txid, response);
+                        }
+                    }
+                }
+            }
+        }
+
+        TxResult::err(format!("Timeout waiting for delivery: {}", txid))
     }
 }
 

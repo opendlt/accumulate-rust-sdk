@@ -175,6 +175,17 @@ pub fn compute_signature_metadata_hash(
     sha256_bytes(writer.bytes())
 }
 
+/// Options for extended transaction header fields (fields 5-7).
+#[derive(Debug, Clone, Default)]
+pub struct HeaderBinaryOptions {
+    /// Expire: at_time as Unix seconds, signed (field 5)
+    pub expire_at_time: Option<i64>,
+    /// HoldUntil: minor_block number (field 6)
+    pub hold_until_minor_block: Option<u64>,
+    /// Additional authority URLs (field 7, repeatable)
+    pub authorities: Option<Vec<String>>,
+}
+
 /// Marshal transaction header to binary format
 ///
 /// Field order matches Go: protocol/types_gen.go TransactionHeader.MarshalBinary
@@ -182,11 +193,25 @@ pub fn compute_signature_metadata_hash(
 /// - Field 2: Initiator (hash, 32 bytes, no length prefix)
 /// - Field 3: Memo (string)
 /// - Field 4: Metadata (bytes)
+/// - Field 5: Expire (nested: ExpireOptions with field 1 = atTime uint)
+/// - Field 6: HoldUntil (nested: HoldUntilOptions with field 1 = minorBlock uint)
+/// - Field 7: Authorities (repeatable URL strings)
 pub fn marshal_transaction_header(
     principal: &str,
     initiator: &[u8; 32],
     memo: Option<&str>,
     metadata: Option<&[u8]>,
+) -> Vec<u8> {
+    marshal_transaction_header_full(principal, initiator, memo, metadata, None)
+}
+
+/// Marshal transaction header with all fields including extended options (fields 5-7).
+pub fn marshal_transaction_header_full(
+    principal: &str,
+    initiator: &[u8; 32],
+    memo: Option<&str>,
+    metadata: Option<&[u8]>,
+    extended: Option<&HeaderBinaryOptions>,
 ) -> Vec<u8> {
     let mut writer = BinaryWriter::new();
 
@@ -220,6 +245,47 @@ pub fn marshal_transaction_header(
             let _ = writer.write_uvarint(4);
             let _ = writer.write_uvarint(metadata_bytes.len() as u64);
             let _ = writer.write_bytes(metadata_bytes);
+        }
+    }
+
+    // Fields 5-7: Extended header options
+    if let Some(ext) = extended {
+        // Field 5: Expire (nested ExpireOptions)
+        // Go: writer.WriteValue(5, v.Expire.MarshalBinary)
+        // ExpireOptions.MarshalBinary: writer.WriteTime(1, *v.AtTime)
+        // WriteTime: writeField(n) then writeInt(n, v.UTC().Unix())
+        // writeInt uses binary.PutVarint (signed/zigzag varint)
+        if let Some(at_time) = ext.expire_at_time {
+            let mut expire_writer = BinaryWriter::new();
+            let _ = expire_writer.write_uvarint(1); // ExpireOptions field 1: AtTime
+            let _ = expire_writer.write_varint(at_time); // signed varint (zigzag)
+            let expire_bytes = expire_writer.into_bytes();
+
+            let _ = writer.write_uvarint(5);
+            let _ = writer.write_uvarint(expire_bytes.len() as u64);
+            let _ = writer.write_bytes(&expire_bytes);
+        }
+
+        // Field 6: HoldUntil (nested HoldUntilOptions)
+        if let Some(minor_block) = ext.hold_until_minor_block {
+            let mut hold_writer = BinaryWriter::new();
+            let _ = hold_writer.write_uvarint(1); // HoldUntilOptions field 1: MinorBlock
+            let _ = hold_writer.write_uvarint(minor_block);
+            let hold_bytes = hold_writer.into_bytes();
+
+            let _ = writer.write_uvarint(6);
+            let _ = writer.write_uvarint(hold_bytes.len() as u64);
+            let _ = writer.write_bytes(&hold_bytes);
+        }
+
+        // Field 7: Authorities (repeatable URL)
+        if let Some(ref authorities) = ext.authorities {
+            for auth_url in authorities {
+                let _ = writer.write_uvarint(7);
+                let auth_bytes = auth_url.as_bytes();
+                let _ = writer.write_uvarint(auth_bytes.len() as u64);
+                let _ = writer.write_bytes(auth_bytes);
+            }
         }
     }
 
