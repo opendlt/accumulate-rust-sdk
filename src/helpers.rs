@@ -275,6 +275,65 @@ impl TxBody {
             }]
         })
     }
+
+    /// Create a BurnCredits transaction body
+    pub fn burn_credits(amount: u64) -> Value {
+        json!({
+            "type": "burnCredits",
+            "amount": amount
+        })
+    }
+
+    /// Create an UpdateKey transaction body (key rotation)
+    pub fn update_key(new_key_hash: &str) -> Value {
+        json!({
+            "type": "updateKey",
+            "newKeyHash": new_key_hash
+        })
+    }
+
+    /// Create a LockAccount transaction body
+    pub fn lock_account(height: u64) -> Value {
+        json!({
+            "type": "lockAccount",
+            "height": height
+        })
+    }
+
+    /// Create an UpdateAccountAuth transaction body
+    pub fn update_account_auth(operations: &Value) -> Value {
+        json!({
+            "type": "updateAccountAuth",
+            "operations": operations
+        })
+    }
+
+    /// Create a WriteDataTo transaction body (write data to a remote data account)
+    pub fn write_data_to(recipient: &str, entries: &[&str]) -> Value {
+        let entries_hex: Vec<Value> = entries
+            .iter()
+            .map(|e| Value::String(hex::encode(e.as_bytes())))
+            .collect();
+        json!({
+            "type": "writeDataTo",
+            "recipient": recipient,
+            "entry": {
+                "type": "doublehash",
+                "data": entries_hex
+            }
+        })
+    }
+
+    /// Create a generic UpdateKeyPage transaction body with raw operations
+    ///
+    /// For simple cases, prefer update_key_page_add_key, update_key_page_remove_key,
+    /// or update_key_page_set_threshold.
+    pub fn update_key_page(operations: &Value) -> Value {
+        json!({
+            "type": "updateKeyPage",
+            "operation": operations
+        })
+    }
 }
 
 // =============================================================================
