@@ -5,16 +5,19 @@ All notable changes to the Accumulate Rust SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.1.0] - 2026-02-27
 
 ### Added
-- N/A
-
-### Changed
-- N/A
+- Binary encoding for CreateKeyPage, BurnTokens, CreateKeyBook, UpdateKey, BurnCredits, TransferCredits, WriteDataTo, LockAccount, and UpdateAccountAuth transaction types
+- `compute_write_data_to_body_hash` for correct WriteDataTo transaction hashing
+- `TxBody::write_data_to_hex` builder method
+- `marshal_body_to_binary` dispatch for all newly encoded transaction types
+- `account_auth_op_types` constants matching Go protocol
 
 ### Fixed
-- N/A
+- Corrected tx_type constant values (LockAccount, BurnCredits, TransferCredits, UpdateAccountAuth, UpdateKey) to match Go protocol
+- Fixed `create_key_page` field name from `publicKeyHash` to `keyHash`
+- SmartSigner now handles WriteDataTo separately from WriteData for correct hashing
 
 ## [2.0.2] - 2026-02-07
 
