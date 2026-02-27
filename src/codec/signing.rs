@@ -44,11 +44,11 @@ pub mod tx_types {
     pub const CREATE_KEY_BOOK: u64 = 0x0D;
     pub const ADD_CREDITS: u64 = 0x0E;
     pub const UPDATE_KEY_PAGE: u64 = 0x0F;
-    pub const UPDATE_ACCOUNT_AUTH: u64 = 0x10;
-    pub const UPDATE_KEY: u64 = 0x11;
-    pub const LOCK_ACCOUNT: u64 = 0x12;
-    pub const TRANSFER_CREDITS: u64 = 0x15;
-    pub const BURN_CREDITS: u64 = 0x16;
+    pub const LOCK_ACCOUNT: u64 = 0x10;
+    pub const BURN_CREDITS: u64 = 0x11;
+    pub const TRANSFER_CREDITS: u64 = 0x12;
+    pub const UPDATE_ACCOUNT_AUTH: u64 = 0x15;
+    pub const UPDATE_KEY: u64 = 0x16;
 }
 
 /// KeyPageOperation type enum values matching Go core
@@ -719,6 +719,46 @@ fn marshal_write_data_body_without_entry(scratch: bool, write_to_state: bool) ->
     writer.into_bytes()
 }
 
+/// Compute WriteDataTo body hash using special Merkle algorithm
+///
+/// Same algorithm as WriteData but with Type=WRITE_DATA_TO and Recipient included
+/// Based on Go: protocol/transaction_hash.go WriteDataTo.GetHash()
+pub fn compute_write_data_to_body_hash(recipient: &str, entries_hex: &[String]) -> [u8; 32] {
+    // Marshal body WITHOUT entry (but WITH recipient)
+    let body_without_entry = marshal_write_data_to_body_without_entry(recipient);
+    let body_part_hash = sha256_bytes(&body_without_entry);
+
+    // Compute entry hash
+    let entry_hash = if entries_hex.is_empty() {
+        [0u8; 32]
+    } else {
+        compute_data_entry_hash(entries_hex)
+    };
+
+    // Merkle hash of [bodyPartHash, entryHash]
+    merkle_hash(&[body_part_hash, entry_hash])
+}
+
+/// Marshal WriteDataTo body without entry (Entry = nil)
+/// Includes Type and Recipient, but NOT Entry
+fn marshal_write_data_to_body_without_entry(recipient: &str) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (WriteDataTo = 0x06)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::WRITE_DATA_TO);
+
+    // Field 2: Recipient URL
+    let url_bytes = recipient.as_bytes();
+    let _ = writer.write_uvarint(2);
+    let _ = writer.write_uvarint(url_bytes.len() as u64);
+    let _ = writer.write_bytes(url_bytes);
+
+    // Field 3: Entry - OMITTED (nil)
+
+    writer.into_bytes()
+}
+
 /// Compute hash for a DataEntry
 ///
 /// Based on Go: protocol/data_entry.go
@@ -936,6 +976,276 @@ pub fn marshal_update_key_page_body(operations: &[Vec<u8>]) -> Vec<u8> {
         let _ = writer.write_uvarint(2);
         let _ = writer.write_uvarint(op_bytes.len() as u64);
         let _ = writer.write_bytes(op_bytes);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal CreateKeyPage transaction body to binary format
+///
+/// Field order matches Go: protocol/user_transactions.yml CreateKeyPage
+/// - Field 1: Type (enum, 0x0C)
+/// - Field 2: Keys (repeated KeySpec, each as nested sub-message)
+pub fn marshal_create_key_page_body(key_hashes: &[Vec<u8>]) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (CreateKeyPage = 0x0C)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::CREATE_KEY_PAGE);
+
+    // Field 2: Keys (repeated KeySpec, each as nested value)
+    for key_hash in key_hashes {
+        let key_spec_bytes = marshal_key_spec_params(key_hash, None);
+        let _ = writer.write_uvarint(2);
+        let _ = writer.write_uvarint(key_spec_bytes.len() as u64);
+        let _ = writer.write_bytes(&key_spec_bytes);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal BurnTokens transaction body to binary format
+///
+/// Field order matches Go: protocol/user_transactions.yml BurnTokens
+/// - Field 1: Type (enum, 0x0A)
+/// - Field 2: Amount (BigInt)
+pub fn marshal_burn_tokens_body(amount: u64) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (BurnTokens = 0x0A)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::BURN_TOKENS);
+
+    // Field 2: Amount (BigInt, big-endian bytes)
+    if amount > 0 {
+        let _ = writer.write_uvarint(2);
+        let amount_bytes = amount_to_bigint_bytes(amount);
+        let _ = writer.write_uvarint(amount_bytes.len() as u64);
+        let _ = writer.write_bytes(&amount_bytes);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal CreateKeyBook transaction body to binary format
+///
+/// Field order matches Go: protocol/user_transactions.yml CreateKeyBook
+/// - Field 1: Type (enum, 0x0D)
+/// - Field 2: Url (URL as string)
+/// - Field 3: PublicKeyHash (bytes)
+pub fn marshal_create_key_book_body(url: &str, public_key_hash: &[u8]) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (CreateKeyBook = 0x0D)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::CREATE_KEY_BOOK);
+
+    // Field 2: Url
+    let url_bytes = url.as_bytes();
+    let _ = writer.write_uvarint(2);
+    let _ = writer.write_uvarint(url_bytes.len() as u64);
+    let _ = writer.write_bytes(url_bytes);
+
+    // Field 3: PublicKeyHash (bytes)
+    if !public_key_hash.is_empty() {
+        let _ = writer.write_uvarint(3);
+        let _ = writer.write_uvarint(public_key_hash.len() as u64);
+        let _ = writer.write_bytes(public_key_hash);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal UpdateKey transaction body to binary format
+///
+/// Field order matches Go: protocol/user_transactions.yml UpdateKey
+/// - Field 1: Type (enum, 0x16)
+/// - Field 2: NewKeyHash (bytes)
+pub fn marshal_update_key_body(new_key_hash: &[u8]) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (UpdateKey = 0x16)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::UPDATE_KEY);
+
+    // Field 2: NewKeyHash (bytes)
+    if !new_key_hash.is_empty() {
+        let _ = writer.write_uvarint(2);
+        let _ = writer.write_uvarint(new_key_hash.len() as u64);
+        let _ = writer.write_bytes(new_key_hash);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal BurnCredits transaction body to binary format
+///
+/// Field order matches Go: protocol/user_transactions.yml BurnCredits
+/// - Field 1: Type (enum, 0x11)
+/// - Field 2: Amount (uint64)
+pub fn marshal_burn_credits_body(amount: u64) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (BurnCredits = 0x11)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::BURN_CREDITS);
+
+    // Field 2: Amount (uint64, NOT BigInt)
+    if amount > 0 {
+        let _ = writer.write_uvarint(2);
+        let _ = writer.write_uvarint(amount);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal TransferCredits transaction body to binary format
+///
+/// Field order matches Go: protocol/user_transactions.yml TransferCredits
+/// - Field 1: Type (enum, 0x12)
+/// - Field 2: To (repeated CreditRecipient)
+pub fn marshal_transfer_credits_body(recipients: &[(&str, u64)]) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (TransferCredits = 0x12)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::TRANSFER_CREDITS);
+
+    // Field 2: To (repeated CreditRecipient)
+    for (url, amount) in recipients {
+        let recipient_bytes = marshal_credit_recipient(url, *amount);
+        let _ = writer.write_uvarint(2);
+        let _ = writer.write_uvarint(recipient_bytes.len() as u64);
+        let _ = writer.write_bytes(&recipient_bytes);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal a CreditRecipient to binary
+/// Go CreditRecipient: Field 1=Url, Field 2=Amount (uint64)
+fn marshal_credit_recipient(url: &str, amount: u64) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: URL
+    let url_bytes = url.as_bytes();
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(url_bytes.len() as u64);
+    let _ = writer.write_bytes(url_bytes);
+
+    // Field 2: Amount (uint64, NOT BigInt)
+    if amount > 0 {
+        let _ = writer.write_uvarint(2);
+        let _ = writer.write_uvarint(amount);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal WriteDataTo transaction body to binary format
+///
+/// Field order matches Go: protocol/user_transactions.yml WriteDataTo
+/// - Field 1: Type (enum, 0x06)
+/// - Field 2: Recipient (URL)
+/// - Field 3: Entry (nested DataEntry)
+pub fn marshal_write_data_to_body(recipient: &str, entries_hex: &[String]) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (WriteDataTo = 0x06)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::WRITE_DATA_TO);
+
+    // Field 2: Recipient URL
+    let url_bytes = recipient.as_bytes();
+    let _ = writer.write_uvarint(2);
+    let _ = writer.write_uvarint(url_bytes.len() as u64);
+    let _ = writer.write_bytes(url_bytes);
+
+    // Field 3: Entry (nested DataEntry)
+    if !entries_hex.is_empty() {
+        let entry_bytes = marshal_data_entry(entries_hex);
+        let _ = writer.write_uvarint(3);
+        let _ = writer.write_uvarint(entry_bytes.len() as u64);
+        let _ = writer.write_bytes(&entry_bytes);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal LockAccount transaction body to binary format
+///
+/// Field order matches Go: protocol/user_transactions.yml LockAccount
+/// - Field 1: Type (enum, 0x10)
+/// - Field 2: Height (uint64)
+pub fn marshal_lock_account_body(height: u64) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (LockAccount = 0x10)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::LOCK_ACCOUNT);
+
+    // Field 2: Height (uint64)
+    if height > 0 {
+        let _ = writer.write_uvarint(2);
+        let _ = writer.write_uvarint(height);
+    }
+
+    writer.into_bytes()
+}
+
+/// AccountAuthOperation type constants (matches Go AccountAuthOperationType)
+pub mod account_auth_op_types {
+    pub const ENABLE: u64 = 1;
+    pub const DISABLE: u64 = 2;
+    pub const ADD_AUTHORITY: u64 = 3;
+    pub const REMOVE_AUTHORITY: u64 = 4;
+}
+
+/// Marshal UpdateAccountAuth transaction body to binary format
+///
+/// Field order matches Go: protocol/user_transactions.yml UpdateAccountAuth
+/// - Field 1: Type (enum, 0x15)
+/// - Field 2: Operations (repeated AccountAuthOperation)
+pub fn marshal_update_account_auth_body(operations: &[(&str, &str)]) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (UpdateAccountAuth = 0x15)
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::UPDATE_ACCOUNT_AUTH);
+
+    // Field 2: Operations (repeated)
+    for (op_type, authority_url) in operations {
+        let op_bytes = marshal_account_auth_operation(op_type, authority_url);
+        let _ = writer.write_uvarint(2);
+        let _ = writer.write_uvarint(op_bytes.len() as u64);
+        let _ = writer.write_bytes(&op_bytes);
+    }
+
+    writer.into_bytes()
+}
+
+/// Marshal a single AccountAuthOperation to binary
+/// Go: Field 1=Type (enum), Field 2=Authority (URL)
+fn marshal_account_auth_operation(op_type: &str, authority_url: &str) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    // Field 1: Type (AccountAuthOperationType enum)
+    let type_num = match op_type {
+        "enable" => account_auth_op_types::ENABLE,
+        "disable" => account_auth_op_types::DISABLE,
+        "add" | "addAuthority" => account_auth_op_types::ADD_AUTHORITY,
+        "remove" | "removeAuthority" => account_auth_op_types::REMOVE_AUTHORITY,
+        _ => 0,
+    };
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(type_num);
+
+    // Field 2: Authority URL
+    if !authority_url.is_empty() {
+        let url_bytes = authority_url.as_bytes();
+        let _ = writer.write_uvarint(2);
+        let _ = writer.write_uvarint(url_bytes.len() as u64);
+        let _ = writer.write_bytes(url_bytes);
     }
 
     writer.into_bytes()

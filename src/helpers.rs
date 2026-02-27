@@ -199,11 +199,27 @@ impl TxBody {
         })
     }
 
+    /// Create a WriteDataTo transaction body with hex entries (entries already hex-encoded)
+    pub fn write_data_to_hex(recipient: &str, entries_hex: &[&str]) -> Value {
+        let entries: Vec<Value> = entries_hex
+            .iter()
+            .map(|e| Value::String((*e).to_string()))
+            .collect();
+        json!({
+            "type": "writeDataTo",
+            "recipient": recipient,
+            "entry": {
+                "type": "doublehash",
+                "data": entries
+            }
+        })
+    }
+
     /// Create a CreateKeyPage transaction body
     pub fn create_key_page(key_hashes: &[&[u8]]) -> Value {
         let keys: Vec<Value> = key_hashes
             .iter()
-            .map(|h| json!({"publicKeyHash": hex::encode(h)}))
+            .map(|h| json!({"keyHash": hex::encode(h)}))
             .collect();
         json!({
             "type": "createKeyPage",
@@ -455,6 +471,7 @@ impl<'a> SmartSigner<'a> {
             compute_ed25519_signature_metadata_hash,
             compute_transaction_hash,
             compute_write_data_body_hash,
+            compute_write_data_to_body_hash,
             create_signing_preimage,
             marshal_transaction_header,
             sha256_bytes,
@@ -486,13 +503,11 @@ impl<'a> SmartSigner<'a> {
         );
 
         // Step 3 & 4: Compute transaction hash
-        // For WriteData, use special Merkle hash algorithm
+        // WriteData/WriteDataTo use special Merkle hash algorithm
         let tx_type = body.get("type").and_then(|t| t.as_str()).unwrap_or("");
-        let tx_hash = if tx_type == "writeData" || tx_type == "writeDataTo" {
-            // WriteData uses special hash: MerkleHash([bodyPartHash, entryHash])
-            let header_hash = sha256_bytes(&header_bytes);
 
-            // Extract entries from body.entry.data
+        // Helper: extract entries from body.entry.data
+        let extract_entries = |body: &Value| -> Vec<String> {
             let mut entries_hex = Vec::new();
             if let Some(entry) = body.get("entry") {
                 if let Some(data) = entry.get("data") {
@@ -505,11 +520,25 @@ impl<'a> SmartSigner<'a> {
                     }
                 }
             }
+            entries_hex
+        };
+
+        let tx_hash = if tx_type == "writeData" {
+            let header_hash = sha256_bytes(&header_bytes);
+            let entries_hex = extract_entries(body);
             let scratch = body.get("scratch").and_then(|s| s.as_bool()).unwrap_or(false);
             let write_to_state = body.get("writeToState").and_then(|w| w.as_bool()).unwrap_or(false);
-
             let body_hash = compute_write_data_body_hash(&entries_hex, scratch, write_to_state);
-
+            // txHash = SHA256(SHA256(header) + bodyHash)
+            let mut combined = Vec::with_capacity(64);
+            combined.extend_from_slice(&header_hash);
+            combined.extend_from_slice(&body_hash);
+            sha256_bytes(&combined)
+        } else if tx_type == "writeDataTo" {
+            let header_hash = sha256_bytes(&header_bytes);
+            let entries_hex = extract_entries(body);
+            let recipient = body.get("recipient").and_then(|r| r.as_str()).unwrap_or("");
+            let body_hash = compute_write_data_to_body_hash(recipient, &entries_hex);
             // txHash = SHA256(SHA256(header) + bodyHash)
             let mut combined = Vec::with_capacity(64);
             combined.extend_from_slice(&header_hash);
@@ -696,6 +725,7 @@ impl<'a> SmartSigner<'a> {
             compute_ed25519_signature_metadata_hash,
             compute_transaction_hash,
             compute_write_data_body_hash,
+            compute_write_data_to_body_hash,
             create_signing_preimage,
             marshal_transaction_header_full,
             HeaderBinaryOptions,
@@ -747,8 +777,9 @@ impl<'a> SmartSigner<'a> {
 
         // Step 3 & 4: Compute transaction hash
         let tx_type = body.get("type").and_then(|t| t.as_str()).unwrap_or("");
-        let tx_hash = if tx_type == "writeData" || tx_type == "writeDataTo" {
-            let header_hash = sha256_bytes(&header_bytes);
+
+        // Helper: extract entries from body.entry.data
+        let extract_entries = |body: &Value| -> Vec<String> {
             let mut entries_hex = Vec::new();
             if let Some(entry) = body.get("entry") {
                 if let Some(data) = entry.get("data") {
@@ -761,9 +792,24 @@ impl<'a> SmartSigner<'a> {
                     }
                 }
             }
+            entries_hex
+        };
+
+        let tx_hash = if tx_type == "writeData" {
+            let header_hash = sha256_bytes(&header_bytes);
+            let entries_hex = extract_entries(body);
             let scratch = body.get("scratch").and_then(|s| s.as_bool()).unwrap_or(false);
             let write_to_state = body.get("writeToState").and_then(|w| w.as_bool()).unwrap_or(false);
             let body_hash = compute_write_data_body_hash(&entries_hex, scratch, write_to_state);
+            let mut combined = Vec::with_capacity(64);
+            combined.extend_from_slice(&header_hash);
+            combined.extend_from_slice(&body_hash);
+            sha256_bytes(&combined)
+        } else if tx_type == "writeDataTo" {
+            let header_hash = sha256_bytes(&header_bytes);
+            let entries_hex = extract_entries(body);
+            let recipient = body.get("recipient").and_then(|r| r.as_str()).unwrap_or("");
+            let body_hash = compute_write_data_to_body_hash(recipient, &entries_hex);
             let mut combined = Vec::with_capacity(64);
             combined.extend_from_slice(&header_hash);
             combined.extend_from_slice(&body_hash);
@@ -929,6 +975,11 @@ fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
         marshal_create_token_account_body, marshal_create_data_account_body,
         marshal_write_data_body, marshal_create_token_body, marshal_issue_tokens_body,
         marshal_key_page_operation, marshal_update_key_page_body,
+        marshal_create_key_book_body, marshal_create_key_page_body,
+        marshal_burn_tokens_body, marshal_update_key_body,
+        marshal_burn_credits_body, marshal_transfer_credits_body,
+        marshal_write_data_to_body, marshal_lock_account_body,
+        marshal_update_account_auth_body,
         tx_types
     };
     use crate::codec::writer::BinaryWriter;
@@ -1016,6 +1067,43 @@ fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
             }
             Ok(marshal_issue_tokens_body(&recipients))
         }
+        "burnTokens" => {
+            let amount_str = body.get("amount").and_then(|a| a.as_str()).unwrap_or("0");
+            let amount: u64 = amount_str.parse().unwrap_or(0);
+            Ok(marshal_burn_tokens_body(amount))
+        }
+        "createKeyBook" => {
+            let url = body.get("url").and_then(|u| u.as_str()).unwrap_or("");
+            let key_hash_hex = body.get("publicKeyHash")
+                .or_else(|| body.get("keyHash"))
+                .and_then(|k| k.as_str())
+                .unwrap_or("");
+            let key_hash = hex::decode(key_hash_hex).unwrap_or_default();
+            Ok(marshal_create_key_book_body(url, &key_hash))
+        }
+        "createKeyPage" => {
+            let keys_array = body.get("keys").and_then(|k| k.as_array());
+            let mut key_hashes: Vec<Vec<u8>> = Vec::new();
+            if let Some(keys) = keys_array {
+                for key in keys {
+                    let key_hash_hex = key.get("keyHash")
+                        .or_else(|| key.get("publicKeyHash"))
+                        .and_then(|k| k.as_str())
+                        .unwrap_or("");
+                    let key_hash = hex::decode(key_hash_hex).unwrap_or_default();
+                    key_hashes.push(key_hash);
+                }
+            }
+            Ok(marshal_create_key_page_body(&key_hashes))
+        }
+        "updateKey" => {
+            let new_key_hash_hex = body.get("newKeyHash")
+                .or_else(|| body.get("newKey"))
+                .and_then(|k| k.as_str())
+                .unwrap_or("");
+            let new_key_hash = hex::decode(new_key_hash_hex).unwrap_or_default();
+            Ok(marshal_update_key_body(&new_key_hash))
+        }
         "updateKeyPage" => {
             // Parse operations array from JSON
             let op_array = body.get("operation").and_then(|o| o.as_array());
@@ -1065,6 +1153,54 @@ fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
             }
 
             Ok(marshal_update_key_page_body(&operations))
+        }
+        "burnCredits" => {
+            let amount = body.get("amount").and_then(|a| a.as_u64()).unwrap_or(0);
+            Ok(marshal_burn_credits_body(amount))
+        }
+        "transferCredits" => {
+            let to_array = body.get("to").and_then(|t| t.as_array());
+            let mut recipients: Vec<(&str, u64)> = Vec::new();
+            if let Some(to) = to_array {
+                for recipient in to {
+                    let url = recipient.get("url").and_then(|u| u.as_str()).unwrap_or("");
+                    let amount = recipient.get("amount").and_then(|a| a.as_u64()).unwrap_or(0);
+                    recipients.push((url, amount));
+                }
+            }
+            Ok(marshal_transfer_credits_body(&recipients))
+        }
+        "writeDataTo" => {
+            let recipient = body.get("recipient").and_then(|r| r.as_str()).unwrap_or("");
+            let mut entries_hex = Vec::new();
+            if let Some(entry) = body.get("entry") {
+                if let Some(data) = entry.get("data") {
+                    if let Some(arr) = data.as_array() {
+                        for item in arr {
+                            if let Some(s) = item.as_str() {
+                                entries_hex.push(s.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+            Ok(marshal_write_data_to_body(recipient, &entries_hex))
+        }
+        "lockAccount" => {
+            let height = body.get("height").and_then(|h| h.as_u64()).unwrap_or(0);
+            Ok(marshal_lock_account_body(height))
+        }
+        "updateAccountAuth" => {
+            let ops_array = body.get("operations").and_then(|o| o.as_array());
+            let mut operations: Vec<(&str, &str)> = Vec::new();
+            if let Some(ops) = ops_array {
+                for op in ops {
+                    let op_type = op.get("type").and_then(|t| t.as_str()).unwrap_or("");
+                    let authority = op.get("authority").and_then(|a| a.as_str()).unwrap_or("");
+                    operations.push((op_type, authority));
+                }
+            }
+            Ok(marshal_update_account_auth_body(&operations))
         }
         // For other transaction types, fall back to JSON encoding
         // This won't produce correct signatures but allows compilation
