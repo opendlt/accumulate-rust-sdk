@@ -22,8 +22,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Endpoint: {}\n", KERMIT_V3);
 
     // Connect to Kermit testnet
-    let v2_url = Url::parse(KERMIT_V2)?;
-    let v3_url = Url::parse(KERMIT_V3)?;
+    // Honor ACCUMULATE_V2_URL/V3_URL when set (e.g. mock/devnet harness); default to Kermit.
+    let v2_url = Url::parse(&std::env::var("ACCUMULATE_V2_URL").unwrap_or_else(|_| KERMIT_V2.to_string()))?;
+    let v3_url = Url::parse(&std::env::var("ACCUMULATE_V3_URL").unwrap_or_else(|_| KERMIT_V3.to_string()))?;
     let client = AccumulateClient::new_with_options(v2_url, v3_url, AccOptions::default()).await?;
 
     // =========================================================

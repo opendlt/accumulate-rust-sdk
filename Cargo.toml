@@ -1,14 +1,14 @@
 [package]
 name = "accumulate-sdk"
-version = "2.1.0"
+version = "2.1.1"
 edition = "2021"
 rust-version = "1.70"
 license = "MIT"
 readme = "README.md"
 authors = ["OpenDLT Developers"]
 description = "Accumulate Rust SDK (V2/V3 unified) with DevNet-first flows"
-repository = "https://github.com/opendlt/opendlt-rust-v2v3-sdk"
-homepage = "https://github.com/opendlt/opendlt-rust-v2v3-sdk"
+repository = "https://github.com/opendlt/accumulate-rust-sdk"
+homepage = "https://github.com/opendlt/accumulate-rust-sdk"
 documentation = "https://docs.rs/accumulate-sdk"
 keywords = ["accumulate","blockchain","sdk","json-rpc","crypto"]
 categories = ["api-bindings","cryptography","network-programming"]
