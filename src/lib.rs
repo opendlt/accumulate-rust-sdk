@@ -10,6 +10,9 @@
 // Import the main V2/V3 client as the primary AccumulateClient
 pub use crate::client::AccumulateClient;
 
+// ACME amount helpers
+pub use crate::amounts::{Amount, ACME_BASE_UNITS, ACME_PRECISION};
+
 /// Type alias for convenient access to AccumulateClient methods
 pub type Accumulate = AccumulateClient;
 pub use crate::codec::{
@@ -51,6 +54,8 @@ pub use crate::runtime::rpc::*;
 #[cfg(test)]
 pub use crate::runtime::signing_test_shims;
 
+/// ACME amount helpers (1 ACME = 1e8 base units)
+pub mod amounts;
 /// Canonical JSON encoding utilities
 pub mod canonjson;
 /// Main Accumulate client implementation
