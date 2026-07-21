@@ -1915,3 +1915,96 @@ mod tests {
         assert!(lite_token_account.contains("/ACME"));
     }
 }
+
+// =============================================================================
+// Golden byte-compatibility harness (Phase 3 Workstream A safety net)
+//
+// Marshals every TxBody type to its binary encoding with fixed inputs and pins
+// the bytes. Transaction signatures are computed over these bytes, so ANY change
+// to them silently breaks signing. Run before AND after the typed-body refactor:
+// the hashes must not move. `hex_bytes` takes `impl Into<Value>` so the same test
+// works whether TxBody returns `Value` (today) or typed structs (after refactor).
+// =============================================================================
+#[cfg(test)]
+mod golden_marshal {
+    use super::*;
+
+    fn hex_bytes(body: impl Into<Value>) -> String {
+        hex::encode(marshal_body_to_binary(&body.into()).expect("marshal"))
+    }
+
+    const KH_HEX: &str = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
+
+    fn cases() -> Vec<(&'static str, String)> {
+        let kh = hex::decode(KH_HEX).unwrap();
+        vec![
+            ("add_credits", hex_bytes(TxBody::add_credits("acc://alice.acme", "1000000", 500))),
+            ("create_identity", hex_bytes(TxBody::create_identity("acc://alice.acme", "acc://alice.acme/book", KH_HEX))),
+            ("create_token_account", hex_bytes(TxBody::create_token_account("acc://alice.acme/tokens", "acc://acme.acme/ACME"))),
+            ("create_data_account", hex_bytes(TxBody::create_data_account("acc://alice.acme/data"))),
+            ("create_token", hex_bytes(TxBody::create_token("acc://alice.acme/mytoken", "MYT", 8, Some("1000000")))),
+            ("send_tokens_single", hex_bytes(TxBody::send_tokens_single("acc://bob.acme/tokens", "100000000"))),
+            ("send_tokens_multi", hex_bytes(TxBody::send_tokens_multi(&[("acc://bob.acme/tokens", "100000000"), ("acc://carol.acme/tokens", "200000000")]))),
+            ("issue_tokens_single", hex_bytes(TxBody::issue_tokens_single("acc://bob.acme/tokens", "100000000"))),
+            ("write_data", hex_bytes(TxBody::write_data(&["hello", "world"]))),
+            ("write_data_hex", hex_bytes(TxBody::write_data_hex(&["48656c6c6f"]))),
+            ("write_data_to", hex_bytes(TxBody::write_data_to("acc://alice.acme/data", &["hello"]))),
+            ("write_data_to_hex", hex_bytes(TxBody::write_data_to_hex("acc://alice.acme/data", &["48656c6c6f"]))),
+            ("create_key_page", hex_bytes(TxBody::create_key_page(&[kh.as_slice()]))),
+            ("create_key_book", hex_bytes(TxBody::create_key_book("acc://alice.acme/book2", KH_HEX))),
+            ("update_key_page_add_key", hex_bytes(TxBody::update_key_page_add_key(&kh))),
+            ("update_key_page_remove_key", hex_bytes(TxBody::update_key_page_remove_key(&kh))),
+            ("update_key_page_set_threshold", hex_bytes(TxBody::update_key_page_set_threshold(2))),
+            ("burn_tokens", hex_bytes(TxBody::burn_tokens("100000000"))),
+            ("transfer_credits", hex_bytes(TxBody::transfer_credits("acc://bob.acme", 100))),
+            ("burn_credits", hex_bytes(TxBody::burn_credits(100))),
+            ("lock_account", hex_bytes(TxBody::lock_account(1000))),
+        ]
+    }
+
+    /// Capture mode: `cargo test -p accumulate-sdk golden_capture -- --ignored --nocapture`
+    #[test]
+    #[ignore]
+    fn golden_capture() {
+        for (name, hex) in cases() {
+            println!("GOLDEN\t{name}\t{hex}");
+        }
+    }
+
+    /// Regression guard: byte encodings must not change across the typed-body refactor.
+    #[test]
+    fn golden_bytes_stable() {
+        let expected: &[(&str, &str)] = GOLDEN;
+        let actual = cases();
+        assert_eq!(actual.len(), expected.len(), "case count changed");
+        for ((name, got), (ename, want)) in actual.iter().zip(expected.iter()) {
+            assert_eq!(name, ename, "case order changed");
+            assert_eq!(got, want, "marshaled bytes changed for {name} — signing would break!");
+        }
+    }
+
+    // Filled from `golden_capture` output (the pinned reference).
+    const GOLDEN: &[(&str, &str)] = &[
+        ("add_credits", "010e02106163633a2f2f616c6963652e61636d6503030f424004f403"),
+        ("create_identity", "010102106163633a2f2f616c6963652e61636d65032000112233445566778899aabbccddeeff00112233445566778899aabbccddeeff04156163633a2f2f616c6963652e61636d652f626f6f6b"),
+        ("create_token_account", "010202176163633a2f2f616c6963652e61636d652f746f6b656e7303146163633a2f2f61636d652e61636d652f41434d45"),
+        ("create_data_account", "010402156163633a2f2f616c6963652e61636d652f64617461"),
+        ("create_token", "010802186163633a2f2f616c6963652e61636d652f6d79746f6b656e04034d5954050807030f4240"),
+        ("send_tokens_single", "0103041d01156163633a2f2f626f622e61636d652f746f6b656e73020405f5e100"),
+        ("send_tokens_multi", "0103041d01156163633a2f2f626f622e61636d652f746f6b656e73020405f5e100041f01176163633a2f2f6361726f6c2e61636d652f746f6b656e7302040bebc200"),
+        ("issue_tokens_single", "0109041d01156163633a2f2f626f622e61636d652f746f6b656e73020405f5e100"),
+        ("write_data", "010502100103020568656c6c6f0205776f726c64"),
+        ("write_data_hex", "010502090103020548656c6c6f"),
+        ("write_data_to", "010602156163633a2f2f616c6963652e61636d652f6461746103090103020568656c6c6f"),
+        ("write_data_to_hex", "010602156163633a2f2f616c6963652e61636d652f6461746103090103020548656c6c6f"),
+        ("create_key_page", "010c0222012000112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"),
+        ("create_key_book", "010d02166163633a2f2f616c6963652e61636d652f626f6f6b32032000112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"),
+        ("update_key_page_add_key", "010f022601030222012000112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"),
+        ("update_key_page_remove_key", "010f022601020222012000112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"),
+        ("update_key_page_set_threshold", "010f020401040202"),
+        ("burn_tokens", "010a020405f5e100"),
+        ("transfer_credits", "01120212010e6163633a2f2f626f622e61636d650264"),
+        ("burn_credits", "01110264"),
+        ("lock_account", "011002e807"),
+    ];
+}
