@@ -2,7 +2,7 @@
 
 [![Rust](https://img.shields.io/badge/Rust-1.70+-orange.svg)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Crates.io](https://img.shields.io/crates/v/accumulate-client.svg)](https://crates.io/crates/accumulate-client)
+[![Crates.io](https://img.shields.io/crates/v/accumulate-sdk.svg)](https://crates.io/crates/accumulate-sdk)
 
 Production-ready Rust SDK for the Accumulate blockchain protocol. Supports all signature types, V2/V3 API endpoints, and provides a high-level signing API with automatic version tracking.
 
@@ -20,9 +20,11 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-accumulate-client = "2.0"
+accumulate-sdk = "2.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 ```
+
+> The crate is published as **`accumulate-sdk`**; its library import path is **`accumulate_client`** (e.g. `use accumulate_client::QuickStart;`). Run `cargo add accumulate-sdk`.
 
 ## Quick Start
 
@@ -289,4 +291,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 - [Accumulate Protocol](https://accumulatenetwork.io/)
 - [API Documentation](https://docs.accumulatenetwork.io/)
 - [Kermit Testnet Explorer](https://kermit.explorer.accumulatenetwork.io/)
-- [Crates.io Package](https://crates.io/crates/accumulate-client)
+- [Crates.io Package](https://crates.io/crates/accumulate-sdk)

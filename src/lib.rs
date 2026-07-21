@@ -2,6 +2,10 @@
 //!
 //! This crate provides a unified client for interacting with Accumulate blockchain
 //! networks, supporting both V2 and V3 protocol versions.
+//!
+//! Published on crates.io as **`accumulate-sdk`** (`cargo add accumulate-sdk`); the
+//! library import path is **`accumulate_client`**. Start from [`QuickStart`], build
+//! transactions with [`TxBody`], and sign/submit with [`SmartSigner`].
 
 // Import the main V2/V3 client as the primary AccumulateClient
 pub use crate::client::AccumulateClient;
