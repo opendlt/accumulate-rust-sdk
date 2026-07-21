@@ -21,6 +21,9 @@ include = [
   "LICENSE",
   "CHANGELOG.md",
   "examples/**",
+  "llms.txt",
+  "llms-full.txt",
+  "AGENTS.md",
 ]
 
 [lib]
