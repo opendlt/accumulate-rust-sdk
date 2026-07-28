@@ -26,19 +26,23 @@ const ASINVOKER_MANIFEST: &str = r#"<?xml version="1.0" encoding="UTF-8" standal
 </assembly>
 "#;
 
-fn main() {
+// `[lints.clippy] expect_used = "deny"` in Cargo.toml applies to every target,
+// including this build script. Returning a Result and using `?` satisfies it
+// without suppressing the lint: a failure here aborts the build with the error
+// message, which is exactly the desired behaviour for a build script.
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-changed=build.rs");
 
     // Only Windows MSVC needs (and supports, via link.exe) this manifest embedding.
     let is_windows = env::var_os("CARGO_CFG_WINDOWS").is_some();
     let is_msvc = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default() == "msvc";
     if !is_windows || !is_msvc {
-        return;
+        return Ok(());
     }
 
-    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+    let out_dir = env::var("OUT_DIR")?;
     let manifest_path = PathBuf::from(&out_dir).join("accumulate-asinvoker.manifest");
-    fs::write(&manifest_path, ASINVOKER_MANIFEST).expect("failed to write app manifest");
+    fs::write(&manifest_path, ASINVOKER_MANIFEST)?;
     let input = manifest_path.display();
 
     // Plain `rustc-link-arg` applies to all binary outputs (examples, bins, tests,
@@ -46,4 +50,6 @@ fn main() {
     println!("cargo:rustc-link-arg=/MANIFEST:EMBED");
     println!("cargo:rustc-link-arg=/MANIFESTINPUT:{input}");
     println!("cargo:rustc-link-arg=/MANIFESTUAC:NO");
+
+    Ok(())
 }

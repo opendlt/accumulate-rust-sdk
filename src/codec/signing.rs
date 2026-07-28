@@ -819,8 +819,13 @@ fn merkle_hash(hashes: &[[u8; 32]]) -> [u8; 32] {
                 break;
             }
 
-            // Combine hashes and carry to next level
-            current = combine_hashes(&pending[i].unwrap(), &current);
+            // Combine hashes and carry to next level.
+            // `pending[i]` is Some here — the `is_none()` branch above breaks —
+            // but match on it rather than unwrap so the invariant is explicit
+            // and a future edit cannot turn it into a panic in signing code.
+            if let Some(existing) = pending[i] {
+                current = combine_hashes(&existing, &current);
+            }
             pending[i] = None;
             i += 1;
         }
@@ -829,10 +834,13 @@ fn merkle_hash(hashes: &[[u8; 32]]) -> [u8; 32] {
     // Combine remaining pending hashes
     let mut anchor: Option<[u8; 32]> = None;
     for v in &pending {
-        if anchor.is_none() {
-            anchor = *v;
-        } else if let Some(val) = v {
-            anchor = Some(combine_hashes(val, &anchor.unwrap()));
+        match (anchor, v) {
+            // First non-empty slot seeds the anchor.
+            (None, _) => anchor = *v,
+            // Both present: fold the slot into the running anchor. Matching on
+            // the pair removes the unwrap without changing the fold order.
+            (Some(acc), Some(val)) => anchor = Some(combine_hashes(val, &acc)),
+            (Some(_), None) => {}
         }
     }
 

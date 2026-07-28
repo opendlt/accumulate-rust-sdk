@@ -1353,11 +1353,11 @@ pub async fn poll_for_balance(
                         }
                     }
                 }
-                println!("  Waiting for balance... (attempt {}/{})", i + 1, max_attempts);
+                tracing::debug!("  Waiting for balance... (attempt {}/{})", i + 1, max_attempts);
             }
             Err(_) => {
                 // Account may not exist yet
-                println!("  Account not found yet... (attempt {}/{})", i + 1, max_attempts);
+                tracing::debug!("  Account not found yet... (attempt {}/{})", i + 1, max_attempts);
             }
         }
 
@@ -1584,10 +1584,10 @@ impl QuickStart {
                         .or_else(|| response.get("txid"))
                         .and_then(|v| v.as_str())
                         .unwrap_or("submitted");
-                    println!("  Faucet {}/{}: {}", i + 1, times, txid);
+                    tracing::debug!("  Faucet {}/{}: {}", i + 1, times, txid);
                 }
                 Err(e) => {
-                    println!("  Faucet {}/{} failed: {}", i + 1, times, e);
+                    tracing::debug!("  Faucet {}/{} failed: {}", i + 1, times, e);
                 }
             }
             if i < times - 1 {
@@ -1596,13 +1596,13 @@ impl QuickStart {
         }
 
         // Wait for faucet transactions to process
-        println!("  Waiting for faucet to process...");
+        tracing::debug!("  Waiting for faucet to process...");
         tokio::time::sleep(Duration::from_secs(10)).await;
 
         // Poll for balance to confirm account is available
         let balance = poll_for_balance(&self.client, &wallet.lite_token_account, 30).await;
         if balance.is_none() || balance == Some(0) {
-            println!("  Warning: Account balance not confirmed yet");
+            tracing::debug!("  Warning: Account balance not confirmed yet");
         }
 
         Ok(())
@@ -1967,7 +1967,7 @@ mod golden_marshal {
     #[ignore]
     fn golden_capture() {
         for (name, hex) in cases() {
-            println!("GOLDEN\t{name}\t{hex}");
+            tracing::debug!("GOLDEN\t{name}\t{hex}");
         }
     }
 
