@@ -1,6 +1,6 @@
 # opendlt-rust-v2v3-sdk — repository guide for agents
 
-The Rust SDK for the Accumulate blockchain. Published as `accumulate-sdk` (v2.3.0).
+The Rust SDK for the Accumulate blockchain. Published as `accumulate-sdk` (v2.3.1).
 
 > **The project root is `unified/`, not the repository root.** Run every command below from there unless stated otherwise.
 

@@ -5,6 +5,16 @@ All notable changes to the Accumulate Rust SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-07-28
+
+### Fixed
+- **Library helpers no longer print to stdout.** `poll_for_balance` and the faucet helpers wrote progress with `println!`, which corrupts any caller parsing stdout as data. They now emit through `tracing`, so consumers decide whether to surface them.
+- `build.rs` propagates errors instead of `expect()`. `[lints.clippy] expect_used = "deny"` applies to every target, so clippy failed on the build script and never reached the library — meaning `make lint` and `make ci-check` had never actually run against library code.
+- Replaced two `unwrap()` calls in the Merkle anchor fold with explicit matches. Signing bytes are unchanged (`golden_bytes_stable` passes).
+
+### Added
+- `tracing` as a runtime dependency (previously only `tracing-subscriber`, and only for dev).
+
 ## [2.3.0] - 2026-07-28
 
 ### Added
