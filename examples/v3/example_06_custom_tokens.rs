@@ -9,7 +9,7 @@
 //! Run with: cargo run --example example_06_custom_tokens
 
 use accumulate_client::{
-    AccumulateClient, AccOptions, TxBody, SmartSigner,
+    AccumulateClient, AccOptions, Amount, TxBody, SmartSigner,
     poll_for_balance, poll_for_credits, derive_lite_identity_url,
     KERMIT_V2, KERMIT_V3,
 };
@@ -261,11 +261,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // =========================================================
     println!("--- Step 8: Issue Custom Tokens ---\n");
 
-    // Issue 10000 tokens (100.00 with 2 decimal precision)
-    let issue_amount = "10000"; // 100.00 RUST
-    println!("Issuing {} tokens (100.00 {}) to {}", issue_amount, symbol, account1_url);
+    // IssueTokens takes BASE UNITS on the wire. Use Amount::token to convert
+    // from whole tokens rather than writing the base-unit literal by hand:
+    // passing "100" here would mint 1.00 RUST, and the transaction would
+    // succeed while being 100x off what was intended.
+    let issue_whole = 100u64;
+    let issue_amount = Amount::token(issue_whole, precision as u32).to_wire();
+    println!(
+        "Issuing {}.00 {} ({} base units at precision {}) to {}",
+        issue_whole, symbol, issue_amount, precision, account1_url
+    );
 
-    let issue_body = TxBody::issue_tokens_single(&account1_url, issue_amount);
+    let issue_body = TxBody::issue_tokens_single(&account1_url, &issue_amount);
 
     let result = adi_signer.sign_submit_and_wait(
         &custom_token_url,

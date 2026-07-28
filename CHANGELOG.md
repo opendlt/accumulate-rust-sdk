@@ -5,6 +5,14 @@ All notable changes to the Accumulate Rust SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-07-28
+
+### Added
+- `Amount::token(whole_tokens, precision)` and `Amount::to_token(precision)` for **custom tokens**. Custom tokens declare their own precision at creation; the wire format is always base units. Previously `Amount` covered only ACME (`acme`, `base_units`, `credits`), so issuing a custom token meant hand-computing a power of ten.
+
+### Fixed
+- `examples/v3/example_06_custom_tokens.rs` labelled a base-unit literal as "tokens" (`Issuing 10000 tokens (100.00 RUST)`). The arithmetic was right but the wording taught the wrong model: an AI agent following this example issued `1000` against a precision-8 token and minted `0.00001` tokens instead of 1000, and the transaction succeeded. The example now uses `Amount::token` and prints both readings.
+
 ## [2.1.0] - 2026-02-27
 
 ### Added

@@ -1,8 +1,13 @@
-//! ACME amount helpers.
+//! Token amount helpers.
 //!
 //! Accumulate denominates ACME in *base units* where **1 ACME = 1e8 base
 //! units**. Passing whole ACME where base units are expected is the single most
 //! common integration bug. Use [`Amount`] to convert explicitly.
+//!
+//! Custom tokens work the same way but with **their own precision**, declared
+//! when the token is created. A token with `precision = 2` stores `10000` base
+//! units for `100.00` tokens. Use [`Amount::token`] rather than computing the
+//! power of ten by hand — see [`Amount::token`] for why this matters.
 
 /// Number of decimal places in ACME (1 ACME = 10^[`ACME_PRECISION`] base units).
 pub const ACME_PRECISION: u32 = 8;
@@ -38,6 +43,52 @@ impl Amount {
     #[must_use]
     pub fn base_units(units: u128) -> Self {
         Self { base_units: units }
+    }
+
+    /// Create from whole units of a **custom token** with the given precision.
+    ///
+    /// Custom tokens declare their own precision at creation time; the wire
+    /// format is always base units. `Amount::token(1000, 8)` is 1000 whole
+    /// tokens = `100000000000` base units.
+    ///
+    /// Without this helper the only options are hand-computing a power of ten
+    /// or passing a raw base-unit string, and both are routinely got wrong:
+    /// issuing `1000` against a precision-8 token mints `0.00001` tokens, not
+    /// 1000. The value silently differs from intent by eight orders of
+    /// magnitude and the transaction succeeds either way.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use accumulate_client::Amount;
+    ///
+    /// // 1000 whole tokens of a precision-8 token
+    /// assert_eq!(Amount::token(1000, 8).to_wire(), "100000000000");
+    /// // 100.00 of a precision-2 token
+    /// assert_eq!(Amount::token(100, 2).to_wire(), "10000");
+    /// // precision 0 means base units *are* whole tokens
+    /// assert_eq!(Amount::token(1000, 0).to_wire(), "1000");
+    /// ```
+    #[must_use]
+    pub fn token(whole_tokens: u64, precision: u32) -> Self {
+        Self {
+            base_units: u128::from(whole_tokens) * 10u128.pow(precision),
+        }
+    }
+
+    /// The amount expressed in whole units of a token with the given precision.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use accumulate_client::Amount;
+    ///
+    /// assert_eq!(Amount::base_units(100_000_000_000).to_token(8), 1000.0);
+    /// ```
+    #[must_use]
+    #[allow(clippy::cast_precision_loss)]
+    pub fn to_token(&self, precision: u32) -> f64 {
+        self.base_units as f64 / 10u128.pow(precision) as f64
     }
 
     /// ACME base units needed to buy `credit_count` credits at `oracle_price`
