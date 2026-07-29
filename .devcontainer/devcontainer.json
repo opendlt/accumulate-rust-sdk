@@ -1,0 +1,31 @@
+{
+  "name": "accumulate-rust-sdk",
+  "image": "mcr.microsoft.com/devcontainers/rust:1-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // `make ci-check` runs fmt-check, lint, test, coverage-gate and audit. A
+  // container that ships rustc but not cargo-audit/llvm-cov fails the very
+  // command it exists to guarantee, so install the toolchain the Makefile needs.
+  // llvm-tools-preview is required by cargo-llvm-cov, which `make coverage-gate`
+  // needs. This directory IS the crate root: Cargo.toml sits here, not in a subdir.
+  "postCreateCommand": "rustup component add rustfmt clippy llvm-tools-preview && cargo install cargo-audit cargo-llvm-cov --locked && cargo fetch",
+
+  "containerEnv": {
+    "ACCUMULATE_NETWORK": "kermit",
+    "CARGO_TERM_COLOR": "never"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["rust-lang.rust-analyzer", "tamasfe.even-better-toml"],
+      "settings": {
+        "rust-analyzer.linkedProjects": ["Cargo.toml"]
+      }
+    }
+  },
+
+  "remoteUser": "vscode"
+}
