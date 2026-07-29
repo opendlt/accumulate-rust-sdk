@@ -5,6 +5,14 @@ All notable changes to the Accumulate Rust SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.2] - 2026-07-29
+
+### Fixed
+- **Submit-time rejections were silently swallowed.** `sign_submit_and_wait` extracted the transaction id from the `submit` response and went straight to polling, never inspecting the per-submission `status` for an error. A network rejection (e.g. `unauthorized`) therefore surfaced only as a timeout after `max_attempts` — 60 x 2s — with no reason attached, discarding the actionable error at the moment it arrived. Both submit paths now return it immediately.
+
+### Added
+- `llms.txt` documents that custom tokens carry their own precision, configured when the token issuer is created. It is not 1e8, and issuing `1000` against a precision-8 token mints `0.00001` tokens while the transaction still succeeds.
+
 ## [2.3.1] - 2026-07-28
 
 ### Fixed

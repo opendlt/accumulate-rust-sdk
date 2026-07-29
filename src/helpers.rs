@@ -614,6 +614,12 @@ impl<'a> SmartSigner<'a> {
             Err(e) => return TxResult::err(format!("Submit failed: {}", e)),
         };
 
+        // Surface a submit-time rejection immediately instead of polling for two
+        // minutes and reporting a bare timeout.
+        if let Some(err) = extract_submit_error(&response) {
+            return TxResult::err(format!("Transaction rejected at submit: {err}"));
+        }
+
         // Extract transaction ID
         let txid = extract_txid(&response);
         if txid.is_none() {
@@ -903,6 +909,12 @@ impl<'a> SmartSigner<'a> {
             Ok(resp) => resp,
             Err(e) => return TxResult::err(format!("Submit failed: {}", e)),
         };
+
+        // Surface a submit-time rejection immediately instead of polling for two
+        // minutes and reporting a bare timeout.
+        if let Some(err) = extract_submit_error(&response) {
+            return TxResult::err(format!("Transaction rejected at submit: {err}"));
+        }
 
         // Extract transaction ID
         let txid = extract_txid(&response);
@@ -1836,6 +1848,61 @@ pub fn sha256_hash(data: &[u8]) -> [u8; 32] {
 /// - [1] = signature result with txID like acc://hash@account
 ///
 /// We prefer the second entry (signature tx) which doesn't have path suffix.
+
+/// Detect a submit-time rejection in a V3 `submit` response.
+///
+/// The network can accept the envelope transport-wise while REJECTING the
+/// transaction, returning a per-submission `status` carrying an error (e.g.
+/// `unauthorized`). Callers previously extracted the txid and went straight to
+/// polling, so a rejection surfaced only as a timeout after `max_attempts`
+/// (60 x 2s = two minutes) with no reason attached — the actionable error was
+/// discarded at the moment it arrived.
+fn extract_submit_error(response: &Value) -> Option<String> {
+    fn from_entry(entry: &Value) -> Option<String> {
+        let status = entry.get("status")?;
+
+        // Explicit failure flag.
+        if status.get("failed").and_then(Value::as_bool).unwrap_or(false) {
+            let msg = status
+                .get("error")
+                .and_then(|e| e.get("message").and_then(Value::as_str).or_else(|| e.as_str()))
+                .unwrap_or("transaction rejected at submit");
+            return Some(msg.to_string());
+        }
+
+        // Some responses carry `error` without `failed`.
+        if let Some(err) = status.get("error") {
+            if !err.is_null() {
+                let msg = err
+                    .get("message")
+                    .and_then(Value::as_str)
+                    .or_else(|| err.as_str())
+                    .unwrap_or("transaction rejected at submit");
+                let code = err.get("code").and_then(Value::as_str).map(|c| format!(" ({c})")).unwrap_or_default();
+                return Some(format!("{msg}{code}"));
+            }
+        }
+
+        // Envelope-level success flag, when present, must be true.
+        if let Some(false) = entry.get("success").and_then(Value::as_bool) {
+            let msg = entry.get("message").and_then(Value::as_str).unwrap_or("submit reported success=false");
+            return Some(msg.to_string());
+        }
+
+        None
+    }
+
+    if let Some(arr) = response.as_array() {
+        for entry in arr {
+            if let Some(e) = from_entry(entry) {
+                return Some(e);
+            }
+        }
+        return None;
+    }
+    from_entry(response)
+}
+
 fn extract_txid(response: &Value) -> Option<String> {
     // Try array format first - this is the V3 format
     if let Some(arr) = response.as_array() {
@@ -1862,6 +1929,49 @@ fn extract_txid(response: &Value) -> Option<String> {
         .or_else(|| response.get("transactionHash"))
         .and_then(|t| t.as_str())
         .map(String::from)
+}
+
+#[cfg(test)]
+mod submit_error_tests {
+    use super::extract_submit_error;
+    use serde_json::json;
+
+    #[test]
+    fn detects_failed_flag_with_message() {
+        let r = json!([{"status": {"failed": true, "error": {"message": "unauthorized"}}}]);
+        assert_eq!(extract_submit_error(&r).as_deref(), Some("unauthorized"));
+    }
+
+    #[test]
+    fn detects_error_without_failed_flag() {
+        let r = json!([{"status": {"error": {"message": "insufficient credits", "code": "402"}}}]);
+        let got = extract_submit_error(&r).unwrap();
+        assert!(got.contains("insufficient credits"), "got: {got}");
+    }
+
+    #[test]
+    fn detects_success_false() {
+        let r = json!([{"success": false, "message": "rejected", "status": {}}]);
+        assert_eq!(extract_submit_error(&r).as_deref(), Some("rejected"));
+    }
+
+    #[test]
+    fn accepts_a_clean_submit() {
+        // A normal accepted submission must NOT be reported as an error, or
+        // every transaction would fail.
+        let r = json!([{"status": {"txID": "acc://abc@def/ACME"}}]);
+        assert_eq!(extract_submit_error(&r), None);
+    }
+
+    #[test]
+    fn scans_every_entry_in_the_array() {
+        // V3 returns one entry per message; the rejection may not be first.
+        let r = json!([
+            {"status": {"txID": "acc://ok@x"}},
+            {"status": {"failed": true, "error": {"message": "bad signature"}}}
+        ]);
+        assert_eq!(extract_submit_error(&r).as_deref(), Some("bad signature"));
+    }
 }
 
 #[cfg(test)]
