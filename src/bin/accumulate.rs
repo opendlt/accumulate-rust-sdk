@@ -702,7 +702,9 @@ async fn run_verb(verb: &str, a: &Args, network: &str, em: &Emitter) -> Result<i
                 .map_err(|e| Usage(format!("could not read envelope '{path}': {e}")))?;
             let envelope: Value = serde_json::from_str(&body)
                 .map_err(|e| Usage(format!("envelope is not valid JSON: {e}")))?;
-            match rpc(base, "v3", "submit", envelope).await {
+            // V3 submit takes {"envelope": <envelope>}; posting the bare
+            // envelope returns -33400 "envelope is missing".
+            match rpc(base, "v3", "submit", json!({"envelope": envelope})).await {
                 Err(e) => Ok(em.fail(&e, None, None)),
                 Ok(v) => match v.get("error") {
                     Some(err) => Ok(em.fail(&rpc_error_text(err), None, None)),
