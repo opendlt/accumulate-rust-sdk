@@ -152,11 +152,20 @@ static VERBS: &[VerbSpec] = &[
     VerbSpec { name: "credits estimate", summary: "Estimate credits purchased for an ACME amount", network: true, signs: false,
         args: &[("url", "string", true)], flags: &[("--amount", "number", true, None, false)] },
     VerbSpec { name: "tx build", summary: "Build an unsigned transaction body", network: false, signs: false,
-        args: &[("op", "string", true)], flags: &[("--param", "key=value", false, None, true)] },
-    VerbSpec { name: "tx submit", summary: "Submit a signed envelope", network: true, signs: true,
-        args: &[], flags: &[("--envelope", "path", true, None, false),
-                            ("--key-file", "path", false, None, false),
-                            ("--key-env", "string", false, None, false)] },
+        args: &[("op", "string", true)],
+        flags: &[("--param", "key=value", false, None, true),
+                 ("--out", "path", false, None, false)] },
+    VerbSpec { name: "tx sign", summary: "Sign a transaction body into a submittable envelope",
+        network: true, signs: true, args: &[],
+        flags: &[("--body", "path", true, None, false),
+                 ("--principal", "string", true, None, false),
+                 ("--signer", "string", true, None, false),
+                 ("--key-file", "path", false, None, false),
+                 ("--key-env", "string", false, None, false),
+                 ("--out", "path", false, None, false)] },
+    VerbSpec { name: "tx submit", summary: "Submit an ALREADY-SIGNED envelope (does not sign)",
+        network: true, signs: false,
+        args: &[], flags: &[("--envelope", "path", true, None, false)] },
     VerbSpec { name: "tx wait", summary: "Poll a transaction until it reaches a final state", network: true, signs: false,
         args: &[("txid", "string", true)], flags: &[("--timeout", "integer", false, Some("60"), false)] },
     VerbSpec { name: "tx status", summary: "Read a transaction's current status", network: true, signs: false,
@@ -259,6 +268,99 @@ impl Emitter {
         }
         ec
     }
+}
+
+
+/// Case- and underscore-insensitive parameter lookup, so snake_case and
+/// camelCase both work. Op and parameter names differ per SDK, and making an
+/// agent learn each one defeats the point of a single CLI spec.
+fn pick<'x>(a: &'x Args, name: &str) -> Option<&'x str> {
+    let norm = |x: &str| x.replace('_', "").to_lowercase();
+    let target = norm(name);
+    a.values.iter().find(|(k, _)| norm(k) == target).map(|(_, v)| v.as_str())
+}
+
+fn req<'x>(a: &'x Args, name: &str, op: &str) -> Result<&'x str, Usage> {
+    pick(a, name).ok_or_else(|| Usage(format!("'{op}' requires --param {name}")))
+}
+
+/// Rust has no runtime reflection, so builder dispatch is explicit. Every branch
+/// delegates to `TxBody`, which is what keeps the produced bytes identical to
+/// the SDK path — these are consensus-visible.
+const BUILD_OPS: &[&str] = &[
+    "create_identity", "create_token_account", "create_data_account", "create_token",
+    "send_tokens_single", "issue_tokens_single", "burn_tokens", "add_credits",
+    "write_data", "write_data_hex", "create_key_book", "update_key",
+    "transfer_credits", "burn_credits", "lock_account",
+];
+
+fn build_body(op: &str, a: &Args) -> Result<Value, Usage> {
+    use accumulate_client::helpers::TxBody;
+    let n: String = op.replace('_', "").to_lowercase();
+    let parse_u64 = |v: &str, name: &str| -> Result<u64, Usage> {
+        v.parse::<u64>().map_err(|_| Usage(format!("--param {name} must be a non-negative integer")))
+    };
+    Ok(match n.as_str() {
+        "createidentity" => TxBody::create_identity(
+            req(a, "url", op)?, req(a, "key_book_url", op)?, req(a, "public_key_hash", op)?),
+        "createtokenaccount" => TxBody::create_token_account(
+            req(a, "url", op)?, req(a, "token_url", op)?),
+        "createdataaccount" => TxBody::create_data_account(req(a, "url", op)?),
+        "createtoken" => TxBody::create_token(
+            req(a, "url", op)?, req(a, "symbol", op)?,
+            parse_u64(req(a, "precision", op)?, "precision")?,
+            pick(a, "supply_limit")),
+        "sendtokenssingle" => TxBody::send_tokens_single(
+            req(a, "to_url", op)?, req(a, "amount", op)?),
+        "issuetokenssingle" => TxBody::issue_tokens_single(
+            req(a, "to_url", op)?, req(a, "amount", op)?),
+        "burntokens" => TxBody::burn_tokens(req(a, "amount", op)?),
+        "addcredits" => TxBody::add_credits(
+            req(a, "recipient", op)?, req(a, "amount", op)?,
+            parse_u64(req(a, "oracle", op)?, "oracle")?),
+        "writedata" => TxBody::write_data(&[req(a, "data", op)?]),
+        "writedatahex" => TxBody::write_data_hex(&[req(a, "data", op)?]),
+        "createkeybook" => TxBody::create_key_book(
+            req(a, "url", op)?, req(a, "public_key_hash", op)?),
+        "updatekey" => TxBody::update_key(req(a, "new_key_hash", op)?),
+        "transfercredits" => TxBody::transfer_credits(
+            req(a, "to_url", op)?, parse_u64(req(a, "amount", op)?, "amount")?),
+        "burncredits" => TxBody::burn_credits(parse_u64(req(a, "amount", op)?, "amount")?),
+        "lockaccount" => TxBody::lock_account(parse_u64(req(a, "height", op)?, "height")?),
+        _ => return Err(Usage(format!(
+            "unknown transaction op '{op}' -- available: {}", BUILD_OPS.join(", ")))),
+    })
+}
+
+/// Resolve the signing key from an EXPLICIT source only.
+///
+/// Never falls back to an ambient default: a CLI that quietly finds a key is a
+/// CLI that signs something the caller did not intend. Keys are never positional
+/// either, so they stay out of shell history.
+fn load_private_key(a: &Args) -> Result<String, Usage> {
+    let key_file = a.get("key_file");
+    let key_env = a.get("key_env");
+    if key_file.is_some() && key_env.is_some() {
+        return Err(Usage("pass only one of --key-file or --key-env".into()));
+    }
+    if let Some(p) = key_file {
+        return std::fs::read_to_string(p)
+            .map(|v| v.trim().to_string())
+            .map_err(|e| Usage(format!("could not read --key-file: {e}")));
+    }
+    if let Some(v) = key_env {
+        let val = std::env::var(v)
+            .map_err(|_| Usage(format!("--key-env '{v}' is not set or empty")))?;
+        if val.trim().is_empty() {
+            return Err(Usage(format!("--key-env '{v}' is not set or empty")));
+        }
+        return Ok(val.trim().to_string());
+    }
+    Err(Usage(
+        "signing requires an explicit key source: --key-file <path> or --key-env <VAR>. \
+         No ambient default key is ever used."
+            .into(),
+    ))
 }
 
 fn base_url(network: &str) -> Result<&'static str, Usage> {
@@ -423,15 +525,27 @@ async fn run_verb(verb: &str, a: &Args, network: &str, em: &Emitter) -> Result<i
         }
         "tx build" => {
             let mut params = Map::new();
+            let mut arg = Args::default();
             for raw in a.repeated.get("param").cloned().unwrap_or_default() {
                 match raw.split_once('=') {
-                    Some((k, v)) => { params.insert(k.to_string(), json!(v)); }
+                    Some((k, v)) => {
+                        params.insert(k.to_string(), json!(v));
+                        arg.values.insert(k.to_string(), v.to_string());
+                    }
                     None => return Err(Usage(format!("--param must be key=value, got '{raw}'"))),
                 }
             }
+            let op = a.get("op").unwrap_or_default().to_string();
+            let body = build_body(&op, &arg)?;
+            let out = a.get("out").map(|s| s.to_string());
+            if let Some(p) = &out {
+                std::fs::write(p, serde_json::to_string(&body).unwrap_or_default())
+                    .map_err(|e| Usage(format!("could not write --out: {e}")))?;
+            }
             return Ok(em.ok(json!({
-                "op": a.get("op"), "params": Value::Object(params), "signed": false,
-                "note": "unsigned body; sign and submit with `tx submit --envelope`"})));
+                "op": op, "params": Value::Object(params), "body": body, "signed": false,
+                "out": out,
+                "note": "unsigned body; sign it with `tx sign --body <file>`, then `tx submit`"})));
         }
         _ => {}
     }
@@ -541,11 +655,48 @@ async fn run_verb(verb: &str, a: &Args, network: &str, em: &Emitter) -> Result<i
                     "probe": v.get("result"), "probeError": v.get("error").map(rpc_error_text)}))),
             }
         }
-        "tx submit" => {
-            if a.get("key_file").is_none() && a.get("key_env").is_none() {
-                return Err(Usage("tx submit signs, so it requires --key-file or --key-env; \
-                                  no ambient default key is ever used".into()));
+        "tx sign" => {
+            // The ONLY verb that signs. Delegates to the SDK signer: signing
+            // bytes are consensus-visible and a second implementation is how
+            // they drift (this crate has a golden-byte harness for that reason).
+            let private_hex = load_private_key(a)?;
+            let path = a.get("body").unwrap();
+            let raw = std::fs::read_to_string(path)
+                .map_err(|e| Usage(format!("could not read --body '{path}': {e}")))?;
+            let body: Value = serde_json::from_str(&raw)
+                .map_err(|e| Usage(format!("body is not valid JSON: {e}")))?;
+
+            let seed = hex::decode(private_hex.trim())
+                .map_err(|e| Usage(format!("private key is not valid hex: {e}")))?;
+            let seed32: [u8; 32] = seed.get(..32)
+                .and_then(|s| s.try_into().ok())
+                .ok_or_else(|| Usage("private key must be at least 32 bytes of hex".into()))?;
+
+            use accumulate_client::helpers::SmartSigner;
+            use ed25519_dalek::SigningKey;
+            let client = accumulate_client::AccumulateClient::from_endpoints(
+                format!("{base}/v2").parse().unwrap(),
+                format!("{base}/v3").parse().unwrap(),
+                Default::default(),
+            ).await.map_err(|e| Usage(format!("could not reach {base}: {e}")))?;
+
+            let signer = SmartSigner::new(&client, SigningKey::from_bytes(&seed32), a.get("signer").unwrap());
+            let envelope = signer
+                .sign(a.get("principal").unwrap(), &body, None)
+                .map_err(|e| Usage(format!("signing failed: {e}")))?;
+
+            let out = a.get("out").map(|s| s.to_string());
+            if let Some(p) = &out {
+                std::fs::write(p, serde_json::to_string(&envelope).unwrap_or_default())
+                    .map_err(|e| Usage(format!("could not write --out: {e}")))?;
             }
+            return Ok(em.ok(json!({
+                "signed": true, "principal": a.get("principal"), "signer": a.get("signer"),
+                "envelope": envelope, "out": out})));
+        }
+        "tx submit" => {
+            // Deliberately does NOT sign, and no longer pretends to: it used to
+            // take --key-file/--key-env and never use them.
             let path = a.get("envelope").unwrap();
             let body = std::fs::read_to_string(path)
                 .map_err(|e| Usage(format!("could not read envelope '{path}': {e}")))?;
