@@ -118,6 +118,26 @@ impl TxBody {
         })
     }
 
+    /// Create a CreateDataAccount transaction body governed by specific key books.
+    ///
+    /// Without `authorities` the new account inherits the parent ADI's own book.
+    /// Pass a non-default book to create an account that a multi-signature page
+    /// can authorize directly; the authority cannot be changed by re-creating the
+    /// account later.
+    ///
+    /// This is a separate constructor rather than an optional argument because
+    /// changing `create_data_account`'s signature would break every caller.
+    pub fn create_data_account_with_authorities(url: &str, authorities: &[String]) -> Value {
+        let mut body = json!({
+            "type": "createDataAccount",
+            "url": url
+        });
+        if !authorities.is_empty() {
+            body["authorities"] = json!(authorities);
+        }
+        body
+    }
+
     /// Create a CreateToken transaction body
     pub fn create_token(url: &str, symbol: &str, precision: u64, supply_limit: Option<&str>) -> Value {
         let mut body = json!({
@@ -640,14 +660,21 @@ impl<'a> SmartSigner<'a> {
 
         let public_key = self.keypair.verifying_key().to_bytes();
 
-        // Refuse a duplicate: the same key signing twice does not advance the
-        // threshold, and the node rejects the envelope.
+        // Refuse a duplicate: the same key signing twice as the SAME signer does
+        // not advance that page's threshold, and the node rejects the envelope.
+        // The signer URL is part of the identity: one key may legitimately sign
+        // as two different pages when a transaction needs several authorities to
+        // approve — creating an account governed by another book, for instance.
+        let want_signer = self.signer_url.trim_end_matches('/');
         let already = sigs.iter().any(|s| {
             s.get("publicKey").and_then(|p| p.as_str()) == Some(&hex::encode(public_key))
+                && s.get("signer").and_then(|u| u.as_str()).map(|u| u.trim_end_matches('/'))
+                    == Some(want_signer)
         });
         if already {
             return Err(JsonRpcError::General(anyhow::anyhow!(
-                "this key has already signed the envelope; a threshold needs DISTINCT signers"
+                "this key has already signed the envelope as {}; a threshold needs DISTINCT signers",
+                self.signer_url
             )));
         }
 
@@ -1137,7 +1164,12 @@ fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
         }
         "createDataAccount" => {
             let url = body.get("url").and_then(|u| u.as_str()).unwrap_or("");
-            Ok(marshal_create_data_account_body(url))
+            let authorities: Vec<String> = body
+                .get("authorities")
+                .and_then(|a| a.as_array())
+                .map(|a| a.iter().filter_map(|v| v.as_str().map(String::from)).collect())
+                .unwrap_or_default();
+            Ok(marshal_create_data_account_body(url, &authorities))
         }
         "writeData" => {
             // Extract entries from nested entry.data structure

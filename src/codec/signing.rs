@@ -406,7 +406,7 @@ pub fn marshal_create_identity_body(
 /// - Field 1: Type (enum)
 /// - Field 2: Url (URL as string)
 /// - Field 3: Authorities (repeated URLs)
-pub fn marshal_create_data_account_body(url: &str) -> Vec<u8> {
+pub fn marshal_create_data_account_body(url: &str, authorities: &[String]) -> Vec<u8> {
     let mut writer = BinaryWriter::new();
 
     // Field 1: Type (CreateDataAccount = 0x04)
@@ -419,6 +419,20 @@ pub fn marshal_create_data_account_body(url: &str) -> Vec<u8> {
         let url_bytes = url.as_bytes();
         let _ = writer.write_uvarint(url_bytes.len() as u64);
         let _ = writer.write_bytes(url_bytes);
+    }
+
+    // Field 3 is repeated: each authority is written as its own field 3 entry.
+    // Sending authorities in the JSON body without encoding them here would make
+    // the locally computed transaction hash disagree with the node's, and the
+    // transaction would be rejected as unsigned.
+    for auth in authorities {
+        if auth.is_empty() {
+            continue;
+        }
+        let _ = writer.write_uvarint(3);
+        let auth_bytes = auth.as_bytes();
+        let _ = writer.write_uvarint(auth_bytes.len() as u64);
+        let _ = writer.write_bytes(auth_bytes);
     }
 
     writer.into_bytes()
