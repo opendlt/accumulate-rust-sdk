@@ -155,10 +155,11 @@ static VERBS: &[VerbSpec] = &[
         args: &[("op", "string", true)],
         flags: &[("--param", "key=value", false, None, true),
                  ("--out", "path", false, None, false)] },
-    VerbSpec { name: "tx sign", summary: "Sign a transaction body into a submittable envelope",
+    VerbSpec { name: "tx sign", summary: "Sign a body into an envelope, or co-sign an existing envelope (M-of-N)",
         network: true, signs: true, args: &[],
-        flags: &[("--body", "path", true, None, false),
-                 ("--principal", "string", true, None, false),
+        flags: &[("--body", "path", false, None, false),
+                 ("--envelope", "path", false, None, false),
+                 ("--principal", "string", false, None, false),
                  ("--signer", "string", true, None, false),
                  ("--key-file", "path", false, None, false),
                  ("--key-env", "string", false, None, false),
@@ -660,11 +661,15 @@ async fn run_verb(verb: &str, a: &Args, network: &str, em: &Emitter) -> Result<i
             // bytes are consensus-visible and a second implementation is how
             // they drift (this crate has a golden-byte harness for that reason).
             let private_hex = load_private_key(a)?;
-            let path = a.get("body").unwrap();
-            let raw = std::fs::read_to_string(path)
-                .map_err(|e| Usage(format!("could not read --body '{path}': {e}")))?;
-            let body: Value = serde_json::from_str(&raw)
-                .map_err(|e| Usage(format!("body is not valid JSON: {e}")))?;
+            let body_path = a.get("body");
+            let env_path = a.get("envelope");
+            if body_path.is_some() == env_path.is_some() {
+                return Err(Usage(
+                    "pass exactly one of --body (start a new transaction) or \
+                     --envelope (co-sign an existing one for an M-of-N threshold)"
+                        .into(),
+                ));
+            }
 
             let seed = hex::decode(private_hex.trim())
                 .map_err(|e| Usage(format!("private key is not valid hex: {e}")))?;
@@ -680,10 +685,41 @@ async fn run_verb(verb: &str, a: &Args, network: &str, em: &Emitter) -> Result<i
                 Default::default(),
             ).await.map_err(|e| Usage(format!("could not reach {base}: {e}")))?;
 
-            let signer = SmartSigner::new(&client, SigningKey::from_bytes(&seed32), a.get("signer").unwrap());
-            let envelope = signer
-                .sign(a.get("principal").unwrap(), &body, None)
-                .map_err(|e| Usage(format!("signing failed: {e}")))?;
+            let mut signer =
+                SmartSigner::new(&client, SigningKey::from_bytes(&seed32), a.get("signer").unwrap());
+            // The signer version is part of the signature metadata, so a stale
+            // value produces a signature the node rejects.
+            let _ = signer.refresh_version().await;
+
+            let (envelope, cosigned) = if let Some(p) = env_path {
+                let raw = std::fs::read_to_string(p)
+                    .map_err(|e| Usage(format!("could not read --envelope '{p}': {e}")))?;
+                let existing: Value = serde_json::from_str(&raw)
+                    .map_err(|e| Usage(format!("envelope is not valid JSON: {e}")))?;
+                let signed = signer
+                    .sign_existing(&existing)
+                    .map_err(|e| Usage(format!("co-signing failed: {e}")))?;
+                (signed, true)
+            } else {
+                let p = body_path.unwrap();
+                let raw = std::fs::read_to_string(p)
+                    .map_err(|e| Usage(format!("could not read --body '{p}': {e}")))?;
+                let body: Value = serde_json::from_str(&raw)
+                    .map_err(|e| Usage(format!("body is not valid JSON: {e}")))?;
+                let principal = a.get("principal").ok_or_else(|| {
+                    Usage("--principal is required when signing a --body".into())
+                })?;
+                let signed = signer
+                    .sign(principal, &body, None)
+                    .map_err(|e| Usage(format!("signing failed: {e}")))?;
+                (signed, false)
+            };
+
+            let sig_count = envelope
+                .get("signatures")
+                .and_then(|s| s.as_array())
+                .map(|s| s.len())
+                .unwrap_or(0);
 
             let out = a.get("out").map(|s| s.to_string());
             if let Some(p) = &out {
@@ -691,7 +727,8 @@ async fn run_verb(verb: &str, a: &Args, network: &str, em: &Emitter) -> Result<i
                     .map_err(|e| Usage(format!("could not write --out: {e}")))?;
             }
             return Ok(em.ok(json!({
-                "signed": true, "principal": a.get("principal"), "signer": a.get("signer"),
+                "signed": true, "cosigned": cosigned, "signatures": sig_count,
+                "principal": a.get("principal"), "signer": a.get("signer"),
                 "envelope": envelope, "out": out})));
         }
         "tx submit" => {
@@ -708,7 +745,49 @@ async fn run_verb(verb: &str, a: &Args, network: &str, em: &Emitter) -> Result<i
                 Err(e) => Ok(em.fail(&e, None, None)),
                 Ok(v) => match v.get("error") {
                     Some(err) => Ok(em.fail(&rpc_error_text(err), None, None)),
-                    None => Ok(em.ok(json!({"submitted": true, "result": v.get("result")}))),
+                    None => {
+                        // A 200 with no JSON-RPC error does NOT mean the transaction
+                        // was accepted. V3 submit returns one status per message, and
+                        // a rejected envelope shows up as `failed: true` inside them.
+                        // Reporting that as success is the "submitted != delivered"
+                        // trap: the agent believes a write landed when it never did.
+                        let result = v.get("result").cloned().unwrap_or(Value::Null);
+                        let failures: Vec<String> = result
+                            .as_array()
+                            .map(|items| {
+                                items
+                                    .iter()
+                                    .filter_map(|it| {
+                                        let st = it.get("status")?;
+                                        let failed = st
+                                            .get("failed")
+                                            .and_then(|f| f.as_bool())
+                                            .unwrap_or(false);
+                                        if !failed {
+                                            return None;
+                                        }
+                                        Some(
+                                            st.get("error")
+                                                .and_then(|e| e.get("message"))
+                                                .and_then(|m| m.as_str())
+                                                .map(|s| s.to_string())
+                                                .unwrap_or_else(|| {
+                                                    st.get("code")
+                                                        .and_then(|c| c.as_str())
+                                                        .unwrap_or("unknown")
+                                                        .to_string()
+                                                }),
+                                        )
+                                    })
+                                    .collect()
+                            })
+                            .unwrap_or_default();
+
+                        if !failures.is_empty() {
+                            return Ok(em.fail(&failures.join("; "), None, None));
+                        }
+                        Ok(em.ok(json!({"submitted": true, "result": result})))
+                    }
                 },
             }
         }

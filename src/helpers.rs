@@ -585,6 +585,106 @@ impl<'a> SmartSigner<'a> {
         Ok(envelope)
     }
 
+    /// Co-sign an EXISTING envelope, appending this signer's signature.
+    ///
+    /// This is what a multi-signature (M-of-N) flow needs, and it is NOT the same
+    /// as calling [`Self::sign`] twice. `sign` derives the transaction's
+    /// `initiator` from the FIRST signer's metadata and bakes it into the header,
+    /// so the transaction hash is a function of that signer. Signing the same body
+    /// again with a different key therefore produces a *different transaction*,
+    /// and neither one ever reaches the threshold.
+    ///
+    /// A co-signer must instead sign the preimage over the EXISTING transaction
+    /// hash, using its own signature metadata:
+    ///
+    /// ```text
+    /// preimage = SHA256(cosigner_sig_metadata_hash + existing_tx_hash)
+    /// ```
+    ///
+    /// The existing hash is read from the envelope's first signature rather than
+    /// recomputed, so this is exact for every transaction type — including
+    /// `writeData`/`writeDataTo`, whose body hash uses a different algorithm.
+    pub fn sign_existing(&self, envelope: &Value) -> Result<Value, JsonRpcError> {
+        use crate::codec::signing::{
+            compute_ed25519_signature_metadata_hash, create_signing_preimage,
+        };
+
+        let sigs = envelope
+            .get("signatures")
+            .and_then(|s| s.as_array())
+            .ok_or_else(|| {
+                JsonRpcError::General(anyhow::anyhow!("envelope has no `signatures` array"))
+            })?;
+        let first = sigs.first().ok_or_else(|| {
+            JsonRpcError::General(anyhow::anyhow!(
+                "envelope has no existing signature to co-sign; sign it first"
+            ))
+        })?;
+        let tx_hash_hex = first
+            .get("transactionHash")
+            .and_then(|h| h.as_str())
+            .ok_or_else(|| {
+                JsonRpcError::General(anyhow::anyhow!(
+                    "existing signature has no `transactionHash`"
+                ))
+            })?;
+        let tx_hash_bytes = hex::decode(tx_hash_hex).map_err(|e| {
+            JsonRpcError::General(anyhow::anyhow!("transactionHash is not valid hex: {}", e))
+        })?;
+        let tx_hash: [u8; 32] = tx_hash_bytes.as_slice().try_into().map_err(|_| {
+            JsonRpcError::General(anyhow::anyhow!(
+                "transactionHash must be 32 bytes, got {}",
+                tx_hash_bytes.len()
+            ))
+        })?;
+
+        let public_key = self.keypair.verifying_key().to_bytes();
+
+        // Refuse a duplicate: the same key signing twice does not advance the
+        // threshold, and the node rejects the envelope.
+        let already = sigs.iter().any(|s| {
+            s.get("publicKey").and_then(|p| p.as_str()) == Some(&hex::encode(public_key))
+        });
+        if already {
+            return Err(JsonRpcError::General(anyhow::anyhow!(
+                "this key has already signed the envelope; a threshold needs DISTINCT signers"
+            )));
+        }
+
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("Time error: {}", e)))?
+            .as_micros() as u64;
+
+        // The co-signer's OWN metadata — its signer URL, version and timestamp.
+        // This is deliberately not the transaction's initiator.
+        let sig_metadata_hash = compute_ed25519_signature_metadata_hash(
+            &public_key,
+            &self.signer_url,
+            self.cached_version,
+            timestamp,
+        );
+
+        let preimage = create_signing_preimage(&sig_metadata_hash, &tx_hash);
+        let signature = self.keypair.sign(&preimage);
+
+        let mut out = envelope.clone();
+        out["signatures"]
+            .as_array_mut()
+            .expect("signatures checked above")
+            .push(json!({
+                "type": "ed25519",
+                "publicKey": hex::encode(&public_key),
+                "signature": hex::encode(signature.to_bytes()),
+                "signer": &self.signer_url,
+                "signerVersion": self.cached_version,
+                "timestamp": timestamp,
+                "transactionHash": tx_hash_hex
+            }));
+
+        Ok(out)
+    }
+
     /// Sign, submit, and wait for transaction confirmation
     pub async fn sign_submit_and_wait(
         &mut self,
