@@ -1108,6 +1108,46 @@ impl<'a> SmartSigner<'a> {
 /// Marshal a JSON transaction body to binary format
 ///
 /// This handles different transaction types and converts them to proper binary encoding.
+/// Append a body's `authorities` as a repeated URL field.
+///
+/// Authorities carry the highest field number in every body that has them, so
+/// appending after the type-specific marshaller preserves field order. The
+/// number differs per transaction type and must match the protocol exactly:
+/// sending authorities in the JSON body while omitting them here (or writing
+/// them under the wrong number) makes the locally computed transaction hash
+/// disagree with the node's, and the transaction is rejected as unsigned.
+fn append_authorities(mut bytes: Vec<u8>, body: &Value, field_nr: u64) -> Vec<u8> {
+    use crate::codec::writer::BinaryWriter;
+    let auths = match body.get("authorities").and_then(|a| a.as_array()) {
+        Some(a) if !a.is_empty() => a,
+        _ => return bytes,
+    };
+    let mut writer = BinaryWriter::new();
+    for auth in auths {
+        let url = auth
+            .as_str()
+            .or_else(|| auth.get("url").and_then(|u| u.as_str()))
+            .unwrap_or("");
+        if url.is_empty() {
+            continue;
+        }
+        let _ = writer.write_uvarint(field_nr);
+        let _ = writer.write_uvarint(url.len() as u64);
+        let _ = writer.write_bytes(url.as_bytes());
+    }
+    bytes.extend_from_slice(&writer.into_bytes());
+    bytes
+}
+
+/// Marshal a transaction body to its signing bytes.
+///
+/// Exposed so the byte layout can be compared against the other SDKs: a field
+/// number that silently disagrees with the protocol is otherwise only visible
+/// as a transaction the network rejects as unsigned.
+pub fn marshal_body_for_test(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
+    marshal_body_to_binary(body)
+}
+
 fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
     use crate::codec::signing::{
         marshal_add_credits_body, marshal_send_tokens_body, marshal_create_identity_body,
@@ -1155,12 +1195,12 @@ fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
                 .and_then(|k| k.as_str())
                 .unwrap_or("");
             let key_hash = hex::decode(key_hash_hex).unwrap_or_default();
-            Ok(marshal_create_identity_body(url, &key_hash, key_book_url))
+            Ok(append_authorities(marshal_create_identity_body(url, &key_hash, key_book_url), body, 6))
         }
         "createTokenAccount" => {
             let url = body.get("url").and_then(|u| u.as_str()).unwrap_or("");
             let token_url = body.get("tokenUrl").and_then(|t| t.as_str()).unwrap_or("");
-            Ok(marshal_create_token_account_body(url, token_url))
+            Ok(append_authorities(marshal_create_token_account_body(url, token_url), body, 7))
         }
         "createDataAccount" => {
             let url = body.get("url").and_then(|u| u.as_str()).unwrap_or("");
@@ -1196,7 +1236,7 @@ fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
             let supply_limit = body.get("supplyLimit")
                 .and_then(|s| s.as_str())
                 .and_then(|s| s.parse::<u64>().ok());
-            Ok(marshal_create_token_body(url, symbol, precision, supply_limit))
+            Ok(append_authorities(marshal_create_token_body(url, symbol, precision, supply_limit), body, 9))
         }
         "issueTokens" => {
             let to_array = body.get("to").and_then(|t| t.as_array());
@@ -1223,7 +1263,7 @@ fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
                 .and_then(|k| k.as_str())
                 .unwrap_or("");
             let key_hash = hex::decode(key_hash_hex).unwrap_or_default();
-            Ok(marshal_create_key_book_body(url, &key_hash))
+            Ok(append_authorities(marshal_create_key_book_body(url, &key_hash), body, 5))
         }
         "createKeyPage" => {
             let keys_array = body.get("keys").and_then(|k| k.as_array());

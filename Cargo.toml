@@ -194,3 +194,7 @@ path = "examples/misc/transaction_demo.rs"
 [[example]]
 name = "example_15_co_signing"
 path = "examples/v3/example_15_co_signing.rs"
+
+[[example]]
+name = "marshal_dump"
+path = "examples/misc/marshal_dump.rs"
