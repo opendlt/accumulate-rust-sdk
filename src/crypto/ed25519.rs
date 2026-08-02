@@ -23,18 +23,21 @@ impl Ed25519Signer {
         Self { signing_key }
     }
 
+    /// Generate a new signing key from the operating system CSPRNG.
+    ///
+    /// This previously seeded from the clock: the nanosecond timestamp was
+    /// copied twice to fill 32 bytes, so the seed had the structure `X||X` and
+    /// only as much entropy as the creation time. Anyone who knew roughly when a
+    /// key was generated could search the remaining space, and these keys hold
+    /// real balances. Key material must come from the OS CSPRNG.
+    ///
+    /// # Panics
+    /// Panics if the OS entropy source is unavailable — continuing with a
+    /// predictable key would be far worse than failing loudly.
     pub fn generate() -> Self {
-        // Use a simple deterministic approach for now
-        // In production, this should use proper random generation
-        use std::time::{SystemTime, UNIX_EPOCH};
-        let nanos = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_nanos();
         let mut seed = [0u8; 32];
-        let bytes = nanos.to_le_bytes();
-        seed[0..16].copy_from_slice(&bytes);
-        seed[16..32].copy_from_slice(&bytes);
+        getrandom::getrandom(&mut seed)
+            .expect("OS entropy source unavailable; refusing to generate a predictable key");
         Self::from_seed(&seed).expect("Failed to create keypair from seed")
     }
 
