@@ -328,6 +328,31 @@ impl TxBody {
         })
     }
 
+    /// Create a ReleaseLockedOperation body (type 0x18): releases a hash-locked deposit by
+    /// revealing the preimage. Submit it from the recipient account holding the locked deposit,
+    /// before the lock expires.
+    ///
+    /// `locked_tx_id` is the SyntheticLockedDeposit's transaction ID; `preimage` is the secret.
+    pub fn release_locked_operation(locked_tx_id: &str, preimage: &[u8]) -> Value {
+        json!({
+            "type": "releaseLockedOperation",
+            "lockedTxID": locked_tx_id,
+            "preimage": hex::encode(preimage)
+        })
+    }
+
+    /// Build a header hash lock (header field 8) for [`HeaderOptions::hash_lock`].
+    ///
+    /// `hash` is the hash of the secret preimage (32 bytes for SHA256/SHA256D, 20 for HASH160);
+    /// `expiration_unix` is when the lock expires (10 minutes to 30 days ahead).
+    pub fn hash_lock(
+        algorithm: crate::generated::enums::HashAlgorithm,
+        hash: Vec<u8>,
+        expiration_unix: i64,
+    ) -> crate::generated::header::HashLockOptions {
+        crate::generated::header::HashLockOptions::new(algorithm, hash, Some(expiration_unix))
+    }
+
     /// Create a LockAccount transaction body
     pub fn lock_account(height: u64) -> Value {
         json!({
@@ -424,6 +449,10 @@ pub struct HeaderOptions {
     pub hold_until: Option<crate::generated::header::HoldUntilOptions>,
     /// Additional signing authorities (list of authority URLs)
     pub authorities: Option<Vec<String>>,
+    /// Hash lock (HTLC) condition (header field 8). On a SendTokens the recipient receives a
+    /// SyntheticLockedDeposit that only a ReleaseLockedOperation revealing the preimage unlocks.
+    /// Build one with [`TxBody::hash_lock`].
+    pub hash_lock: Option<crate::generated::header::HashLockOptions>,
 }
 
 // =============================================================================
@@ -888,13 +917,21 @@ impl<'a> SmartSigner<'a> {
         // Build extended binary options for fields 5-7
         let has_extended = options.expire.is_some()
             || options.hold_until.is_some()
-            || options.authorities.is_some();
+            || options.authorities.is_some()
+            || options.hash_lock.is_some();
 
         let extended = if has_extended {
+            let hash_lock = match options.hash_lock.as_ref() {
+                Some(hl) => Some(hl.to_binary().map_err(|e| {
+                    JsonRpcError::General(anyhow::anyhow!("invalid hash lock: {}", e))
+                })?),
+                None => None,
+            };
             Some(HeaderBinaryOptions {
                 expire_at_time: options.expire.as_ref().and_then(|e| e.at_time.map(|t| t as i64)),
                 hold_until_minor_block: options.hold_until.as_ref().and_then(|h| h.minor_block),
                 authorities: options.authorities.clone(),
+                hash_lock,
             })
         } else {
             None
@@ -987,6 +1024,10 @@ impl<'a> SmartSigner<'a> {
         }
         if let Some(ref auths) = options.authorities {
             tx["header"]["authorities"] = json!(auths);
+        }
+        if let Some(ref hl) = options.hash_lock {
+            tx["header"]["hashLock"] = serde_json::to_value(hl)
+                .map_err(|e| JsonRpcError::General(anyhow::anyhow!("hash lock: {}", e)))?;
         }
 
         // Build envelope
@@ -1139,6 +1180,72 @@ fn append_authorities(mut bytes: Vec<u8>, body: &Value, field_nr: u64) -> Vec<u8
     bytes
 }
 
+/// Decode a hex string field of a body (absent means empty).
+fn body_hex(body: &Value, key: &str) -> Result<Vec<u8>, JsonRpcError> {
+    match body.get(key).and_then(|v| v.as_str()) {
+        Some(h) => hex::decode(h)
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("{} is not valid hex: {}", key, e))),
+        None => Ok(Vec::new()),
+    }
+}
+
+/// Parse an RFC 3339 timestamp to Unix seconds.
+fn parse_rfc3339_seconds(t: &str) -> Result<i64, JsonRpcError> {
+    chrono::DateTime::parse_from_rfc3339(t)
+        .map(|dt| dt.timestamp())
+        .map_err(|e| JsonRpcError::General(anyhow::anyhow!("invalid timestamp '{}': {}", t, e)))
+}
+
+/// Binary-encode a transaction header given in its JSON (envelope) form, covering every header
+/// field: principal, initiator, memo, metadata, expire, holdUntil, authorities and hashLock.
+///
+/// This is what a co-signer needs to recompute a hash from a received envelope, and what the
+/// golden-vector tests feed with Go's own JSON.
+pub fn marshal_header_from_json(header: &Value) -> Result<Vec<u8>, JsonRpcError> {
+    use crate::codec::signing::{marshal_transaction_header_full, HeaderBinaryOptions};
+
+    let principal = header.get("principal").and_then(|v| v.as_str()).unwrap_or("");
+    let initiator_bytes = body_hex(header, "initiator")?;
+    let mut initiator = [0u8; 32];
+    if !initiator_bytes.is_empty() {
+        if initiator_bytes.len() != 32 {
+            return Err(JsonRpcError::General(anyhow::anyhow!(
+                "initiator must be 32 bytes, got {}",
+                initiator_bytes.len()
+            )));
+        }
+        initiator.copy_from_slice(&initiator_bytes);
+    }
+    let metadata = body_hex(header, "metadata")?;
+    let expire_at_time = match header.get("expire").and_then(|e| e.get("atTime")).and_then(|v| v.as_str()) {
+        Some(t) => Some(parse_rfc3339_seconds(t)?),
+        None => None,
+    };
+    let hash_lock = match header.get("hashLock") {
+        Some(v) if !v.is_null() => {
+            let hl: crate::generated::header::HashLockOptions = serde_json::from_value(v.clone())
+                .map_err(|e| JsonRpcError::General(anyhow::anyhow!("invalid hashLock: {}", e)))?;
+            Some(hl.to_binary().map_err(|e| JsonRpcError::General(anyhow::anyhow!("invalid hashLock: {}", e)))?)
+        }
+        _ => None,
+    };
+    let ext = HeaderBinaryOptions {
+        expire_at_time,
+        hold_until_minor_block: header.get("holdUntil").and_then(|h| h.get("minorBlock")).and_then(|v| v.as_u64()),
+        authorities: header.get("authorities").and_then(|a| a.as_array()).map(|a| {
+            a.iter().filter_map(|u| u.as_str().map(|s| s.to_string())).collect()
+        }),
+        hash_lock,
+    };
+    Ok(marshal_transaction_header_full(
+        principal,
+        &initiator,
+        header.get("memo").and_then(|v| v.as_str()),
+        if metadata.is_empty() { None } else { Some(&metadata) },
+        Some(&ext),
+    ))
+}
+
 /// Marshal a transaction body to its signing bytes.
 ///
 /// Exposed so the byte layout can be compared against the other SDKs: a field
@@ -1159,6 +1266,8 @@ fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
         marshal_burn_credits_body, marshal_transfer_credits_body,
         marshal_write_data_to_body, marshal_lock_account_body,
         marshal_update_account_auth_body,
+        marshal_release_locked_operation_body, marshal_synthetic_locked_deposit_body,
+        SyntheticLockedDepositFields,
         tx_types
     };
     use crate::codec::writer::BinaryWriter;
@@ -1279,6 +1388,51 @@ fn marshal_body_to_binary(body: &Value) -> Result<Vec<u8>, JsonRpcError> {
                 }
             }
             Ok(marshal_create_key_page_body(&key_hashes))
+        }
+        "releaseLockedOperation" => {
+            let locked = body
+                .get("lockedTxID")
+                .or_else(|| body.get("lockedTxId"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            let preimage = body_hex(body, "preimage")?;
+            Ok(marshal_release_locked_operation_body(locked, &preimage))
+        }
+        "syntheticLockedDeposit" => {
+            let text = |k: &str| body.get(k).and_then(|v| v.as_str()).unwrap_or("");
+            let amount = match body.get("amount") {
+                Some(Value::String(a)) => a.parse::<num_bigint::BigUint>().map_err(|e| {
+                    JsonRpcError::General(anyhow::anyhow!("invalid amount '{}': {}", a, e))
+                })?,
+                Some(Value::Number(n)) => num_bigint::BigUint::from(n.as_u64().ok_or_else(|| {
+                    JsonRpcError::General(anyhow::anyhow!("invalid amount: {}", n))
+                })?),
+                _ => num_bigint::BigUint::default(),
+            };
+            let hash_algorithm = match body.get("hashAlgorithm") {
+                Some(v) => serde_json::from_value::<crate::generated::enums::HashAlgorithm>(v.clone())
+                    .map_err(|e| JsonRpcError::General(anyhow::anyhow!("hashAlgorithm: {}", e)))?
+                    .value(),
+                None => 0,
+            };
+            let hash = body_hex(body, "hash")?;
+            let expiration = match body.get("expiration").and_then(|v| v.as_str()) {
+                Some(t) => Some(parse_rfc3339_seconds(t)?),
+                None => None,
+            };
+            Ok(marshal_synthetic_locked_deposit_body(&SyntheticLockedDepositFields {
+                cause: text("cause"),
+                initiator: text("initiator"),
+                fee_refund: body.get("feeRefund").and_then(|v| v.as_u64()).unwrap_or(0),
+                index: body.get("index").and_then(|v| v.as_u64()).unwrap_or(0),
+                token: text("token"),
+                amount,
+                sender: text("sender"),
+                hash_algorithm,
+                hash: &hash,
+                expiration,
+                is_issuer: body.get("isIssuer").and_then(|v| v.as_bool()).unwrap_or(false),
+            }))
         }
         "updateKey" => {
             let new_key_hash_hex = body.get("newKeyHash")

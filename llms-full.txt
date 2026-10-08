@@ -153,6 +153,15 @@ The node could not determine which partition should handle the request.
 - Rust type: `Error::Routing`
 - fix: Build the envelope through TxBody + SmartSigner rather than by hand. Every transaction needs a header with a valid `principal` — that URL is the routing key, and without it the node rejects the request before validating anything else.
 
+## Hash-locked transfers (HTLC, Accumulate 1.4.6.x) — library API only
+- Lock: `signer.sign_submit_and_wait_with_options(principal, &TxBody::send_tokens_single(to, amount), &HeaderOptions { hash_lock: Some(TxBody::hash_lock(HashAlgorithm::Sha256, sha256(secret), expiration_unix)), ..Default::default() }, 30)`.
+  The recipient gets a `SyntheticLockedDeposit` (type 0x37) instead of a normal deposit.
+- Release: the recipient submits `TxBody::release_locked_operation(locked_tx_id, &preimage)` (type 0x18) before expiry; otherwise the tokens are refunded to the sender.
+- Node limits: hash is 32 bytes (Sha256, Sha256D) or 20 bytes (Hash160); expiration 10 minutes to 30 days ahead. `HashLockOptions::validate_for_submit(now_unix)` checks these locally.
+- `HeaderOptions` also carries `expire`, `hold_until` and `authorities` (header fields 5-7). All of fields 5-8 are part of the transaction hash; `sign_existing` co-signs by reusing the hash in the envelope, and `marshal_header_from_json` recomputes it from a received header.
+- Not exposed by the `accumulate` CLI yet.
+- v3 proof methods: `major_header_range`, `minor_root_range`, `anchor_receipt`; `Receipt` has `for_height`, `complete`, `partition`, `starts_at_main_state`; `NetworkGlobals.block_interval` (raw JSON `{seconds, nanoseconds}`).
+
 ## Operations (25)
 
 ### generate_keys  —  Generate Keys  [utility]

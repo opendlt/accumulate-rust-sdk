@@ -66,6 +66,7 @@
         "v2Baikonur",
         "v2Vandenberg",
         "v2Jiuquan",
+        "v2Kourou",
         "vNext"
       ]
     },
@@ -160,6 +161,7 @@
         "transferCredits",
         "updateAccountAuth",
         "updateKey",
+        "releaseLockedOperation",
         "networkMaintenance",
         "activateProtocolVersion",
         "signPending",
@@ -169,6 +171,7 @@
         "syntheticDepositCredits",
         "syntheticBurnTokens",
         "syntheticForwardTransaction",
+        "syntheticLockedDeposit",
         "systemGenesis",
         "directoryAnchor",
         "blockValidatorAnchor",

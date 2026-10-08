@@ -99,6 +99,8 @@ pub enum ExecutorVersion {
     V2Vandenberg,
     #[serde(rename = "v2Jiuquan", alias = "v2-jiuquan")]
     V2Jiuquan,
+    #[serde(rename = "v2Kourou", alias = "v2-kourou")]
+    V2Kourou,
     #[serde(rename = "vNext", alias = "vnext")]
     VNext,
 }
@@ -245,6 +247,8 @@ pub enum TransactionType {
     UpdateAccountAuth,
     #[serde(rename = "updateKey")]
     UpdateKey,
+    #[serde(rename = "releaseLockedOperation")]
+    ReleaseLockedOperation,
     #[serde(rename = "networkMaintenance")]
     NetworkMaintenance,
     #[serde(rename = "activateProtocolVersion")]
@@ -263,6 +267,8 @@ pub enum TransactionType {
     SyntheticBurnTokens,
     #[serde(rename = "syntheticForwardTransaction")]
     SyntheticForwardTransaction,
+    #[serde(rename = "syntheticLockedDeposit")]
+    SyntheticLockedDeposit,
     #[serde(rename = "systemGenesis")]
     SystemGenesis,
     #[serde(rename = "directoryAnchor")]
@@ -271,6 +277,85 @@ pub enum TransactionType {
     BlockValidatorAnchor,
     #[serde(rename = "systemWriteData")]
     SystemWriteData,
+}
+
+/// Hash algorithm for hash-locked transactions (protocol/enums.yml HashAlgorithm).
+/// Unknown = 0, SHA256 = 1, SHA256D = 2, HASH160 = 3.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum HashAlgorithm {
+    Unknown,
+    Sha256,
+    Sha256D,
+    Hash160,
+}
+
+impl HashAlgorithm {
+    /// Numeric protocol value
+    pub fn value(&self) -> u64 {
+        match self {
+            HashAlgorithm::Unknown => 0,
+            HashAlgorithm::Sha256 => 1,
+            HashAlgorithm::Sha256D => 2,
+            HashAlgorithm::Hash160 => 3,
+        }
+    }
+
+    /// Create from numeric protocol value
+    pub fn from_u64(value: u64) -> Option<Self> {
+        match value {
+            0 => Some(HashAlgorithm::Unknown),
+            1 => Some(HashAlgorithm::Sha256),
+            2 => Some(HashAlgorithm::Sha256D),
+            3 => Some(HashAlgorithm::Hash160),
+            _ => None,
+        }
+    }
+
+    /// Canonical JSON name (as emitted by the Go marshaler)
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            HashAlgorithm::Unknown => "unknown",
+            HashAlgorithm::Sha256 => "sha256",
+            HashAlgorithm::Sha256D => "sha256D",
+            HashAlgorithm::Hash160 => "hash160",
+        }
+    }
+
+    /// Expected hash length in bytes (None for Unknown)
+    pub fn hash_len(&self) -> Option<usize> {
+        match self {
+            HashAlgorithm::Unknown => None,
+            HashAlgorithm::Sha256 | HashAlgorithm::Sha256D => Some(32),
+            HashAlgorithm::Hash160 => Some(20),
+        }
+    }
+}
+
+impl Serialize for HashAlgorithm {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(self.as_str())
+    }
+}
+
+impl<'de> Deserialize<'de> for HashAlgorithm {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        use serde::de::Error;
+        let v = serde_json::Value::deserialize(deserializer)?;
+        match &v {
+            serde_json::Value::String(s) => match s.to_ascii_lowercase().as_str() {
+                "unknown" => Ok(HashAlgorithm::Unknown),
+                "sha256" => Ok(HashAlgorithm::Sha256),
+                "sha256d" => Ok(HashAlgorithm::Sha256D),
+                "hash160" => Ok(HashAlgorithm::Hash160),
+                _ => Err(D::Error::custom(format!("unknown HashAlgorithm: {}", s))),
+            },
+            serde_json::Value::Number(n) => n
+                .as_u64()
+                .and_then(HashAlgorithm::from_u64)
+                .ok_or_else(|| D::Error::custom(format!("unknown HashAlgorithm: {}", n))),
+            _ => Err(D::Error::custom("HashAlgorithm must be a string or number")),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -612,14 +697,14 @@ pub fn __get_all_enum_variants() -> std::collections::HashMap<String, Vec<String
     map.insert("AllowedTransactionBit".to_string(), vec!["updatekeypage".to_string(), "updateaccountauth".to_string()]);
     map.insert("BookType".to_string(), vec!["normal".to_string(), "validator".to_string(), "operator".to_string()]);
     map.insert("DataEntryType".to_string(), vec!["unknown".to_string(), "factom".to_string(), "accumulate".to_string(), "doublehash".to_string()]);
-    map.insert("ExecutorVersion".to_string(), vec!["v1".to_string(), "v1-signatureAnchoring".to_string(), "v1-doubleHashEntries".to_string(), "v1-halt".to_string(), "v2".to_string(), "v2-baikonur".to_string(), "v2-vandenberg".to_string(), "v2-jiuquan".to_string(), "vnext".to_string()]);
+    map.insert("ExecutorVersion".to_string(), vec!["v1".to_string(), "v1-signatureAnchoring".to_string(), "v1-doubleHashEntries".to_string(), "v1-halt".to_string(), "v2".to_string(), "v2-baikonur".to_string(), "v2-vandenberg".to_string(), "v2-jiuquan".to_string(), "v2-kourou".to_string(), "vnext".to_string()]);
     map.insert("KeyPageOperationType".to_string(), vec!["unknown".to_string(), "update".to_string(), "remove".to_string(), "add".to_string(), "setthreshold".to_string(), "updateallowed".to_string(), "setrejectthreshold".to_string(), "setresponsethreshold".to_string()]);
     map.insert("NetworkMaintenanceOperationType".to_string(), vec!["unknown".to_string(), "pendingtransactiongc".to_string()]);
     map.insert("ObjectType".to_string(), vec!["unknown".to_string(), "account".to_string(), "transaction".to_string()]);
     map.insert("PartitionType".to_string(), vec!["directory".to_string(), "block-validator".to_string(), "block-summary".to_string(), "bootstrap".to_string()]);
     map.insert("SignatureType".to_string(), vec!["unknown".to_string(), "legacyed25519".to_string(), "ed25519".to_string(), "rcd1".to_string(), "receipt".to_string(), "synthetic".to_string(), "set".to_string(), "remote".to_string(), "btc".to_string(), "btclegacy".to_string(), "eth".to_string(), "delegated".to_string(), "internal".to_string(), "authority".to_string(), "rsasha256".to_string(), "ecdsasha256".to_string(), "typeddata".to_string()]);
     map.insert("TransactionMax".to_string(), vec!["user".to_string(), "synthetic".to_string(), "system".to_string()]);
-    map.insert("TransactionType".to_string(), vec!["unknown".to_string(), "createIdentity".to_string(), "createTokenAccount".to_string(), "sendTokens".to_string(), "createDataAccount".to_string(), "writeData".to_string(), "writeDataTo".to_string(), "acmeFaucet".to_string(), "createToken".to_string(), "issueTokens".to_string(), "burnTokens".to_string(), "createLiteTokenAccount".to_string(), "createKeyPage".to_string(), "createKeyBook".to_string(), "addCredits".to_string(), "updateKeyPage".to_string(), "lockAccount".to_string(), "burnCredits".to_string(), "transferCredits".to_string(), "updateAccountAuth".to_string(), "updateKey".to_string(), "networkMaintenance".to_string(), "activateProtocolVersion".to_string(), "signPending".to_string(), "syntheticCreateIdentity".to_string(), "syntheticWriteData".to_string(), "syntheticDepositTokens".to_string(), "syntheticDepositCredits".to_string(), "syntheticBurnTokens".to_string(), "syntheticForwardTransaction".to_string(), "systemGenesis".to_string(), "directoryAnchor".to_string(), "blockValidatorAnchor".to_string(), "systemWriteData".to_string()]);
+    map.insert("TransactionType".to_string(), vec!["unknown".to_string(), "createIdentity".to_string(), "createTokenAccount".to_string(), "sendTokens".to_string(), "createDataAccount".to_string(), "writeData".to_string(), "writeDataTo".to_string(), "acmeFaucet".to_string(), "createToken".to_string(), "issueTokens".to_string(), "burnTokens".to_string(), "createLiteTokenAccount".to_string(), "createKeyPage".to_string(), "createKeyBook".to_string(), "addCredits".to_string(), "updateKeyPage".to_string(), "lockAccount".to_string(), "burnCredits".to_string(), "transferCredits".to_string(), "updateAccountAuth".to_string(), "updateKey".to_string(), "releaseLockedOperation".to_string(), "networkMaintenance".to_string(), "activateProtocolVersion".to_string(), "signPending".to_string(), "syntheticCreateIdentity".to_string(), "syntheticWriteData".to_string(), "syntheticDepositTokens".to_string(), "syntheticDepositCredits".to_string(), "syntheticBurnTokens".to_string(), "syntheticForwardTransaction".to_string(), "syntheticLockedDeposit".to_string(), "systemGenesis".to_string(), "directoryAnchor".to_string(), "blockValidatorAnchor".to_string(), "systemWriteData".to_string()]);
     map.insert("VoteType".to_string(), vec!["accept".to_string(), "reject".to_string(), "abstain".to_string(), "suggest".to_string()]);
     map
 }

@@ -33,6 +33,7 @@ fn create_minimal_header() -> TransactionHeader {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     }
 }
 

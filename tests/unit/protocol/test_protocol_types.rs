@@ -99,6 +99,7 @@ fn test_executor_version_serialization() {
         ExecutorVersion::V2Baikonur,
         ExecutorVersion::V2Vandenberg,
         ExecutorVersion::V2Jiuquan,
+        ExecutorVersion::V2Kourou,
         ExecutorVersion::VNext,
     ];
 

@@ -5,6 +5,31 @@ All notable changes to the Accumulate Rust SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-10-08
+
+### Added
+- **Accumulate 1.4.6.x protocol support.**
+  - `ExecutorVersion::V2Kourou` (`v2-kourou`; runs on Kermit, destined for mainnet); `VNext` moves from
+    9 to 10 to match the protocol.
+  - **Hash-locked transfers (HTLC).** `TransactionHeader.hash_lock` (header field 8, `HashLockOptions`,
+    `HashAlgorithm`, `validate_for_submit`), transaction types `ReleaseLockedOperation` (0x18) and
+    `SyntheticLockedDeposit` (0x37) with binary marshalers, `TxBody::release_locked_operation` /
+    `TxBody::hash_lock`, and `HeaderOptions::hash_lock`.
+  - `helpers::marshal_header_from_json`, which binary-encodes a header in its envelope JSON form (all of
+    fields 1-8), for recomputing a hash from a received envelope.
+  - v3: `Receipt` (`for_height`, `complete`, `partition`, `starts_at_main_state`), and
+    `major_header_range` / `minor_root_range` / `anchor_receipt` with their option types.
+  - `NetworkGlobals.block_interval`, kept as raw JSON.
+- `tests/golden_vectors_1_4_6_7.rs` checks header, HashLock, body and transaction-hash bytes against
+  vectors produced by Go's own marshaler (accumulate e1d1db9, 1.4.6.7), and that a signed envelope's
+  hash covers every header field after a JSON hand-off.
+
+### Changed
+- `TransactionHeader` has a new `hash_lock` field, so struct literals need `hash_lock: None` (or
+  `..Default::default()`).
+- `src/generated/header.rs` was edited by hand to add `HashLockOptions`; regenerating it with
+  `rust_tx_header_codegen.py` would drop it until the generator learns the type.
+
 ## [2.3.6] - 2026-07-31
 
 ### Added

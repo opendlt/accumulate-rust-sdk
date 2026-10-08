@@ -19,6 +19,7 @@ fn transaction_header_hash_golden() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     // Serialize using the canonical JSON implementation (our established truth)
@@ -59,6 +60,7 @@ fn transaction_header_with_optional_fields_hash_golden() {
         }),
         hold_until: None,
         authorities: Some(vec!["acc://auth.acme".to_string()]),
+        hash_lock: None,
     };
 
     let canon_json = canonical_json(&serde_json::to_value(&hdr).unwrap());

@@ -1,6 +1,10 @@
 //! GENERATED FILE - DO NOT EDIT
 //! Source: protocol/transaction.yml
 //! Generated: 2025-10-03 22:05:19
+//!
+//! NOTE: `HashLockOptions` and `TransactionHeader::hash_lock` (Accumulate 1.4.6.x) were added by
+//! hand. `tooling/backends/rust_tx_header_codegen.py` does not know the type yet, so regenerating
+//! this file would drop them; teach the generator first.
 
 #![allow(missing_docs)]
 
@@ -93,6 +97,103 @@ impl HoldUntilOptions {
     }
 }
 
+/// Hash lock conditions for a transaction (TransactionHeader field 8,
+/// HashLockOptions in protocol/transaction.yml, Accumulate 1.4.6.7).
+///
+/// `expiration` is an RFC 3339 UTC timestamp string (the Go JSON form), e.g.
+/// `2030-01-02T03:04:05Z`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HashLockOptions {
+    pub hash_algorithm: crate::generated::enums::HashAlgorithm,
+    #[serde(with = "hex::serde")]
+    pub hash: Vec<u8>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub expiration: Option<String>,
+}
+
+impl HashLockOptions {
+    /// Build options from an algorithm, hash and optional expiration (Unix seconds).
+    pub fn new(
+        hash_algorithm: crate::generated::enums::HashAlgorithm,
+        hash: Vec<u8>,
+        expiration_unix: Option<i64>,
+    ) -> Self {
+        let expiration = expiration_unix.and_then(|t| {
+            chrono::DateTime::from_timestamp(t, 0)
+                .map(|dt| dt.to_rfc3339_opts(chrono::SecondsFormat::Secs, true))
+        });
+        Self { hash_algorithm, hash, expiration }
+    }
+
+    /// Expiration as Unix seconds, if set.
+    pub fn expiration_unix(&self) -> Result<Option<i64>, crate::errors::Error> {
+        match &self.expiration {
+            None => Ok(None),
+            Some(s) => chrono::DateTime::parse_from_rfc3339(s)
+                .map(|dt| Some(dt.timestamp()))
+                .map_err(|e| crate::errors::ValidationError::InvalidFieldValue {
+                    field: "hashLock.expiration".to_string(),
+                    reason: format!("invalid RFC 3339 timestamp: {}", e),
+                }.into()),
+        }
+    }
+
+    /// Binary form used for header field 8.
+    pub fn to_binary(&self) -> Result<crate::codec::signing::HashLockBinary, crate::errors::Error> {
+        Ok(crate::codec::signing::HashLockBinary {
+            hash_algorithm: self.hash_algorithm.value(),
+            hash: self.hash.clone(),
+            expiration: self.expiration_unix()?,
+        })
+    }
+
+    /// Everything [`validate`](Self::validate) checks, plus the node's expiration window: the lock
+    /// must expire between 10 minutes and 30 days after `now_unix`, and must have an expiration.
+    pub fn validate_for_submit(&self, now_unix: i64) -> Result<(), crate::errors::Error> {
+        self.validate()?;
+        let invalid = |reason: &str| -> crate::errors::Error {
+            crate::errors::ValidationError::InvalidFieldValue {
+                field: "hashLock.expiration".to_string(),
+                reason: reason.to_string(),
+            }
+            .into()
+        };
+        match self.expiration_unix()? {
+            None => Err(invalid("expiration is required")),
+            Some(exp) if exp - now_unix < 10 * 60 => {
+                Err(invalid("expiration must be at least 10 minutes in the future"))
+            }
+            Some(exp) if exp - now_unix > 30 * 24 * 3600 => {
+                Err(invalid("expiration must be at most 30 days in the future"))
+            }
+            Some(_) => Ok(()),
+        }
+    }
+
+    pub fn validate(&self) -> Result<(), crate::errors::Error> {
+        use crate::generated::enums::HashAlgorithm;
+        let expected = match self.hash_algorithm {
+            HashAlgorithm::Unknown => {
+                return Err(crate::errors::ValidationError::InvalidFieldValue {
+                    field: "hashLock.hashAlgorithm".to_string(),
+                    reason: "hash algorithm must be set".to_string(),
+                }.into());
+            }
+            HashAlgorithm::Sha256 | HashAlgorithm::Sha256D => 32,
+            HashAlgorithm::Hash160 => 20,
+        };
+        if self.hash.len() != expected {
+            return Err(crate::errors::ValidationError::InvalidFieldValue {
+                field: "hashLock.hash".to_string(),
+                reason: format!("hash must be {} bytes for {:?}, got {}", expected, self.hash_algorithm, self.hash.len()),
+            }.into());
+        }
+        self.expiration_unix()?;
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TransactionHeader {
@@ -110,6 +211,8 @@ pub struct TransactionHeader {
     pub hold_until: Option<HoldUntilOptions>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub authorities: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub hash_lock: Option<HashLockOptions>,
 }
 
 impl TransactionHeader {
@@ -142,6 +245,7 @@ impl TransactionHeader {
 
         if let Some(ref opts) = self.expire { opts.validate()?; }
         if let Some(ref opts) = self.hold_until { opts.validate()?; }
+        if let Some(ref opts) = self.hash_lock { opts.validate()?; }
         Ok(())
     }
 
