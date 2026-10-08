@@ -49,6 +49,18 @@ pub mod tx_types {
     pub const TRANSFER_CREDITS: u64 = 0x12;
     pub const UPDATE_ACCOUNT_AUTH: u64 = 0x15;
     pub const UPDATE_KEY: u64 = 0x16;
+    /// ReleaseLockedOperation (user transaction, Accumulate 1.4.6.7)
+    pub const RELEASE_LOCKED_OPERATION: u64 = 0x18;
+    /// SyntheticLockedDeposit (synthetic transaction, Accumulate 1.4.6.7)
+    pub const SYNTHETIC_LOCKED_DEPOSIT: u64 = 0x37;
+}
+
+/// HashAlgorithm enum values matching Go core (protocol/enums.yml)
+pub mod hash_algorithm_types {
+    pub const UNKNOWN: u64 = 0;
+    pub const SHA256: u64 = 1;
+    pub const SHA256D: u64 = 2;
+    pub const HASH160: u64 = 3;
 }
 
 /// KeyPageOperation type enum values matching Go core
@@ -175,7 +187,44 @@ pub fn compute_signature_metadata_hash(
     sha256_bytes(writer.bytes())
 }
 
-/// Options for extended transaction header fields (fields 5-7).
+/// Binary-level HashLockOptions (header field 8, Accumulate 1.4.6.7).
+///
+/// Go: protocol/types_gen.go HashLockOptions.MarshalBinary
+/// - Field 1: HashAlgorithm (enum, omitted when 0)
+/// - Field 2: Hash (bytes, omitted when empty)
+/// - Field 3: Expiration (time, Unix seconds as signed varint, omitted when None)
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct HashLockBinary {
+    /// HashAlgorithm enum value (see [`hash_algorithm_types`])
+    pub hash_algorithm: u64,
+    /// Hash of the secret preimage
+    pub hash: Vec<u8>,
+    /// Expiration as Unix seconds
+    pub expiration: Option<i64>,
+}
+
+impl HashLockBinary {
+    /// Marshal the HashLockOptions struct body (no outer field/length prefix).
+    pub fn marshal(&self) -> Vec<u8> {
+        let mut w = BinaryWriter::new();
+        if self.hash_algorithm != 0 {
+            let _ = w.write_uvarint(1);
+            let _ = w.write_uvarint(self.hash_algorithm);
+        }
+        if !self.hash.is_empty() {
+            let _ = w.write_uvarint(2);
+            let _ = w.write_uvarint(self.hash.len() as u64);
+            let _ = w.write_bytes(&self.hash);
+        }
+        if let Some(exp) = self.expiration {
+            let _ = w.write_uvarint(3);
+            let _ = w.write_varint(exp);
+        }
+        w.into_bytes()
+    }
+}
+
+/// Options for extended transaction header fields (fields 5-8).
 #[derive(Debug, Clone, Default)]
 pub struct HeaderBinaryOptions {
     /// Expire: at_time as Unix seconds, signed (field 5)
@@ -184,6 +233,8 @@ pub struct HeaderBinaryOptions {
     pub hold_until_minor_block: Option<u64>,
     /// Additional authority URLs (field 7, repeatable)
     pub authorities: Option<Vec<String>>,
+    /// HashLock options (field 8)
+    pub hash_lock: Option<HashLockBinary>,
 }
 
 /// Marshal transaction header to binary format
@@ -196,6 +247,7 @@ pub struct HeaderBinaryOptions {
 /// - Field 5: Expire (nested: ExpireOptions with field 1 = atTime uint)
 /// - Field 6: HoldUntil (nested: HoldUntilOptions with field 1 = minorBlock uint)
 /// - Field 7: Authorities (repeatable URL strings)
+/// - Field 8: HashLock (nested: HashLockOptions)
 pub fn marshal_transaction_header(
     principal: &str,
     initiator: &[u8; 32],
@@ -287,9 +339,150 @@ pub fn marshal_transaction_header_full(
                 let _ = writer.write_bytes(auth_bytes);
             }
         }
+
+        // Field 8: HashLock (nested HashLockOptions)
+        if let Some(ref hl) = ext.hash_lock {
+            let hl_bytes = hl.marshal();
+            if !hl_bytes.is_empty() {
+                let _ = writer.write_uvarint(8);
+                let _ = writer.write_uvarint(hl_bytes.len() as u64);
+                let _ = writer.write_bytes(&hl_bytes);
+            }
+        }
     }
 
     writer.into_bytes()
+}
+
+/// Marshal ReleaseLockedOperation transaction body to binary format
+///
+/// Field order matches Go: protocol/types_gen.go ReleaseLockedOperation.MarshalBinary
+/// - Field 1: Type (enum = 0x18)
+/// - Field 2: LockedTxID (txid, as string)
+/// - Field 3: Preimage (bytes)
+pub fn marshal_release_locked_operation_body(locked_tx_id: &str, preimage: &[u8]) -> Vec<u8> {
+    let mut writer = BinaryWriter::new();
+
+    let _ = writer.write_uvarint(1);
+    let _ = writer.write_uvarint(tx_types::RELEASE_LOCKED_OPERATION);
+
+    if !locked_tx_id.is_empty() {
+        let _ = writer.write_uvarint(2);
+        let b = locked_tx_id.as_bytes();
+        let _ = writer.write_uvarint(b.len() as u64);
+        let _ = writer.write_bytes(b);
+    }
+
+    if !preimage.is_empty() {
+        let _ = writer.write_uvarint(3);
+        let _ = writer.write_uvarint(preimage.len() as u64);
+        let _ = writer.write_bytes(preimage);
+    }
+
+    writer.into_bytes()
+}
+
+/// Fields of a SyntheticLockedDeposit body (Accumulate 1.4.6.7).
+#[derive(Debug, Clone, Default)]
+pub struct SyntheticLockedDepositFields<'a> {
+    /// SyntheticOrigin.Cause (txid string)
+    pub cause: &'a str,
+    /// SyntheticOrigin.Initiator (URL)
+    pub initiator: &'a str,
+    /// SyntheticOrigin.FeeRefund
+    pub fee_refund: u64,
+    /// SyntheticOrigin.Index
+    pub index: u64,
+    /// Token URL
+    pub token: &'a str,
+    /// Amount (big-endian magnitude bytes; empty means zero)
+    pub amount: num_bigint::BigUint,
+    /// Original sender URL (refund target)
+    pub sender: &'a str,
+    /// HashAlgorithm enum value
+    pub hash_algorithm: u64,
+    /// Lock hash
+    pub hash: &'a [u8],
+    /// Expiration (Unix seconds)
+    pub expiration: Option<i64>,
+    /// True if the sender was the token issuer
+    pub is_issuer: bool,
+}
+
+/// Marshal SyntheticLockedDeposit transaction body to binary format
+///
+/// Field order matches Go: protocol/types_gen.go SyntheticLockedDeposit.MarshalBinary
+/// - Field 1: Type (enum = 0x37)
+/// - Field 2: SyntheticOrigin (nested: 1 Cause txid, 3 Initiator url, 4 FeeRefund uint, 5 Index uint)
+/// - Field 3: Token (url)
+/// - Field 4: Amount (bigint)
+/// - Field 5: Sender (url)
+/// - Field 6: HashAlgorithm (enum)
+/// - Field 7: Hash (bytes)
+/// - Field 8: Expiration (time)
+/// - Field 9: IsIssuer (bool)
+pub fn marshal_synthetic_locked_deposit_body(f: &SyntheticLockedDepositFields<'_>) -> Vec<u8> {
+    fn put_str(w: &mut BinaryWriter, field: u64, s: &str) {
+        if !s.is_empty() {
+            let _ = w.write_uvarint(field);
+            let _ = w.write_uvarint(s.len() as u64);
+            let _ = w.write_bytes(s.as_bytes());
+        }
+    }
+
+    // SyntheticOrigin (nested)
+    let mut origin = BinaryWriter::new();
+    put_str(&mut origin, 1, f.cause);
+    put_str(&mut origin, 3, f.initiator);
+    if f.fee_refund != 0 {
+        let _ = origin.write_uvarint(4);
+        let _ = origin.write_uvarint(f.fee_refund);
+    }
+    if f.index != 0 {
+        let _ = origin.write_uvarint(5);
+        let _ = origin.write_uvarint(f.index);
+    }
+    let origin = origin.into_bytes();
+
+    let mut w = BinaryWriter::new();
+    let _ = w.write_uvarint(1);
+    let _ = w.write_uvarint(tx_types::SYNTHETIC_LOCKED_DEPOSIT);
+
+    // Go writes the embedded struct unconditionally (field 2)
+    let _ = w.write_uvarint(2);
+    let _ = w.write_uvarint(origin.len() as u64);
+    let _ = w.write_bytes(&origin);
+
+    put_str(&mut w, 3, f.token);
+
+    if f.amount != num_bigint::BigUint::default() {
+        let amount_bytes = f.amount.to_bytes_be();
+        let _ = w.write_uvarint(4);
+        let _ = w.write_uvarint(amount_bytes.len() as u64);
+        let _ = w.write_bytes(&amount_bytes);
+    }
+
+    put_str(&mut w, 5, f.sender);
+
+    if f.hash_algorithm != 0 {
+        let _ = w.write_uvarint(6);
+        let _ = w.write_uvarint(f.hash_algorithm);
+    }
+    if !f.hash.is_empty() {
+        let _ = w.write_uvarint(7);
+        let _ = w.write_uvarint(f.hash.len() as u64);
+        let _ = w.write_bytes(f.hash);
+    }
+    if let Some(exp) = f.expiration {
+        let _ = w.write_uvarint(8);
+        let _ = w.write_varint(exp);
+    }
+    if f.is_issuer {
+        let _ = w.write_uvarint(9);
+        let _ = w.write_uvarint(1);
+    }
+
+    w.into_bytes()
 }
 
 /// Marshal AddCredits transaction body to binary format

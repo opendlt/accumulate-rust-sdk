@@ -19,6 +19,7 @@ fn test_transaction_header_field_validation() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
     // Note: The current validation implementation may be more permissive than expected
     // We'll test the actual behavior rather than expected strict validation
@@ -37,6 +38,7 @@ fn test_transaction_header_field_validation() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
     if invalid_url.validate().is_err() {
         println!("[OK] Invalid URL format correctly rejected");
@@ -53,6 +55,7 @@ fn test_transaction_header_field_validation() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
     if empty_initiator.validate().is_err() {
         println!("[OK] Empty initiator correctly rejected");
@@ -70,6 +73,7 @@ fn test_transaction_header_field_validation() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
     if excessive_memo.validate().is_err() {
         println!("[OK] Excessively long memo correctly rejected");
@@ -93,6 +97,7 @@ fn test_transaction_header_json_edge_cases() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     let json = serde_json::to_value(&minimal_header).unwrap();
@@ -135,6 +140,7 @@ fn test_transaction_header_timestamp_edge_cases() {
         expire: None,
         hold_until: Some(HoldUntilOptions { minor_block: Some(1) }), // Very old timestamp
         authorities: None,
+        hash_lock: None,
     };
     // Test that timing validation works (may be permissive)
     if past_hold.validate().is_err() {
@@ -152,6 +158,7 @@ fn test_transaction_header_timestamp_edge_cases() {
         expire: Some(ExpireOptions { at_time: Some(1) }), // Very old timestamp
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
     if past_expire.validate().is_err() {
         println!("[OK] Past expire correctly rejected");
@@ -168,6 +175,7 @@ fn test_transaction_header_timestamp_edge_cases() {
         expire: Some(ExpireOptions { at_time: Some(1000) }),
         hold_until: Some(HoldUntilOptions { minor_block: Some(2000) }), // Different units - may be valid
         authorities: None,
+        hash_lock: None,
     };
     if invalid_timing.validate().is_err() {
         println!("[OK] Invalid timing correctly rejected");
@@ -266,6 +274,7 @@ fn test_transaction_envelope_edge_cases() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     // A transaction envelope would need at least one signature
@@ -280,6 +289,7 @@ fn test_transaction_envelope_edge_cases() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     let serialized = serde_json::to_string(&invalid_metadata);
@@ -402,6 +412,7 @@ fn test_unicode_and_special_characters() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     // This should be rejected as principal URLs should be ASCII
@@ -416,6 +427,7 @@ fn test_unicode_and_special_characters() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     // Test if unicode memo can be serialized/deserialized properly
@@ -444,6 +456,7 @@ fn test_boundary_value_validation() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     // Should handle reasonable initiator sizes
@@ -459,6 +472,7 @@ fn test_boundary_value_validation() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     assert!(excessive_initiator.validate().is_err(), "Excessive initiator size should be rejected");
@@ -479,6 +493,7 @@ fn test_cross_field_validation() {
         expire: Some(ExpireOptions { at_time: Some(1893456000) }), // Jan 1, 2030 - reasonable future
         hold_until: Some(HoldUntilOptions { minor_block: Some(100000) }),
         authorities: Some(vec!["acc://authority.acme".to_string()]),
+        hash_lock: None,
     };
 
     let result = complete_header.validate();
@@ -492,7 +507,8 @@ fn test_cross_field_validation() {
         metadata: None,
         expire: None,
         hold_until: None,
-        authorities: Some(vec!["".to_string()]),  // Empty authority string
+        authorities: Some(vec!["".to_string()]),  // Empty authority string,
+        hash_lock: None,
     };
 
     assert!(empty_authority.validate().is_err(), "Empty authority should be rejected");

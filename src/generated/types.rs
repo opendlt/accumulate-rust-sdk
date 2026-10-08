@@ -693,6 +693,15 @@ pub struct NetworkGlobals {
     pub fee_schedule: FeeSchedule,
     #[serde(rename = "Limits")]
     pub limits: NetworkLimits,
+    /// The cadence the network produces blocks at (Accumulate 1.4.6.5+). The node emits
+    /// `{"seconds": n, "nanoseconds": n}`; kept as raw JSON, and absent on older networks.
+    #[serde(
+        rename = "BlockInterval",
+        alias = "blockInterval",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub block_interval: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

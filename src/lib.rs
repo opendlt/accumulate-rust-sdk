@@ -108,7 +108,8 @@ pub use crate::types::{
     V3FaucetOptions, V3SnapshotInfo, ListSnapshotsOptions,
     FindServiceOptions, FindServiceResult, SubscribeOptions,
     // V3 Query Types
-    RangeOptions, ReceiptOptions, DefaultQuery,
+    RangeOptions, ReceiptOptions, Receipt, DefaultQuery,
+    MajorHeaderRangeOptions, MinorRootRangeOptions, AnchorReceiptOptions,
     ChainQuery, DataQuery, DirectoryQuery, PendingQuery, BlockQuery,
     AnchorSearchQuery, PublicKeySearchQuery, PublicKeyHashSearchQuery,
     DelegateSearchQuery, MessageHashSearchQuery, V3Query,

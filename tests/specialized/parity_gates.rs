@@ -162,6 +162,7 @@ fn compilation_validation() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     // Test that we can create a client
@@ -184,6 +185,7 @@ fn cross_stage_integration_validation() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     // Test JSON serialization works

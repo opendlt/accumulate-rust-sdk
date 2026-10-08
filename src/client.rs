@@ -162,6 +162,40 @@ impl AccumulateClient {
     }
 
     // ========================================================================
+    // V3 API Services - Proof Service (spine / anchor proofs)
+    // ========================================================================
+
+    /// Get a record per major block in `[start, end]` (directory only): the block's index entry,
+    /// the quorum-signed anchor of the minor block that closed it, and its network-account
+    /// updates. The response is the node's JSON (`MajorHeaderRecord[]`).
+    pub async fn major_header_range(
+        &self,
+        opts: crate::types::MajorHeaderRangeOptions,
+    ) -> Result<serde_json::Value, JsonRpcError> {
+        self.v3_client.call_v3("major-header-range", json!(opts)).await
+    }
+
+    /// Bind minor blocks past the spine to it (directory only). The response is the node's JSON
+    /// (`MinorRootRecord`).
+    pub async fn minor_root_range(
+        &self,
+        opts: crate::types::MinorRootRangeOptions,
+    ) -> Result<serde_json::Value, JsonRpcError> {
+        self.v3_client.call_v3("minor-root-range", json!(opts)).await
+    }
+
+    /// Bind a partition's BPT root to a directory root: the second call of a two-call account
+    /// proof. The response is the node's JSON (`AnchorReceiptRecord`).
+    pub async fn anchor_receipt(
+        &self,
+        opts: crate::types::AnchorReceiptOptions,
+    ) -> Result<serde_json::Value, JsonRpcError> {
+        opts.validate()
+            .map_err(|e| JsonRpcError::General(anyhow::anyhow!("invalid anchor-receipt options: {}", e)))?;
+        self.v3_client.call_v3("anchor-receipt", json!(opts)).await
+    }
+
+    // ========================================================================
     // V3 API Services - Network Service
     // ========================================================================
 

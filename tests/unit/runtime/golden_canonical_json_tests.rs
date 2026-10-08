@@ -136,6 +136,7 @@ fn canonical_transaction_header() {
             expire: None,
             hold_until: None,
             authorities: None,
+            hash_lock: None,
         }),
         ("with_memo", generated::header::TransactionHeader {
             principal: "acc://test.acme/tokens".to_string(),
@@ -145,6 +146,7 @@ fn canonical_transaction_header() {
             expire: None,
             hold_until: None,
             authorities: None,
+            hash_lock: None,
         }),
         ("with_metadata", generated::header::TransactionHeader {
             principal: "acc://meta.acme".to_string(),
@@ -154,6 +156,7 @@ fn canonical_transaction_header() {
             expire: None,
             hold_until: None,
             authorities: None,
+            hash_lock: None,
         }),
         ("with_expiry", generated::header::TransactionHeader {
             principal: "acc://expire.acme".to_string(),
@@ -165,6 +168,7 @@ fn canonical_transaction_header() {
             }),
             hold_until: None,
             authorities: None,
+            hash_lock: None,
         }),
         ("with_authorities", generated::header::TransactionHeader {
             principal: "acc://auth.acme".to_string(),
@@ -174,6 +178,7 @@ fn canonical_transaction_header() {
             expire: None,
             hold_until: None,
             authorities: Some(vec!["acc://authority1.acme".to_string(), "acc://authority2.acme".to_string()]),
+            hash_lock: None,
         }),
     ];
 

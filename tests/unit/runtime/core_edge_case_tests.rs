@@ -18,6 +18,7 @@ fn test_json_roundtrip_edge_cases() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     // Serialize and deserialize
@@ -38,6 +39,7 @@ fn test_json_roundtrip_edge_cases() {
         expire: Some(ExpireOptions { at_time: Some(1893456000) }), // Jan 1, 2030 - reasonable
         hold_until: Some(HoldUntilOptions { minor_block: Some(12345) }),
         authorities: Some(vec!["acc://auth1.acme".to_string(), "acc://auth2.acme".to_string()]),
+        hash_lock: None,
     };
 
     let json = serde_json::to_string(&complete_header).unwrap();
@@ -166,6 +168,7 @@ fn test_boundary_conditions() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     // Should be able to serialize empty initiator
@@ -184,7 +187,8 @@ fn test_boundary_conditions() {
         metadata: Some(large_metadata.clone()),
         expire: None,
         hold_until: None,
-        authorities: Some(vec!["acc://auth.acme".to_string(); 10]), // Multiple authorities
+        authorities: Some(vec!["acc://auth.acme".to_string(); 10]), // Multiple authorities,
+        hash_lock: None,
     };
 
     // Should handle reasonably large data
@@ -237,6 +241,7 @@ fn test_validation_behavior() {
         expire: Some(ExpireOptions { at_time: Some(1893456000) }), // Jan 1, 2030
         hold_until: Some(HoldUntilOptions { minor_block: Some(12345) }),
         authorities: Some(vec!["acc://authority.acme".to_string()]),
+        hash_lock: None,
     };
 
     let result = valid_header.validate();
@@ -251,6 +256,7 @@ fn test_validation_behavior() {
         expire: None,
         hold_until: None,
         authorities: None,
+        hash_lock: None,
     };
 
     assert!(minimal_header.validate().is_ok(), "Minimal header should pass validation");
@@ -278,6 +284,7 @@ fn test_field_naming_format() {
         expire: Some(ExpireOptions { at_time: Some(1234567890) }),
         hold_until: Some(HoldUntilOptions { minor_block: Some(5678) }),
         authorities: Some(vec!["acc://auth.acme".to_string()]),
+        hash_lock: None,
     };
 
     let json_value = serde_json::to_value(&header).unwrap();

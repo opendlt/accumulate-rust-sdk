@@ -684,6 +684,109 @@ pub struct ReceiptOptions {
     pub for_height: Option<u64>,
 }
 
+/// A v3 API receipt: a merkle receipt together with the block it was produced against
+/// (Go `api.Receipt`). Every field beyond the merkle receipt is optional on the wire, so responses
+/// from older nodes still parse.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Receipt {
+    /// The embedded merkle receipt (`start`, `end`, `anchor`, `entries`)
+    #[serde(flatten)]
+    pub receipt: MerkleReceipt,
+    /// Local block the receipt anchors to
+    #[serde(default)]
+    pub local_block: u64,
+    /// Time of the local block (RFC 3339)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_block_time: Option<String>,
+    /// Major block the receipt anchors to
+    #[serde(default)]
+    pub major_block: u64,
+    /// The minor block height the receipt was produced against; 0 means the current state
+    #[serde(default)]
+    pub for_height: u64,
+    /// The receipt terminates at a directory root, so there is no second call to make. When
+    /// false, `partition` names the BPT root it ends at and the caller continues with
+    /// `anchor_receipt`.
+    #[serde(default)]
+    pub complete: bool,
+    /// When not `complete`, whose BPT root the receipt terminates at
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub partition: Option<String>,
+    /// Set only on a historical receipt: the receipt starts at a plain hash of the account's main
+    /// state, and the account served beside it is that state as of `for_height`. Without it the
+    /// receipt starts at the account's whole BPT entry and no account body is served.
+    #[serde(default)]
+    pub starts_at_main_state: bool,
+}
+
+/// Options for `major-header-range`: a record per major block in `[start, end]`.
+/// Only the directory partition serves this.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MajorHeaderRangeOptions {
+    /// The partition to serve; only the directory serves this
+    pub partition: String,
+    /// The first major block index
+    pub start: u64,
+    /// The last major block index, inclusive
+    pub end: u64,
+}
+
+/// Options for `minor-root-range`: binds minor blocks past the spine to it.
+/// Only the directory partition serves this.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MinorRootRangeOptions {
+    /// The partition to serve; only the directory serves this
+    pub partition: String,
+    /// The client's last verified minor block
+    pub since: u64,
+    /// The target minor block, or 0 for as far as possible
+    #[serde(default)]
+    pub until: u64,
+}
+
+/// Options for `anchor-receipt`: bind a partition's BPT root to a directory root. This is the
+/// second call of a two-call account proof.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnchorReceiptOptions {
+    /// The partition whose BPT root is being bound (the first call's `Receipt::partition`)
+    pub partition: String,
+    /// Where the first call's receipt terminates, as 64 hex characters
+    pub bpt_root: String,
+    /// Ask for a receipt terminating at a directory root no older than this block; 0 returns the
+    /// oldest receipt that works
+    #[serde(default, skip_serializing_if = "is_zero_u64")]
+    pub at_or_after: u64,
+}
+
+fn is_zero_u64(v: &u64) -> bool {
+    *v == 0
+}
+
+impl AnchorReceiptOptions {
+    /// Build options from a 32-byte root.
+    pub fn new(partition: impl Into<String>, bpt_root: &[u8; 32], at_or_after: u64) -> Self {
+        Self { partition: partition.into(), bpt_root: hex::encode(bpt_root), at_or_after }
+    }
+
+    /// Check that `bpt_root` is 32 bytes of hex.
+    pub fn validate(&self) -> Result<(), crate::errors::Error> {
+        let ok = self.bpt_root.len() == 64 && self.bpt_root.chars().all(|c| c.is_ascii_hexdigit());
+        if ok {
+            Ok(())
+        } else {
+            Err(crate::errors::ValidationError::InvalidFieldValue {
+                field: "bptRoot".to_string(),
+                reason: "must be 32 bytes (64 hex characters)".to_string(),
+            }
+            .into())
+        }
+    }
+}
+
 /// Default query - basic account/transaction query
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]

@@ -464,4 +464,9 @@ fn test_real_world_json_examples() {
     assert_eq!(status.version, ExecutorVersion::V2Jiuquan);
     assert_eq!(status.partition, PartitionType::BlockValidator);
     assert_eq!(status.vote, VoteType::Accept);
+
+    // Kourou executor (Kermit testnet, 1.4.6.x)
+    let kourou: ExecutorVersion = serde_json::from_str("\"v2-kourou\"").unwrap();
+    assert_eq!(kourou, ExecutorVersion::V2Kourou);
+    assert_eq!(serde_json::to_string(&kourou).unwrap(), "\"v2Kourou\"");
 }

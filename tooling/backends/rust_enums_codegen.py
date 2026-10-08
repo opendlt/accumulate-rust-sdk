@@ -56,6 +56,7 @@ def normalize_variant_name(name):
         "V2Baikonur": "V2Baikonur",
         "V2Vandenberg": "V2Vandenberg",
         "V2Jiuquan": "V2Jiuquan",
+        "V2Kourou": "V2Kourou",
     }
 
     if name in name_map:

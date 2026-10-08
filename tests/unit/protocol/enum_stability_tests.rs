@@ -188,6 +188,7 @@ fn test_enum_wire_tag_stability() {
         (ExecutorVersion::V1SignatureAnchoring, "v1SignatureAnchoring"),
         (ExecutorVersion::V2, "v2"),
         (ExecutorVersion::V2Baikonur, "v2Baikonur"),
+        (ExecutorVersion::V2Kourou, "v2Kourou"),
     ];
 
     for (enum_val, expected_tag) in executor_version_tags {
@@ -241,7 +242,7 @@ fn test_enum_variant_count_stability() {
     // This helps catch unintentional additions/removals during regeneration
 
     let expected_variant_counts = vec![
-        ("ExecutorVersion", 9),      // V1, V1SignatureAnchoring, etc.
+        ("ExecutorVersion", 10),      // V1, V1SignatureAnchoring, etc.
         ("PartitionType", 4),        // Directory, BlockValidator, etc.
         ("DataEntryType", 4),        // Unknown, Factom, Accumulate, DoubleHash
         ("ObjectType", 3),           // Unknown, Account, Transaction
@@ -250,7 +251,7 @@ fn test_enum_variant_count_stability() {
         ("AccountAuthOperationType", 5), // Unknown, Enable, Disable, etc.
         ("NetworkMaintenanceOperationType", 2), // Unknown, PendingTransactionGC
         ("TransactionMax", 3),       // User, Synthetic, System
-        ("TransactionType", 34),     // Unknown, CreateIdentity, etc.
+        ("TransactionType", 36),     // Unknown, CreateIdentity, etc. (+ ReleaseLockedOperation, SyntheticLockedDeposit in 1.4.6.x)
         ("AccountType", 15),         // Unknown, AnchorLedger, Identity, etc.
         ("AllowedTransactionBit", 2), // UpdateKeyPage, UpdateAccountAuth
         ("VoteType", 4),             // Accept, Reject, Abstain, Suggest
