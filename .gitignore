@@ -23,7 +23,9 @@ lcov.info
 /target/llvm-cov-target/
 /target/llvm-cov/
 /target/llvm-cov-html/
-coverage/
+# Anchored to the repo root: an unanchored "coverage/" also hid tests/coverage/, whose
+# sources tests/mod.rs includes, so a clean clone could not compile the test suite.
+/coverage/
 *.profraw
 
 # Documentation build
